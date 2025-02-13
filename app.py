@@ -3,8 +3,16 @@ import os
 from dotenv import load_dotenv
 from msal import ConfidentialClientApplication
 from flask_session import Session
+import requests
 
 load_dotenv()
+GRAPH_API_BASE_URL = "https://graph.microsoft.com/v1.0"
+
+# Fetches the signed-in user's profile from Microsoft Graph API
+def get_user_profile(access_token):
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = requests.get(f"{GRAPH_API_BASE_URL}/me", headers=headers)
+    return response.json() if response.status_code == 200 else None
 
 # Flask Application setup
 app = Flask(__name__)
@@ -26,7 +34,6 @@ msal_app = ConfidentialClientApplication(
     CLIENT_ID,
     client_credential=CLIENT_SECRET,
     authority=AUTHORITY)
-
 
 # Home page (should include basic info and a login button)
 @app.route("/")
@@ -58,16 +65,27 @@ def callback():
         if "access_token" in result:
             session["user"] = result.get("id_token_claims")
             session["access_token"] = result.get("access_token")
+            return redirect(url_for("dashboard"))
         else:
             flash("Login failed: " + str(result.get("error_description")), "danger")
             return redirect(url_for("home"))
 
-    return redirect(url_for("dashboard"))
+    return redirect(url_for("home"))
 
-# Shows the user is logged in, should have some functionality
+# Shows the user is logged in
 @app.route("/dashboard")
 def dashboard():
-    return render_template('dashboard.html', subtitle='Dashboard', text='This is the dashboard page')
+    if not session.get("access_token"):
+        flash("Please log in first.", "warning")
+        return redirect(url_for("home"))
+
+    user_info = get_user_profile(session["access_token"])
+    
+    if not user_info:
+        flash("Failed to fetch user profile.", "danger")
+        return redirect(url_for("home"))
+
+    return render_template('dashboard.html', user=user_info)
 
 # Logs the user out by clearing session
 @app.route("/logout")

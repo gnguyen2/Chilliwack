@@ -1,1 +1,5 @@
-<h1> Logged In</h1>
+<h1>Logged in user:, {{ user.displayName }}</h1>
+<p>Email: {{ user.mail }}</p>
+<p>Job Title: {{ user.jobTitle }}</p>
+<p>Office Location: {{ user.officeLocation }}</p>
+<a href="{{ url_for('logout') }}">Logout</a>
