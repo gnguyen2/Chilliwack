@@ -5,8 +5,9 @@ from msal import ConfidentialClientApplication
 from flask_session import Session
 import requests
 from flask_migrate import Migrate
-from models import db, User
+from models import db, User, Role
 import urllib.parse
+from decorators import role_required
 
 
 load_dotenv()
@@ -65,6 +66,21 @@ def get_user_profile(access_token):
     response = requests.get(f"{GRAPH_API_BASE_URL}/me", headers=headers)
     return response.json() if response.status_code == 200 else None
 
+# Initializes roles
+def create_default_roles():
+    roles = ["administrator", "basicuser", "privlageduser"]
+    
+    for role_name in roles:
+        existing_role = Role.query.filter_by(name=role_name).first()
+        if not existing_role:
+            new_role = Role(name=role_name)
+            db.session.add(new_role)
+    db.session.commit()
+
+with app.app_context():
+    db.create_all()  # Ensure tables exist
+    create_default_roles()  # Create roles
+
 # Home page (should include basic info and a login button)
 @app.route("/")
 @app.route("/home")
@@ -107,18 +123,29 @@ def callback():
                     existing_user = User.query.filter_by(microsoft_id=microsoft_id).first()
 
                     if not existing_user:
-                        new_user = User(microsoft_id=microsoft_id, name=name, email=email, profile_picture=profile_picture)
+                        default_role = Role.query.filter_by(name="Viewer").first()  # Assign 'Viewer' by default
+                        new_user = User(
+                            microsoft_id=microsoft_id,
+                            name=name,
+                            email=email,
+                            profile_picture=profile_picture,
+                            role=default_role
+                        )
                         db.session.add(new_user)
                         db.session.commit()
 
-                session["user"] = {"name": name, "email": email, "profile_picture": profile_picture}
-                return redirect(url_for("dashboard"))
+                    session["user"] = {
+                        "name": name,
+                        "email": email,
+                        "profile_picture": profile_picture,
+                        "role": existing_user.role.name if existing_user else "Viewer"
+                    }
+                    return redirect(url_for("dashboard"))
 
         flash("Login failed. Please try again.", "danger")
         return redirect(url_for("home"))
 
     return redirect(url_for("home"))
-
 
 # Shows the user is logged in
 @app.route("/dashboard")
@@ -131,6 +158,19 @@ def dashboard():
         user = User.query.filter_by(email=session["user"]["email"]).first()
 
     return render_template('dashboard.html', user=user)
+
+# Shows the user is logged in
+@app.route("/admin")
+@role_required("administrator")
+def admindashboard():
+    if not session.get("user"):
+        flash("Please log in first.", "warning")
+        return redirect(url_for("home"))
+
+    with app.app_context():
+        user = User.query.filter_by(email=session["user"]["email"]).first()
+
+    return render_template('admindashboard.html', user=user)
 
 # Logs the user out by clearing session
 @app.route("/logout")
