@@ -1,5 +1,6 @@
-<h1>Logged in user:, {{ user.displayName }}</h1>
-<p>Email: {{ user.mail }}</p>
-<p>Job Title: {{ user.jobTitle }}</p>
-<p>Office Location: {{ user.officeLocation }}</p>
+<h1>Welcome, {{ user.name }}</h1>
+<p>Email: {{ user.email }}</p>
+{% if user.profile_picture %}
+    <img src="{{ user.profile_picture }}" alt="Profile Picture">
+{% endif %}
 <a href="{{ url_for('logout') }}">Logout</a>

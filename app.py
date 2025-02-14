@@ -4,19 +4,42 @@ from dotenv import load_dotenv
 from msal import ConfidentialClientApplication
 from flask_session import Session
 import requests
+from flask_migrate import Migrate
+from models import db, User
+import urllib.parse
+
 
 load_dotenv()
+
+# Get database credentials from .env
+DB_SERVER = os.environ.get("DB_SERVER", "your-server.database.windows.net")
+DB_NAME = os.environ.get("DB_NAME", "your-database-name")
+DB_USERNAME = os.environ.get("DB_USERNAME", "your-db-username")
+DB_PASSWORD = os.environ.get("DB_PASSWORD", "your-db-password")
+
+# SQLAlchemy connection string paramaters
+params = urllib.parse.quote_plus(
+    f"DRIVER={{ODBC Driver 18 for SQL Server}};"
+    f"SERVER={DB_SERVER};"
+    f"DATABASE={DB_NAME};"
+    f"UID={DB_USERNAME};"
+    f"PWD={DB_PASSWORD};"
+)
+
 GRAPH_API_BASE_URL = "https://graph.microsoft.com/v1.0"
 
-# Fetches the signed-in user's profile from Microsoft Graph API
-def get_user_profile(access_token):
-    headers = {"Authorization": f"Bearer {access_token}"}
-    response = requests.get(f"{GRAPH_API_BASE_URL}/me", headers=headers)
-    return response.json() if response.status_code == 200 else None
-
+# Configurations + setups
 # Flask Application setup
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev')
+
+# Configure MySQL database
+app.config["SQLALCHEMY_DATABASE_URI"] = f"mssql+pyodbc:///?odbc_connect={params}"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+# Initialize SQLAlchemy & Migrate
+db.init_app(app)
+migrate = Migrate(app, db)  # Enables migrations
 
 # Flask Session setup
 app.config["SESSION_TYPE"] = "filesystem"
@@ -35,6 +58,13 @@ msal_app = ConfidentialClientApplication(
     client_credential=CLIENT_SECRET,
     authority=AUTHORITY)
 
+
+# Fetches the signed-in user's profile from Microsoft Graph API
+def get_user_profile(access_token):
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = requests.get(f"{GRAPH_API_BASE_URL}/me", headers=headers)
+    return response.json() if response.status_code == 200 else None
+
 # Home page (should include basic info and a login button)
 @app.route("/")
 @app.route("/home")
@@ -50,7 +80,7 @@ def login():
     )
     return redirect(auth_url)
 
-# Handles response from Microsoft login
+# Handles response from Microsoft login & stores user info in db
 @app.route("/callback")
 def callback():
     if request.args.get("code"):
@@ -60,32 +90,47 @@ def callback():
             redirect_uri="http://localhost:5000/callback"
         )
 
-        # print("MSAL Token Response:", result) # used to debug
-
         if "access_token" in result:
-            session["user"] = result.get("id_token_claims")
             session["access_token"] = result.get("access_token")
-            return redirect(url_for("dashboard"))
-        else:
-            flash("Login failed: " + str(result.get("error_description")), "danger")
-            return redirect(url_for("home"))
+
+            # Fetch user profile from Microsoft Graph API
+            user_info = get_user_profile(session["access_token"])
+
+            if user_info:
+                microsoft_id = user_info.get("id")
+                name = user_info.get("displayName")
+                email = user_info.get("mail") or user_info.get("userPrincipalName")  # Email might be under different keys
+                profile_picture = f"https://graph.microsoft.com/v1.0/me/photo/$value"  # Fetch profile picture
+
+                # Check if user exists, otherwise create
+                with app.app_context():  # Ensure database context
+                    existing_user = User.query.filter_by(microsoft_id=microsoft_id).first()
+
+                    if not existing_user:
+                        new_user = User(microsoft_id=microsoft_id, name=name, email=email, profile_picture=profile_picture)
+                        db.session.add(new_user)
+                        db.session.commit()
+
+                session["user"] = {"name": name, "email": email, "profile_picture": profile_picture}
+                return redirect(url_for("dashboard"))
+
+        flash("Login failed. Please try again.", "danger")
+        return redirect(url_for("home"))
 
     return redirect(url_for("home"))
+
 
 # Shows the user is logged in
 @app.route("/dashboard")
 def dashboard():
-    if not session.get("access_token"):
+    if not session.get("user"):
         flash("Please log in first.", "warning")
         return redirect(url_for("home"))
 
-    user_info = get_user_profile(session["access_token"])
-    
-    if not user_info:
-        flash("Failed to fetch user profile.", "danger")
-        return redirect(url_for("home"))
+    with app.app_context():
+        user = User.query.filter_by(email=session["user"]["email"]).first()
 
-    return render_template('dashboard.html', user=user_info)
+    return render_template('dashboard.html', user=user)
 
 # Logs the user out by clearing session
 @app.route("/logout")
