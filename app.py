@@ -120,10 +120,10 @@ def callback():
 
                 # Check if user exists, otherwise create
                 with app.app_context():  # Ensure database context
-                    existing_user = User.query.filter_by(microsoft_id=microsoft_id).first()
+                    existing_user = User.query.filter_by(email=email).first()
 
                     if not existing_user:
-                        default_role = Role.query.filter_by(name="Viewer").first()  # Assign 'Viewer' by default
+                        default_role = Role.query.filter_by(name="basicuser").first()  # Assign 'basicuser' by default
                         new_user = User(
                             microsoft_id=microsoft_id,
                             name=name,
@@ -138,7 +138,7 @@ def callback():
                         "name": name,
                         "email": email,
                         "profile_picture": profile_picture,
-                        "role": existing_user.role.name if existing_user else "Viewer"
+                        "role": existing_user.role.name if existing_user else "basicuser"
                     }
                     return redirect(url_for("dashboard"))
 

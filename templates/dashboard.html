@@ -1,6 +1,13 @@
-<h1>Welcome, {{ user.name }}</h1>
-<p>Email: {{ user.email }}</p>
+<head>
+    <link rel="stylesheet" href = "static/home.css">
+</head>
+
+<body>
+    <h1>Welcome, {{ user.name }}</h1>
+    <p>Email: {{ user.email }}</p>
 {% if user.profile_picture %}
     <img src="{{ user.profile_picture }}" alt="Profile Picture">
 {% endif %}
 <a href="{{ url_for('logout') }}">Logout</a>
+</body>
+
