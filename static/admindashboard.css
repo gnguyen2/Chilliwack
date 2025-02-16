@@ -1,0 +1,96 @@
+/* Body styling with a faded background image */
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-size: cover;
+    background-position: center;
+    background-blend-mode: overlay;
+    background-color: rgba(0, 0, 0, 0.6); 
+    font-family: Arial, sans-serif;
+}
+
+/* Admin dashboard container */
+.admin-container {
+    background-color: rgba(50, 50, 50, 0.9); 
+    padding: 40px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    width: 80%;
+    max-width: 900px;
+}
+
+/* Heading styling */
+h1 {
+    font-size: 26px;
+    color: #f8f9fa;
+    margin-bottom: 20px;
+}
+
+/* User table styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+th {
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+/* Form controls */
+select, button {
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+select {
+    background-color: white;
+    color: black;
+}
+
+/* Button styling */
+.button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #0056b3;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+    .button:hover {
+        background-color: #004494;
+    }
+
+/* Delete button */
+.delete-button {
+    background-color: #b30000;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+    .delete-button:hover {
+        background-color: #8a0000;
+    }

@@ -1,3 +1,4 @@
+pip install -r requirements.txt
 from flask import Flask, render_template, url_for, redirect, flash, request, session
 import os
 from dotenv import load_dotenv
@@ -169,8 +170,42 @@ def admindashboard():
 
     with app.app_context():
         user = User.query.filter_by(email=session["user"]["email"]).first()
+        users = User.query.all() #fetch all users
+        roles = Role.query.all() # Fetch all roles
+    return render_template('admindashboard.html', user=user, users = users, roles = roles)
 
-    return render_template('admindashboard.html', user=user)
+#update users
+@app.route("/admin/update_role", methods=["POST"])
+@role_required("administrator")
+def update_user_role():
+    user_id = request.form.get("user_id")
+    new_role_id = request.form.get("role_id")
+
+    user = User.query.get(user_id)
+    if user and new_role_id:
+        user.role_id = new_role_id
+        db.session.commit()
+        flash("User role updated successfully!", "success")
+    else:
+        flash("Failed to update user role.", "warning")
+
+    return redirect(url_for("admindashboard"))
+
+
+#delete a users
+@app.route("/admin/delete_user/<int:user_id>", methods=["POST"])
+@role_required("administrator")
+def delete_user(user_id):
+    user = User.query.get(user_id)
+    if user:
+        db.session.delete(user)
+        db.session.commit()
+        flash("User deleted successfully!", "success")
+    else:
+        flash("User not found.", "warning")
+
+    return redirect(url_for("admindashboard"))
+ 
 
 # Logs the user out by clearing session
 @app.route("/logout")
