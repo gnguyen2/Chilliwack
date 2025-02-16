@@ -1,4 +1,3 @@
-pip install -r requirements.txt
 from flask import Flask, render_template, url_for, redirect, flash, request, session
 import os
 from dotenv import load_dotenv
