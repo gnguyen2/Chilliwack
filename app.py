@@ -8,6 +8,8 @@ from flask_migrate import Migrate
 from models import db, User, Role
 import urllib.parse
 from decorators import role_required
+from sqlalchemy.orm import joinedload
+
 
 
 load_dotenv()
@@ -140,6 +142,9 @@ def callback():
                         "profile_picture": profile_picture,
                         "role": existing_user.role.name if existing_user else "basicuser"
                     }
+                    # Redirect based on role
+                    if session["user"]["role"] == "administrator":
+                        return redirect(url_for("admindashboard"))                    
                     return redirect(url_for("dashboard"))
 
         flash("Login failed. Please try again.", "danger")
@@ -168,9 +173,9 @@ def admindashboard():
         return redirect(url_for("home"))
 
     with app.app_context():
-        user = User.query.filter_by(email=session["user"]["email"]).first()
-        users = User.query.all() #fetch all users
-        roles = Role.query.all() # Fetch all roles
+        user = User.query.options(joinedload(User.role)).filter_by(email=session["user"]["email"]).first()
+        users = User.query.options(joinedload(User.role)).all()  # Ensure roles are loaded
+        roles = Role.query.all()  # Fetch all roles
     return render_template('admindashboard.html', user=user, users = users, roles = roles)
 
 #update users
