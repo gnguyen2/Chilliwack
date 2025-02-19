@@ -5,7 +5,7 @@ from msal import ConfidentialClientApplication
 from flask_session import Session
 import requests
 from flask_migrate import Migrate
-from models import db, User, Role
+from models import db, User, Role, Status
 import urllib.parse
 from decorators import role_required, role_not_allowed
 from sqlalchemy.orm import joinedload
@@ -70,7 +70,7 @@ def get_user_profile(access_token):
 
 # Initializes roles
 def create_default_roles():
-    roles = ["administrator", "basicuser", "privlageduser", "DEACTIVATED"]
+    roles = ["administrator", "basicuser", "privlageduser"]
     
     for role_name in roles:
         existing_role = Role.query.filter_by(name=role_name).first()
@@ -79,9 +79,20 @@ def create_default_roles():
             db.session.add(new_role)
     db.session.commit()
 
+def create_default_statuses():
+    statuses = ["active", "deactivated"]
+    
+    for status_name in statuses:
+        existing_status = Status.query.filter_by(name=status_name).first()
+        if not existing_status:
+            new_status = Status(name=status_name)
+            db.session.add(new_status)
+    db.session.commit()
+
 with app.app_context():
     db.create_all()  # Ensure tables exist
     create_default_roles()  # Create roles
+    create_default_statuses() # Create statuses
 
 # Home page (should include basic info and a login button)
 @app.route("/")
@@ -125,11 +136,13 @@ def callback():
 
                     if not existing_user:
                         default_role = Role.query.filter_by(name="basicuser").first()  # Assign 'basicuser' by default
+                        default_status = Status.query.filter_by(name="active").first()  # Assign 'active' by default
                         new_user = User(
                             microsoft_id=microsoft_id,
                             name=name,
                             email=email,
-                            role=default_role
+                            role=default_role,
+                            status=default_status
                         )
                         db.session.add(new_user)
                         db.session.commit()
@@ -137,7 +150,9 @@ def callback():
                     session["user"] = {
                         "name": name,
                         "email": email,
-                        "role": existing_user.role.name if existing_user else "basicuser"
+                        "role": existing_user.role.name if existing_user else "basicuser",
+                        "status": existing_user.status.name if existing_user else "active"
+
                     }
                     # Redirect based on role
                     if session["user"]["role"] == "administrator":
@@ -172,10 +187,19 @@ def admindashboard():
         return redirect(url_for("home"))
 
     with app.app_context():
+        # Get current user with role
         user = User.query.options(joinedload(User.role)).filter_by(email=session["user"]["email"]).first()
-        users = User.query.options(joinedload(User.role)).all()  # Ensure roles are loaded
-        roles = Role.query.all()  # Fetch all roles
-    return render_template('admindashboard.html', user=user, users = users, roles = roles)
+        
+        # Get all users with roles and order by status
+        users = User.query.options(joinedload(User.role)).order_by(User.status_id).all()
+        
+        # Fetch all roles
+        roles = Role.query.all()
+        
+        # Get distinct status values
+        statuses = Status.query.all()
+        
+        return render_template('admindashboard.html', user=user, users=users, roles=roles, statuses=statuses)
 
 #update users
 @app.route("/admin/update_role", methods=["POST"])
@@ -217,6 +241,23 @@ def delete_user(user_id):
     db.session.delete(user)
     db.session.commit()
     flash("User deleted successfully!", "success")
+
+    return redirect(url_for("admindashboard"))
+
+#updates a users status
+@app.route("/admin/status_update", methods=["POST"])
+@role_required("administrator")
+def change_status():
+    user_id = request.form.get("user_id")
+    new_status_id = request.form.get("status_id")
+
+    user = User.query.get(user_id)
+    if user and new_status_id:
+        user.status_id = new_status_id
+        db.session.commit()
+        flash("User status updated successfully!", "success")
+    else:
+        flash("Failed to update user status.", "warning")
 
     return redirect(url_for("admindashboard"))
 
