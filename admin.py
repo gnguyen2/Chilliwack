@@ -42,7 +42,7 @@ def update_user_role():
     else:
         flash("Failed to update user role.", "warning")
 
-    return redirect(url_for("admindashboard"))
+    return redirect(url_for("admin.admindashboard"))
 
 #delete a users
 @admin_bp.route("/admin/delete_user/<int:user_id>", methods=["POST"])
@@ -84,4 +84,4 @@ def change_status():
     else:
         flash("Failed to update user status.", "warning")
 
-    return redirect(url_for("admindashboard"))
+    return redirect(url_for("admin.admindashboard"))
