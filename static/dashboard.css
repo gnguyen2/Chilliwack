@@ -1,0 +1,16 @@
+.color_change_button {
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    background-color: lightgray; /* Default color */
+    transition: background-color 0.3s ease-in-out;
+}
+
+.color_change_button:hover {
+    background-color: darkgray; /* Hover effect */
+}
+
+.color_change_button.active {
+    background-color: green; /* Color when clicked */
+    color: white;
+}

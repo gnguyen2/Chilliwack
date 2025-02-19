@@ -5,9 +5,6 @@
 <body class="admin-container">
     <h1>Welcome Administrator: {{ user.name }}</h1>
     <p>Email: {{ user.email }}</p>
-    {% if user.profile_picture %}
-    <img src="{{ user.profile_picture }}" alt="Profile Picture">
-    {% endif %}
     <a href="{{ url_for('logout') }}" class="button">Logout</a>
 
     {% with messages = get_flashed_messages(with_categories=true) %}

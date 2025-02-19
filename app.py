@@ -118,7 +118,6 @@ def callback():
                 microsoft_id = user_info.get("id")
                 name = user_info.get("displayName")
                 email = user_info.get("mail") or user_info.get("userPrincipalName")  # Email might be under different keys
-                profile_picture = f"https://graph.microsoft.com/v1.0/me/photo/$value"  # Fetch profile picture
 
                 # Check if user exists, otherwise create
                 with app.app_context():  # Ensure database context
@@ -130,7 +129,6 @@ def callback():
                             microsoft_id=microsoft_id,
                             name=name,
                             email=email,
-                            profile_picture=profile_picture,
                             role=default_role
                         )
                         db.session.add(new_user)
@@ -139,7 +137,6 @@ def callback():
                     session["user"] = {
                         "name": name,
                         "email": email,
-                        "profile_picture": profile_picture,
                         "role": existing_user.role.name if existing_user else "basicuser"
                     }
                     # Redirect based on role

@@ -1,13 +1,42 @@
 <head>
-    <link rel="stylesheet" href = "static/home.css">
+    <link rel="stylesheet" href = "static/dashboard.css">
 </head>
 
 <body>
-    <h1>Welcome, {{ user.name }}</h1>
-    <p>Email: {{ user.email }}</p>
-{% if user.profile_picture %}
-    <img src="{{ user.profile_picture }}" alt="Profile Picture">
-{% endif %}
-<a href="{{ url_for('logout') }}">Logout</a>
+    <div class="welcome">
+        <h1>Welcome, {{ user.name }}</h1>
+        <p>Email: {{ user.email }}</p>
+    </div>
+
+    <div class="role_check_box">
+        <button type="button" class="color_change_button" id="basic_user_button">basic user</button>
+        <button type="button" class="color_change_button" id="privlaged_user_button">privlaged user</button>
+        <button type="button" class="color_change_button" id="administrator_button">Administrator</button>
+    </div>
+
+    <a href="{{ url_for('logout') }}">Logout</a>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Select all buttons
+            const buttons = document.querySelectorAll(".color_change_button");
+    
+            buttons.forEach(button => {
+                button.addEventListener("click", function () {
+                    // If this button is already active, remove the active class
+                    if (this.classList.contains("active")) {
+                        this.classList.remove("active");
+                    } else {
+                        // Remove active class from all buttons
+                        buttons.forEach(btn => btn.classList.remove("active"));
+    
+                        // Add active class to the clicked button
+                        this.classList.add("active");
+                    }
+                });
+            });
+        });
+    </script>
+    
 </body>
 
