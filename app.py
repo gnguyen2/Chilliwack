@@ -158,7 +158,8 @@ def dashboard():
         return redirect(url_for("home"))
 
     with app.app_context():
-        user = User.query.filter_by(email=session["user"]["email"]).first()
+        # Ensure to eagerly load the 'role' attribute
+        user = User.query.options(joinedload(User.role)).filter_by(email=session["user"]["email"]).first()
 
     return render_template('dashboard.html', user=user)
 

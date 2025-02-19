@@ -8,7 +8,7 @@ class Role(db.Model):
     name = db.Column(db.String(50), unique=True, nullable=False)  # e.g., 'administrator', 'basicuser',
     
     def __repr__(self):
-        return f"<Role {self.name}>"
+        return f"<{self.name}>"
 
 # User Table
 class User(db.Model):
@@ -16,7 +16,6 @@ class User(db.Model):
     microsoft_id = db.Column(db.String(50), unique=True, nullable=False)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
-    profile_picture = db.Column(db.String(200))  # Optional field
 
     # Foreign Key to Role Table
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'))

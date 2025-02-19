@@ -6,7 +6,17 @@
     <div class="welcome">
         <h1>Welcome, {{ user.name }}</h1>
         <p>Email: {{ user.email }}</p>
+        <p>Debug: Role is "{{ user.role }}"</p>
+
     </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash-message {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
 
     <div class="role_check_box">
         <button type="button" class="color_change_button" id="basic_user_button">basic user</button>
@@ -21,8 +31,25 @@
             // Select all buttons
             const buttons = document.querySelectorAll(".color_change_button");
     
+            // Get user role from a hidden data attribute or a JavaScript variable
+            const userRole = "{{ user.role|replace('\"', '')|replace('<', '')|replace('>', '') }}".trim();
+    
+            // Define role-based permissions
+            const rolePermissions = {
+                "basicuser": ["basic_user_button"],
+                "privlageduser": ["basic_user_button", "privlaged_user_button"],
+                "administrator": ["basic_user_button", "privlaged_user_button", "administrator_button"]
+            };
+
+    
             buttons.forEach(button => {
                 button.addEventListener("click", function () {
+                    // Check if the button is allowed for the user's role
+                    if (!rolePermissions[userRole] || !rolePermissions[userRole].includes(this.id)) {
+                        alert("You do not have permission to select this role.");
+                        return;
+                    }
+    
                     // If this button is already active, remove the active class
                     if (this.classList.contains("active")) {
                         this.classList.remove("active");
@@ -37,6 +64,7 @@
             });
         });
     </script>
+    
     
 </body>
 
