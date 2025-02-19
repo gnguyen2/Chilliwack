@@ -13,4 +13,4 @@ def update_user_role(email, new_role_name):
             print("User or role not found.")
 
 # Makes user administrator:
-update_user_role("crparke3@cougarnet.uh.edu", "basicuser")
+update_user_role("akkisitu@cougarnet.uh.edu", "administrator")

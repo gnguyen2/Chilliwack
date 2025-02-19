@@ -11,3 +11,14 @@ def role_required(required_role):
             return f(*args, **kwargs)
         return decorated_function
     return decorator
+
+def role_not_allowed(blocked_role):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if "user" in session and session["user"].get("role") == blocked_role:
+                flash("You do not have permission to access this page.", "danger")
+                return redirect(url_for("home"))
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator

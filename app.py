@@ -7,7 +7,7 @@ import requests
 from flask_migrate import Migrate
 from models import db, User, Role
 import urllib.parse
-from decorators import role_required
+from decorators import role_required, role_not_allowed
 from sqlalchemy.orm import joinedload
 
 
@@ -70,7 +70,7 @@ def get_user_profile(access_token):
 
 # Initializes roles
 def create_default_roles():
-    roles = ["administrator", "basicuser", "privlageduser"]
+    roles = ["administrator", "basicuser", "privlageduser", "DEACTIVATED"]
     
     for role_name in roles:
         existing_role = Role.query.filter_by(name=role_name).first()
@@ -154,6 +154,7 @@ def callback():
 
 # Shows the user is logged in
 @app.route("/dashboard")
+@role_not_allowed("DEACTIVATED")
 def dashboard():
     if not session.get("user"):
         flash("Please log in first.", "warning")
@@ -164,7 +165,7 @@ def dashboard():
 
     return render_template('dashboard.html', user=user)
 
-# Shows the user is logged in
+# Admin Dashboard
 @app.route("/admin")
 @role_required("administrator")
 def admindashboard():
@@ -209,7 +210,7 @@ def delete_user(user_id):
         flash("User not found.", "warning")
 
     return redirect(url_for("admindashboard"))
- 
+
 
 # Logs the user out by clearing session
 @app.route("/logout")
