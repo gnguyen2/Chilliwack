@@ -202,12 +202,23 @@ def update_user_role():
 @role_required("administrator")
 def delete_user(user_id):
     user = User.query.get(user_id)
-    if user:
+
+    if not user:
+        flash("User not found.", "warning")
+        return redirect(url_for("admindashboard"))
+
+    # Check if the logged-in admin is deleting their own account
+    if session.get("user") and session["user"].get("email") == user.email:
         db.session.delete(user)
         db.session.commit()
-        flash("User deleted successfully!", "success")
-    else:
-        flash("User not found.", "warning")
+        session.clear()  # Clear session to log out the user
+        flash("Your account has been deleted. You have been logged out.", "info")
+        return redirect(url_for("home"))  # Redirect to login page
+
+    # Otherwise, just delete the user normally
+    db.session.delete(user)
+    db.session.commit()
+    flash("User deleted successfully!", "success")
 
     return redirect(url_for("admindashboard"))
 

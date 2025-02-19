@@ -10,6 +10,15 @@
     {% endif %}
     <a href="{{ url_for('logout') }}" class="button">Logout</a>
 
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash-message {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+
     <h2>Manage Users</h2>
     <table>
         <tr>
