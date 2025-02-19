@@ -7,6 +7,7 @@ from sqlalchemy.orm import joinedload
 
 from config import Config
 from auth import auth_bp
+from admin import admin_bp
 
 
 # Configurations + setups
@@ -15,6 +16,7 @@ app = Flask(__name__)
 app.config.from_object(Config)
 
 app.register_blueprint(auth_bp)
+app.register_blueprint(admin_bp)
 
 # Initialize SQLAlchemy & Migrate
 db.init_app(app)
@@ -68,46 +70,6 @@ def dashboard():
         user = User.query.options(joinedload(User.role), joinedload(User.status)).filter_by(email=session["user"]["email"]).first()
 
     return render_template('dashboard.html', user=user)
-
-# Admin Dashboard
-@app.route("/admin")
-@role_required("administrator")
-def admindashboard():
-    if not session.get("user"):
-        flash("Please log in first.", "warning")
-        return redirect(url_for("home"))
-
-    with app.app_context():
-        # Get current user with role
-        user = User.query.options(joinedload(User.role)).filter_by(email=session["user"]["email"]).first()
-        
-        # Get all users with roles and order by status
-        users = User.query.options(joinedload(User.role)).order_by(User.status_id).all()
-        
-        # Fetch all roles
-        roles = Role.query.all()
-        
-        # Get distinct status values
-        statuses = Status.query.all()
-        
-        return render_template('admindashboard.html', user=user, sers=users, roles=roles, statuses=statuses)
-
-#update users
-@app.route("/admin/update_role", methods=["POST"])
-@role_required("administrator")
-def update_user_role():
-    user_id = request.form.get("user_id")
-    new_role_id = request.form.get("role_id")
-
-    user = User.query.get(user_id)
-    if user and new_role_id:
-        user.role_id = new_role_id
-        db.session.commit()
-        flash("User role updated successfully!", "success")
-    else:
-        flash("Failed to update user role.", "warning")
-
-    return redirect(url_for("admindashboard"))
 
 
 #delete a users

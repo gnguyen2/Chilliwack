@@ -75,7 +75,7 @@ def callback():
                     }
                     # Redirect based on role
                     if session["user"]["role"] == "administrator":
-                        return redirect(url_for("admindashboard"))                    
+                        return redirect(url_for("admin.admindashboard"))                    
                     return redirect(url_for("dashboard"))
 
         flash("Login failed. Please try again.", "danger")
