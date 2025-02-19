@@ -1,71 +1,36 @@
 from flask import Flask, render_template, url_for, redirect, flash, request, session
-import os
-from dotenv import load_dotenv
 from msal import ConfidentialClientApplication
 from flask_session import Session
 import requests
 from flask_migrate import Migrate
 from models import db, User, Role, Status
-import urllib.parse
 from decorators import role_required, role_not_allowed
 from sqlalchemy.orm import joinedload
+from config import Config
 
-
-
-load_dotenv()
-
-# Get database credentials from .env
-DB_SERVER = os.environ.get("DB_SERVER", "your-server.database.windows.net")
-DB_NAME = os.environ.get("DB_NAME", "your-database-name")
-DB_USERNAME = os.environ.get("DB_USERNAME", "your-db-username")
-DB_PASSWORD = os.environ.get("DB_PASSWORD", "your-db-password")
-
-# SQLAlchemy connection string paramaters
-params = urllib.parse.quote_plus(
-    f"DRIVER={{ODBC Driver 18 for SQL Server}};"
-    f"SERVER={DB_SERVER};"
-    f"DATABASE={DB_NAME};"
-    f"UID={DB_USERNAME};"
-    f"PWD={DB_PASSWORD};"
-)
-
-GRAPH_API_BASE_URL = "https://graph.microsoft.com/v1.0"
 
 # Configurations + setups
 # Flask Application setup
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev')
-
-# Configure MySQL database
-app.config["SQLALCHEMY_DATABASE_URI"] = f"mssql+pyodbc:///?odbc_connect={params}"
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config.from_object(Config)
 
 # Initialize SQLAlchemy & Migrate
 db.init_app(app)
 migrate = Migrate(app, db)  # Enables migrations
 
-# Flask Session setup
-app.config["SESSION_TYPE"] = "filesystem"
-app.config["SESSION_PERMANENT"] = False
 Session(app)
-
-# MSAL configuration
-CLIENT_ID = os.environ.get("CLIENT_ID", "your_client_id")
-CLIENT_SECRET = os.environ.get("CLIENT_SECRET", "your_client_secret")
-AUTHORITY = "https://login.microsoftonline.com/common"
-SCOPES = ["User.Read"]  # Adjust scopes based on required permissions
 
 # Initialize MSAL Confidential Client
 msal_app = ConfidentialClientApplication(
-    CLIENT_ID,
-    client_credential=CLIENT_SECRET,
-    authority=AUTHORITY)
+    Config.CLIENT_ID,
+    client_credential=Config.CLIENT_SECRET,
+    authority=Config.AUTHORITY)
 
 
 # Fetches the signed-in user's profile from Microsoft Graph API
 def get_user_profile(access_token):
     headers = {"Authorization": f"Bearer {access_token}"}
-    response = requests.get(f"{GRAPH_API_BASE_URL}/me", headers=headers)
+    response = requests.get(f"{Config.GRAPH_API_BASE_URL}/me", headers=headers)
     return response.json() if response.status_code == 200 else None
 
 # Initializes roles
@@ -104,7 +69,7 @@ def home():
 @app.route("/login")
 def login():
     auth_url = msal_app.get_authorization_request_url(
-        SCOPES,
+        Config.SCOPES,
         redirect_uri="http://localhost:5000/callback"
     )
     return redirect(auth_url)
@@ -115,7 +80,7 @@ def callback():
     if request.args.get("code"):
         result = msal_app.acquire_token_by_authorization_code(
             request.args["code"],
-            SCOPES,
+            Config.SCOPES,
             redirect_uri="http://localhost:5000/callback"
         )
 
@@ -174,7 +139,7 @@ def dashboard():
 
     with app.app_context():
         # Ensure to eagerly load the 'role' attribute
-        user = User.query.options(joinedload(User.role)).filter_by(email=session["user"]["email"]).first()
+        user = User.query.options(joinedload(User.role), joinedload(User.status)).filter_by(email=session["user"]["email"]).first()
 
     return render_template('dashboard.html', user=user)
 
@@ -199,7 +164,7 @@ def admindashboard():
         # Get distinct status values
         statuses = Status.query.all()
         
-        return render_template('admindashboard.html', user=user, users=users, roles=roles, statuses=statuses)
+        return render_template('admindashboard.html', user=user, sers=users, roles=roles, statuses=statuses)
 
 #update users
 @app.route("/admin/update_role", methods=["POST"])
