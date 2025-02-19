@@ -7,7 +7,7 @@
     <p>Email: {{ user.email }}</p>
     <p>Debug: Role is "{{ user.role }}"</p>
     <p>Debug: Status is "{{ user.status }}"</p>
-    <a href="{{ url_for('logout') }}" class="button">Logout</a>
+    <a href="{{ url_for('auth.logout') }}" class="button">Logout</a>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
