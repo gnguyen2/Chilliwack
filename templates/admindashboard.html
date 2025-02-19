@@ -17,7 +17,6 @@
         {% endif %}
     {% endwith %}
 
-
     <h2>Manage Users</h2>
     <table>
         <tr>
@@ -31,33 +30,33 @@
             <td>{{ user.name }}</td>
             <td>{{ user.email }}</td>
             <td>
-                <form action="{{ url_for('update_user_role') }}" method="POST">
+                <form action="{{ url_for('admin.update_user_role') }}" method="POST">
                     <input type="hidden" name="user_id" value="{{ user.id }}">
                     <select name="role_id">
                         {% for role in roles %}
-                        <option value="{{ role.id }}" {% if user.role.id==role.id %}selected{% endif %}>
+                        <option value="{{ role.id }}" {% if user.role and user.role.id == role.id %}selected{% endif %}>
                             {{ role.name }}
-                        </option>
+                        </option>                        
                         {% endfor %}
                     </select>
                     <button type="submit">Update</button>
                 </form>
             </td>
             <td>
-                <form action="{{ url_for('change_status') }}" method="POST">
+                <form action="{{ url_for('admin.change_status') }}" method="POST">
                     <input type="hidden" name="user_id" value="{{ user.id }}">
                     <select name="status_id">
                         {% for status in statuses %}
-                        <option value="{{ status.id }}" {% if user.status.id==status.id %}selected{% endif %}>
+                        <option value="{{ status.id }}" {% if user.status and user.status.id == status.id %}selected{% endif %}>
                             {{ status.name }}
-                        </option>
+                        </option>                        
                         {% endfor %}
                     </select>
                     <button type="submit">Update</button>
                 </form>
             </td>
             <td>
-                <form action="{{ url_for('delete_user', user_id=user.id) }}" method="POST">
+                <form action="{{ url_for('admin.delete_user', user_id=user.id) }}" method="POST">
                     <button type="submit" class="delete-button" onclick="return confirm('Are you sure?');">Delete</button>
                 </form>
             </td>

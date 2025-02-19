@@ -2,13 +2,12 @@ from flask import Flask, render_template, url_for, redirect, flash, request, ses
 from flask_session import Session
 from flask_migrate import Migrate
 from models import db, User, Role, Status
-from decorators import role_required, role_not_allowed
+from decorators import role_not_allowed
 from sqlalchemy.orm import joinedload
 
 from config import Config
 from auth import auth_bp
 from admin import admin_bp
-
 
 # Configurations + setups
 # Flask Application setup
@@ -49,13 +48,13 @@ with app.app_context():
     db.create_all()  # Ensure tables exist
     create_default_roles()  # Create roles
     create_default_statuses() # Create statuses
+    
 
 # Home page (should include basic info and a login button)
 @app.route("/")
 @app.route("/home")
 def home():
     return render_template('home.html', subtitle='Home Page', text='This is the home page')
-
 
 # Shows the user is logged in
 @app.route("/dashboard")
@@ -70,51 +69,6 @@ def dashboard():
         user = User.query.options(joinedload(User.role), joinedload(User.status)).filter_by(email=session["user"]["email"]).first()
 
     return render_template('dashboard.html', user=user)
-
-
-#delete a users
-@app.route("/admin/delete_user/<int:user_id>", methods=["POST"])
-@role_required("administrator")
-def delete_user(user_id):
-    user = User.query.get(user_id)
-
-    if not user:
-        flash("User not found.", "warning")
-        return redirect(url_for("admindashboard"))
-
-    # Check if the logged-in admin is deleting their own account
-    if session.get("user") and session["user"].get("email") == user.email:
-        db.session.delete(user)
-        db.session.commit()
-        session.clear()  # Clear session to log out the user
-        flash("Your account has been deleted. You have been logged out.", "info")
-        return redirect(url_for("home"))  # Redirect to login page
-
-    # Otherwise, just delete the user normally
-    db.session.delete(user)
-    db.session.commit()
-    flash("User deleted successfully!", "success")
-
-    return redirect(url_for("admindashboard"))
-
-#updates a users status
-@app.route("/admin/status_update", methods=["POST"])
-@role_required("administrator")
-def change_status():
-    user_id = request.form.get("user_id")
-    new_status_id = request.form.get("status_id")
-
-    user = User.query.get(user_id)
-    if user and new_status_id:
-        user.status_id = new_status_id
-        db.session.commit()
-        flash("User status updated successfully!", "success")
-    else:
-        flash("Failed to update user status.", "warning")
-
-    return redirect(url_for("admindashboard"))
-
-
 
 
 if __name__ == '__main__':

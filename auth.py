@@ -3,6 +3,7 @@ from msal import ConfidentialClientApplication
 import requests
 from config import Config
 from models import db, User, Role, Status
+from sqlalchemy.orm import joinedload
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -51,7 +52,7 @@ def callback():
 
                 # Check if user exists, otherwise create
                 with db.session.begin():  # Ensure database context
-                    existing_user = User.query.filter_by(email=email).first()
+                    existing_user = User.query.options(joinedload(User.role), joinedload(User.status)).filter_by(email=email).first()
 
                     if not existing_user:
                         default_role = Role.query.filter_by(name="basicuser").first()  # Assign 'basicuser' by default
