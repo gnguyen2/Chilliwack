@@ -72,8 +72,9 @@ def callback():
                         "email": email,
                         "role": existing_user.role.name if existing_user else "basicuser",
                         "status": existing_user.status.name if existing_user else "active"
-
                     }
+                    print("User session data:", session["user"]) #added line that logs user info in terminal
+                    
                     # Redirect based on role
                     if session["user"]["role"] == "administrator":
                         return redirect(url_for("admin.admindashboard"))                    

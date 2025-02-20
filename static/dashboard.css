@@ -14,3 +14,33 @@
     background-color: green; /* Color when clicked */
     color: white;
 }
+
+/* Body styling with a faded background image */
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image: url('https://a.travel-assets.com/findyours-php/viewfinder/images/res70/216000/216341-Vancouver-Coast.jpg'); /* Replace with your image URL */
+    background-size: cover;
+    background-position: center;
+    background-blend-mode: overlay;
+    background-color: rgba(0, 0, 0, 0.5); /* Fade effect */
+    font-family: Arial, sans-serif;
+  }
+  
+  /* Gray box styling */
+  .gray-box {
+    background-color: rgba(128, 128, 128, 1); /* Semi-transparent gray */
+    padding: 40px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  }
+
+  .lrg-txt-white {
+    color: white;
+    margin-bottom: 20px;
+  }
