@@ -1,107 +1,128 @@
-/* General Styles */
-body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background-color: #f5f5f7;
-    color: #1d1d1f;
+/* static/admindashboard.css */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600&display=swap');
+
+:root {
+    --primary-bg: #ffffff;
+    --secondary-bg: #f7f7f7;
+    --text-color: #000000;
+    --accent-color: #ff3b3b;
+    --border-color: #000000;
+}
+
+* {
     margin: 0;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Space Grotesk', sans-serif;
 }
 
-/* Container */
-.admin-container {
-    max-width: 900px;
-    width: 100%;
-    background: white;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+body {
+    background: var(--primary-bg);
+    color: var(--text-color);
     text-align: center;
+    padding: 20px;
 }
 
-/* Header */
-h1, h2 {
+h1 {
+    font-size: 40px;
     font-weight: 600;
-    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border-bottom: 2px solid var(--border-color);
+    display: inline-block;
+    padding-bottom: 5px;
 }
 
-/* Profile Picture */
-img {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
+.admin-container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 40px;
+    text-align: left;
+}
+
+p {
+    font-size: 18px;
     margin: 10px 0;
-    object-fit: cover;
 }
 
-/* Buttons */
-.button, button {
-    background: #0071e3;
-    color: white;
-    padding: 10px 16px;
-    border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: 0.3s;
+a.button {
+    display: inline-block;
+    padding: 12px 24px;
+    background: var(--text-color);
+    color: var(--primary-bg);
+    border: 2px solid var(--text-color);
+    border-radius: 3px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    letter-spacing: 1px;
 }
 
-    .button:hover, button:hover {
-        background: #005bb5;
+    a.button:hover {
+        background: var(--primary-bg);
+        color: var(--text-color);
     }
 
-.delete-button {
-    background: #d32f2f;
-}
-
-    .delete-button:hover {
-        background: #b71c1c;
-    }
-
-/* Table */
 table {
     width: 100%;
-    border-collapse: collapse;
     margin-top: 20px;
+    border-collapse: collapse;
 }
 
 th, td {
-    padding: 12px;
-    border-bottom: 1px solid #ddd;
+    padding: 15px;
+    border-bottom: 2px solid var(--border-color);
     text-align: left;
 }
 
 th {
-    background-color: #f0f0f5;
+    font-size: 16px;
     font-weight: 600;
+    text-transform: uppercase;
 }
 
-/* Dropdown */
-select {
-    padding: 6px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    font-size: 14px;
+td select, td button {
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    font-weight: bold;
+    background: transparent;
+    cursor: pointer;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    body {
-        padding: 10px;
+    td button:hover {
+        background: var(--text-color);
+        color: var(--primary-bg);
     }
 
-    .admin-container {
-        width: 100%;
-        padding: 20px;
+.delete-button {
+    background: var(--accent-color);
+    color: var(--primary-bg);
+    border: 2px solid var(--accent-color);
+}
+
+    .delete-button:hover {
+        background: var(--primary-bg);
+        color: var(--accent-color);
     }
 
-    table {
-        font-size: 14px;
+.flash-message {
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 3px;
+    font-weight: bold;
+    animation: fadeIn 0.5s ease-in-out;
+    border: 2px solid var(--text-color);
+    background: var(--secondary-bg);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
     }
 
-    .button, button {
-        font-size: 12px;
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }

@@ -1,6 +1,7 @@
 <head>
     <link rel="stylesheet" href="static/admindashboard.css">
 </head>
+<script src="static/admindashboard.js" defer></script>
 
 <body class="admin-container">
     <h1>Welcome Administrator: {{ user.name }}</h1>
@@ -10,11 +11,11 @@
     <a href="{{ url_for('auth.logout') }}" class="button">Logout</a>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="flash-message {{ category }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="flash-message {{ category }}">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
     {% endwith %}
 
     <h2>Manage Users</h2>
@@ -34,9 +35,9 @@
                     <input type="hidden" name="user_id" value="{{ user.id }}">
                     <select name="role_id">
                         {% for role in roles %}
-                        <option value="{{ role.id }}" {% if user.role and user.role.id == role.id %}selected{% endif %}>
+                        <option value="{{ role.id }}" {% if user.role and user.role.id==role.id %}selected{% endif %}>
                             {{ role.name }}
-                        </option>                        
+                        </option>
                         {% endfor %}
                     </select>
                     <button type="submit">Update</button>
@@ -47,9 +48,9 @@
                     <input type="hidden" name="user_id" value="{{ user.id }}">
                     <select name="status_id">
                         {% for status in statuses %}
-                        <option value="{{ status.id }}" {% if user.status and user.status.id == status.id %}selected{% endif %}>
+                        <option value="{{ status.id }}" {% if user.status and user.status.id==status.id %}selected{% endif %}>
                             {{ status.name }}
-                        </option>                        
+                        </option>
                         {% endfor %}
                     </select>
                     <button type="submit">Update</button>
