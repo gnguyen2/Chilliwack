@@ -24,6 +24,10 @@ def admindashboard():
     
     # Get distinct status values
     statuses = Status.query.all()
+
+    # Check if bypass is requested
+    if request.args.get("bypass") == "true":
+        return render_template("admindashboard.html", user=user, users=users, roles=roles, statuses=statuses)
     
     return render_template('admindashboard.html', user=user, users=users, roles=roles, statuses=statuses)
 

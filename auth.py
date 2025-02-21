@@ -45,40 +45,56 @@ def callback():
             # Fetch user profile from Microsoft Graph API
             user_info = get_user_profile(session["access_token"])
 
-            if user_info:
-                microsoft_id = user_info.get("id")
-                name = user_info.get("displayName")
-                email = user_info.get("mail") or user_info.get("userPrincipalName")  # Email might be under different keys
+            if not user_info:
+                flash("Failed to retrieve user info.", "danger")
+                return redirect(url_for("home"))
 
-                # Check if user exists, otherwise create
-                with db.session.begin():  # Ensure database context
-                    existing_user = User.query.options(joinedload(User.role), joinedload(User.status)).filter_by(email=email).first()
+            microsoft_id = user_info.get("id")
+            name = user_info.get("displayName")
+            email = user_info.get("mail") or user_info.get("userPrincipalName")  # Email might be under different keys
 
-                    if not existing_user:
-                        default_role = Role.query.filter_by(name="basicuser").first()  # Assign 'basicuser' by default
-                        default_status = Status.query.filter_by(name="active").first()  # Assign 'active' by default
-                        new_user = User(
-                            microsoft_id=microsoft_id,
-                            name=name,
-                            email=email,
-                            role=default_role,
-                            status=default_status
-                        )
-                        db.session.add(new_user)
-                        db.session.commit()
+            if not email:
+                flash("No email found for this Microsoft account.", "danger")
+                return redirect(url_for("home"))
 
-                    session["user"] = {
-                        "name": name,
-                        "email": email,
-                        "role": existing_user.role.name if existing_user else "basicuser",
-                        "status": existing_user.status.name if existing_user else "active"
-                    }
-                    print("User session data:", session["user"]) #added line that logs user info in terminal
-                    
-                    # Redirect based on role
-                    if session["user"]["role"] == "administrator":
-                        return redirect(url_for("admin.admindashboard"))                    
-                    return redirect(url_for("dashboard"))
+            # Check if user exists, otherwise create
+            existing_user = User.query.filter_by(email=email).first()
+
+            if not existing_user:
+                default_role = Role.query.filter_by(name="basicuser").first()
+                default_status = Status.query.filter_by(name="active").first()
+                
+                new_user = User(
+                    microsoft_id=microsoft_id,
+                    name=name,
+                    email=email,
+                    role=default_role,
+                    status=default_status
+                )
+                db.session.add(new_user)
+                db.session.commit()
+
+                session["user"] = {
+                    "name": name,
+                    "email": email,
+                    "role": default_role.name,
+                    "status": default_status.name
+                }
+            else:
+
+                session["user"] = {
+                    "name": existing_user.name,
+                    "email": existing_user.email,
+                    "role": existing_user.role.name,
+                    "status": existing_user.status.name
+                }
+
+                print("User session data:", session["user"]) #added line that logs user info in terminal
+                
+                # Redirect based on role
+                if session["user"]["role"] == "administrator":
+                    return redirect(url_for("admin.admindashboard"))                    
+                return redirect(url_for("dashboard"))
 
         flash("Login failed. Please try again.", "danger")
         return redirect(url_for("home"))

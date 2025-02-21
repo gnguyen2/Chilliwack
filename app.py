@@ -48,6 +48,13 @@ with app.app_context():
     db.create_all()  # Ensure tables exist
     create_default_roles()  # Create roles
     create_default_statuses() # Create statuses
+
+@app.before_request
+def refresh_user_session():
+    if "user" in session:
+        user = User.query.filter_by(email=session["user"]["email"]).first()
+        if user:
+            session["user"]["role"] = user.role.name
     
 
 # Home page (should include basic info and a login button)
