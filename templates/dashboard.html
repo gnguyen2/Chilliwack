@@ -33,9 +33,8 @@
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             // Get user role and status from Jinja2 context
-            const userRole = "{{ user.role }}";
+            const userRole = "{{ user.role.name|safe }}";
             const userStatus = "{{ user.status }}";
-
 
             // Your existing code for buttons and role management
             const buttons = document.querySelectorAll(".color_change_button");
@@ -64,4 +63,3 @@
         });
     </script>
 </body>
-
