@@ -74,27 +74,25 @@ def callback():
                 db.session.add(new_user)
                 db.session.commit()
 
-                session["user"] = {
-                    "name": name,
-                    "email": email,
-                    "role": default_role.name,
-                    "status": default_status.name
-                }
+                user = new_user
             else:
+                user = existing_user
 
-                session["user"] = {
-                    "name": existing_user.name,
-                    "email": existing_user.email,
-                    "role": existing_user.role.name,
-                    "status": existing_user.status.name
-                }
+            # Store user details in session
+            session["user"] = {
+                "name": user.name,
+                "email": user.email,
+                "role": user.role.name,
+                "status": user.status.name
+            }
 
-                print("User session data:", session["user"]) #added line that logs user info in terminal
-                
-                # Redirect based on role
-                if session["user"]["role"] == "administrator":
-                    return redirect(url_for("admin.admindashboard"))                    
-                return redirect(url_for("dashboard"))
+            print("User session data:", session["user"])  # Log user info
+
+            # Redirect based on role **(outside if-else to ensure new users are redirected)**
+            if session["user"]["role"] == "administrator":
+                return redirect(url_for("admin.admindashboard"))
+
+            return redirect(url_for("dashboard"))
 
         flash("Login failed. Please try again.", "danger")
         return redirect(url_for("home"))
