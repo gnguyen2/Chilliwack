@@ -29,3 +29,5 @@ The Chilliwack application integrates Microsoft authentication and role-based us
 - `/dashboard` → Displays user profile.
 - `/admin` → Restricted to administrators, allowing them to update, remove, and deactivate user.
 - `/logout` → Clears session and logs out the user.
+  ![image](https://github.com/user-attachments/assets/b47a5f9e-a49d-498f-ae76-f1e8c874b776)
+
