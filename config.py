@@ -12,6 +12,7 @@ class Config:
     DB_NAME = os.environ.get("DB_NAME", "your-database-name")
     DB_USERNAME = os.environ.get("DB_USERNAME", "your-db-username")
     DB_PASSWORD = os.environ.get("DB_PASSWORD", "your-db-password")
+    OPERATING_SYS = os.environ.get("OPERATING_SYS", "MAC")
 
     # SQLAlchemy connection string paramaters
     params = urllib.parse.quote_plus(
@@ -24,7 +25,17 @@ class Config:
 
     GRAPH_API_BASE_URL = "https://graph.microsoft.com/v1.0"
 
-    SQLALCHEMY_DATABASE_URI = f"mssql+pymssql://{DB_USERNAME}:{DB_PASSWORD}@{DB_SERVER}/{DB_NAME}"
+    if(OPERATING_SYS=="MAC"):
+    
+        SQLALCHEMY_DATABASE_URI = f"mssql+pyodbc:///?odbc_connect={params}"
+    
+    else:
+    
+        SQLALCHEMY_DATABASE_URI = f"mssql+pymssql://{DB_USERNAME}:{DB_PASSWORD}@{DB_SERVER}/{DB_NAME}"
+    
+
+
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     SESSION_TYPE = "filesystem"
