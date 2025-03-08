@@ -1,0 +1,17 @@
+<head>
+    <link rel="stylesheet" href="static/home.css">
+</head>
+
+<body>
+    <h1>Upload Your Signature</h1>
+
+    <form action="{{ url_for('upload_signature') }}" method="POST" enctype="multipart/form-data">
+        <label for="signature">Select Signature File:</label>
+        <input type="file" name="signature" required>
+        <br><br>
+        <button type="submit">Upload</button>
+    </form>
+
+    <br>
+    <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+</body>

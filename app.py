@@ -8,6 +8,10 @@ from sqlalchemy.orm import joinedload
 from config import Config
 from auth import auth_bp
 from admin import admin_bp
+import os
+from werkzeug.utils import secure_filename
+from datetime import datetime
+
 
 # Configurations + setups
 # Flask Application setup
@@ -76,7 +80,44 @@ def dashboard():
         user = User.query.options(joinedload(User.role), joinedload(User.status)).filter_by(email=session["user"]["email"]).first()
 
     return render_template('dashboard.html', user=user)
+# upload signature page
+@app.route("/upload_signature_page")
+def upload_signature_page():
+    if not session.get("user"):
+        flash("Please log in first.", "warning")
+        return redirect(url_for("home"))
+    
+    return render_template("upload_signature.html")
 
+@app.route("/upload_signature", methods=["POST"])
+def upload_signature():
+    if "signature" not in request.files or request.files["signature"].filename == "":
+        flash("No file selected!", "danger")
+        return redirect(url_for("upload_signature_page"))
+
+    file = request.files["signature"]
+    filename = secure_filename(file.filename)
+
+    # Ensure the directory exists
+    signature_folder = "static/signatures"
+    if not os.path.exists(signature_folder):
+        os.makedirs(signature_folder)
+
+    file_path = os.path.join(signature_folder, filename)
+    file.save(file_path)
+
+    # Update the user record
+    user = User.query.filter_by(email=session["user"]["email"]).first()
+    user.signature_path = f"signatures/{filename}"
+    user.updated_at = datetime.utcnow()  # Force timestamp update
+    db.session.commit()
+
+    # Refresh session data
+    session["user"]["signature_path"] = user.signature_path  # Ensure session reflects new path
+    session.modified = True
+
+    flash("Signature uploaded successfully!", "success")
+    return redirect(url_for("dashboard"))
 
 if __name__ == '__main__':
     app.run(debug=True, host="localhost")
