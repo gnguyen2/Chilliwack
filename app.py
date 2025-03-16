@@ -146,10 +146,10 @@ def upload_rcl():
 
     # Ensure the directory exists
     signature_folder = "static/rcl_forms"
-    if not os.path.exists(rcl_folder):
-        os.makedirs(rcl_folder)
+    if not os.path.exists(rcl_forms):
+        os.makedirs(rcl_forms)
 
-    file_path = os.path.join(rcl_folder, filename)
+    file_path = os.path.join(rcl_forms, filename)
     file.save(file_path)
 
     # Update the user record

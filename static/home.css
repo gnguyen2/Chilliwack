@@ -64,7 +64,7 @@ body {
   button[type = "submit"] {
     margin: 10px 0; /* Add space above and below the button */
     padding: 10px 20px; /* Add padding to the button */
-    background-color: #03b41e; /* Blue background */
+    background-color: #03b41e;
     color: white; /* White text */
     border: none; /* Remove border */
     border-radius: 5px; /* Rounded corners */
@@ -72,6 +72,6 @@ body {
     transition: background-color 0.3s ease; /* Smooth transition for hover effect */
 }
 
-.button[type = "submit"] :hover{
+.button[type="submit"]:hover{
   background-color: #016710;
 }
