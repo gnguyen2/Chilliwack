@@ -3,15 +3,16 @@
 </head>
 
 <body>
-    <h1>Upload Your Signature</h1>
+    <div class="gray-box">
+        <h1>Upload Your Signature</h1>
 
-    <form action="{{ url_for('upload_signature') }}" method="POST" enctype="multipart/form-data">
-        <label for="signature">Select Signature File:</label>
-        <input type="file" name="signature" required>
-        <br><br>
-        <button type="submit">Upload</button>
-    </form>
-
-    <br>
-    <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+        <form class = "sig-form" action="{{ url_for('upload_signature') }}" method="POST" enctype="multipart/form-data">
+            <label for="signature">Select Signature File:</label>
+            <input type="file" name="signature" required>
+            <br><br>
+        </form>
+        <button type="submit" form = "sig-form">Upload</button>
+        <br>
+        <a href="{{ url_for('dashboard') }}" class ="button">Dashboard</a>    
+    </div>
 </body>

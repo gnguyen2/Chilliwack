@@ -80,6 +80,7 @@ def dashboard():
         user = User.query.options(joinedload(User.role), joinedload(User.status)).filter_by(email=session["user"]["email"]).first()
 
     return render_template('dashboard.html', user=user)
+
 # upload signature page
 @app.route("/upload_signature_page")
 def upload_signature_page():
@@ -88,6 +89,8 @@ def upload_signature_page():
         return redirect(url_for("home"))
     
     return render_template("upload_signature.html")
+
+
 
 @app.route("/upload_signature", methods=["POST"])
 def upload_signature():
@@ -114,6 +117,49 @@ def upload_signature():
 
     # Refresh session data
     session["user"]["signature_path"] = user.signature_path  # Ensure session reflects new path
+    session.modified = True
+
+    flash("Signature uploaded successfully!", "success")
+    return redirect(url_for("dashboard"))
+
+# upload signature page
+@app.route("/upload_rcl_page")
+def upload_rcl_page():
+    if not session.get("user"):
+        flash("Please log in first.", "warning")
+        return redirect(url_for("home"))
+    
+    return render_template("upload_rcl.html")
+
+@app.route("/upload_rcl", methods=['POST'])
+def upload_rcl():
+    if not session.get("user"):
+        flash("Please log in first.", "warning")
+        return redirect(url_for("home"))
+
+    if "rcl" not in request.files or request.files["rcl"].filename == "":
+        flash("No file selected!", "danger")
+        return redirect(url_for("upload_rcl_page"))
+    
+    file = request.files["rcl"]
+    filename = secure_filename(file.filename)
+
+    # Ensure the directory exists
+    signature_folder = "static/rcl_forms"
+    if not os.path.exists(rcl_folder):
+        os.makedirs(rcl_folder)
+
+    file_path = os.path.join(rcl_folder, filename)
+    file.save(file_path)
+
+    # Update the user record
+    user = User.query.filter_by(email=session["user"]["email"]).first()
+    user.rcl_path = f"rcl/{filename}"
+    user.updated_at = datetime.utcnow()  # Force timestamp update
+    db.session.commit()
+
+    # Refresh session data
+    session["user"]["rcl_path"] = user.rcl_path  # Ensure session reflects new path
     session.modified = True
 
     flash("Signature uploaded successfully!", "success")
