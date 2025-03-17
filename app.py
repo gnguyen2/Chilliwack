@@ -94,12 +94,30 @@ def upload_signature_page():
 
 @app.route("/upload_signature", methods=["POST"])
 def upload_signature():
+    file = request.files["signature"]
+
+    user = User.query.filter_by(email=session["user"]["email"]).first()
     if "signature" not in request.files or request.files["signature"].filename == "":
         flash("No file selected!", "danger")
         return redirect(url_for("upload_signature_page"))
 
-    file = request.files["signature"]
-    filename = secure_filename(file.filename)
+    user_id = user.id  # Get the user's ID
+    user_initial = user.name[0].upper()  # Get the first initial of the user's name and capitalize it
+    current_date = datetime.now().strftime("%m%d%Y%H%M%S")  # Get the current date in mmddyyyyhhmmss format     
+
+    # Extract the file extension safely
+    file_extension = file.filename.split('.')[-1] if '.' in file.filename else ""
+    if not file_extension:
+        flash("File must have an extension!", "danger")
+        return redirect(url_for("upload_signature_page"))
+
+    # Construct the custom filename
+    user_id = user.id  # Get the user's ID
+    user_initial = user.name[0].upper()  # Get the first initial of the user's name and capitalize it
+    current_date = datetime.now().strftime("%m%d%Y%H%M%S")  # Get the current date in mmddyyyyhhmmss format
+    filename = f"{user_id}_{user_initial}_{current_date}.{file_extension}"
+    filename = secure_filename(filename)  # Sanitize the custom filename
+
 
     # Ensure the directory exists
     signature_folder = "static/signatures"
@@ -110,7 +128,7 @@ def upload_signature():
     file.save(file_path)
 
     # Update the user record
-    user = User.query.filter_by(email=session["user"]["email"]).first()
+    #user = User.query.filter_by(email=session["user"]["email"]).first() MOVED TO TOP OF DEF
     user.signature_path = f"signatures/{filename}"
     user.updated_at = datetime.utcnow()  # Force timestamp update
     db.session.commit()
@@ -133,6 +151,9 @@ def upload_rcl_page():
 
 @app.route("/upload_rcl", methods=['POST'])
 def upload_rcl():
+     #queries the user info from records table
+    user = User.query.filter_by(email=session["user"]["email"]).first()
+    
     if not session.get("user"):
         flash("Please log in first.", "warning")
         return redirect(url_for("home"))
@@ -146,15 +167,16 @@ def upload_rcl():
 
     # Ensure the directory exists
     signature_folder = "static/rcl_forms"
-    if not os.path.exists(rcl_forms):
-        os.makedirs(rcl_forms)
+    if not os.path.exists(signature_folder):
+        os.makedirs(signature_folder)
 
-    file_path = os.path.join(rcl_forms, filename)
+    
+    file_path = os.path.join(signature_folder, filename)
     file.save(file_path)
 
     # Update the user record
-    user = User.query.filter_by(email=session["user"]["email"]).first()
-    user.rcl_path = f"rcl/{filename}"
+     #user = User.query.filter_by(email=session["user"]["email"]).first() MOVED TO TOP OF DEF 
+    user.rcl_path = f"rcl_forms/{filename}"
     user.updated_at = datetime.utcnow()  # Force timestamp update
     db.session.commit()
 
