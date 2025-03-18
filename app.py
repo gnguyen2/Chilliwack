@@ -95,6 +95,10 @@ def upload_signature_page():
 @app.route("/upload_signature", methods=["POST"])
 def upload_signature():
     file = request.files["signature"]
+        # Ensure the directory exists
+    signature_folder = "static/signatures"
+    if not os.path.exists(signature_folder):
+        os.makedirs(signature_folder)
 
     user = User.query.filter_by(email=session["user"]["email"]).first()
     if "signature" not in request.files or request.files["signature"].filename == "":
@@ -118,12 +122,6 @@ def upload_signature():
     filename = f"{user_id}_{user_initial}_{current_date}.{file_extension}"
     filename = secure_filename(filename)  # Sanitize the custom filename
 
-
-    # Ensure the directory exists
-    signature_folder = "static/signatures"
-    if not os.path.exists(signature_folder):
-        os.makedirs(signature_folder)
-
     file_path = os.path.join(signature_folder, filename)
     file.save(file_path)
 
@@ -141,7 +139,7 @@ def upload_signature():
     return redirect(url_for("dashboard"))
 
 # upload signature page
-@app.route("/upload_rcl_page")
+@app.route("/edit_rcl_page")
 def upload_rcl_page():
     if not session.get("user"):
         flash("Please log in first.", "warning")
@@ -149,7 +147,7 @@ def upload_rcl_page():
     
     return render_template("upload_rcl.html")
 
-@app.route("/upload_rcl", methods=['POST'])
+@app.route("/edit_rcl", methods=['POST'])
 def upload_rcl():
      #queries the user info from records table
     user = User.query.filter_by(email=session["user"]["email"]).first()
