@@ -1,4 +1,4 @@
-from flask import Blueprint, session, redirect, url_for, flash, request, render_template, jsonify
+from flask import Blueprint, session, redirect, url_for, flash, request, render_template, jsonify, send_file
 from models import db, User, TWResponses, TWDocuments, RCLDocuments, RCLResponses
 from werkzeug.utils import secure_filename
 import os
@@ -335,8 +335,44 @@ def save_tw_progress():
     doc.save(save_path)
 
 
-
     return jsonify({"message": "Form progress saved successfully!"}), 200
+
+@form_bp.route("/preview_TW", methods=["POST"])
+def preview_TW():
+    if "user" not in session:
+        return jsonify({"error": "User not logged in"}), 401
+
+    user_id = session["user"]["id"]
+
+    full_name = session["user"]["name"]
+
+    # Split by comma
+    last, first_middle = full_name.split(", ")
+
+    # Split the first and middle parts by space
+    first_name_parts = first_middle.split(" ")
+
+    first = first_name_parts[0]  # First name
+
+    # Last name is already separated
+    last_name = last.strip()
+
+    # Define the file name (You should specify the location where your PDFs are saved)
+    user_initial = first[0].upper()
+    filename = f"{user_id}_{user_initial}.pdf"
+    filename = secure_filename(filename)
+
+    # Define the path to the existing PDF (make sure this path is correct)
+    pdf_path = os.path.join('static', 'documents', filename)
+
+    # Check if the file exists
+    if not os.path.exists(pdf_path):
+        return jsonify({"error": "PDF not found"}), 404
+
+    # Return the existing PDF for display in the browser (opens in a new tab)
+    return send_file(pdf_path, as_attachment=False, download_name=filename, mimetype="application/pdf")
+
+
 
 @form_bp.route("/rcl_form", methods=['GET', 'POST'])
 def fill_rcl_form():

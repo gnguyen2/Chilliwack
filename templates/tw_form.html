@@ -77,12 +77,9 @@
 <!-- Dashboard Button -->
 <button type="button" id="dashboardButton" class="btn btn-secondary">Go to Dashboard</button>
 
-</b>
-<div class="role_check_box">
-    <a href="{{ url_for('form.preview_TW') }}">
-        <button type="button" class="color_change_button_noauth">Preview Form</button>
-    </a>
-</div>
+<form action="{{ url_for('form.preview_TW') }}" method="POST" target="_blank">
+    <button type="submit">Preview TW Form</button>
+</form>
 
 <script>
     document.getElementById("dashboardButton").addEventListener("click", function(event) {
