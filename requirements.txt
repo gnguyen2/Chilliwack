@@ -1,8 +1,9 @@
-alembic==1.14.1
+alembic==1.15.1
 Flask==3.1.0
 flask_migrate==4.1.0
 flask_sqlalchemy==3.1.1
-msal==1.31.1
+msal==1.32.0
 python-dotenv==1.0.1
 Requests==2.32.3
 SQLAlchemy==2.0.31
+Werkzeug==3.1.3

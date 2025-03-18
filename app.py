@@ -8,6 +8,7 @@ from sqlalchemy.orm import joinedload
 from config import Config
 from auth import auth_bp
 from admin import admin_bp
+from form import form_bp
 import os
 from werkzeug.utils import secure_filename
 from datetime import datetime
@@ -20,11 +21,11 @@ app.config.from_object(Config)
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(admin_bp)
+app.register_blueprint(form_bp)
 
 # Initialize SQLAlchemy & Migrate
 db.init_app(app)
 migrate = Migrate(app, db)  # Enables migrations
-
 Session(app)
 
 # Initializes roles
@@ -80,112 +81,3 @@ def dashboard():
         user = User.query.options(joinedload(User.role), joinedload(User.status)).filter_by(email=session["user"]["email"]).first()
 
     return render_template('dashboard.html', user=user)
-
-# upload signature page
-@app.route("/upload_signature_page")
-def upload_signature_page():
-    if not session.get("user"):
-        flash("Please log in first.", "warning")
-        return redirect(url_for("home"))
-    
-    return render_template("upload_signature.html")
-
-
-
-@app.route("/upload_signature", methods=["POST"])
-def upload_signature():
-    file = request.files["signature"]
-
-    user = User.query.filter_by(email=session["user"]["email"]).first()
-    if "signature" not in request.files or request.files["signature"].filename == "":
-        flash("No file selected!", "danger")
-        return redirect(url_for("upload_signature_page"))
-
-    user_id = user.id  # Get the user's ID
-    user_initial = user.name[0].upper()  # Get the first initial of the user's name and capitalize it
-    current_date = datetime.now().strftime("%m%d%Y%H%M%S")  # Get the current date in mmddyyyyhhmmss format     
-
-    # Extract the file extension safely
-    file_extension = file.filename.split('.')[-1] if '.' in file.filename else ""
-    if not file_extension:
-        flash("File must have an extension!", "danger")
-        return redirect(url_for("upload_signature_page"))
-
-    # Construct the custom filename
-    user_id = user.id  # Get the user's ID
-    user_initial = user.name[0].upper()  # Get the first initial of the user's name and capitalize it
-    current_date = datetime.now().strftime("%m%d%Y%H%M%S")  # Get the current date in mmddyyyyhhmmss format
-    filename = f"{user_id}_{user_initial}_{current_date}.{file_extension}"
-    filename = secure_filename(filename)  # Sanitize the custom filename
-
-
-    # Ensure the directory exists
-    signature_folder = "static/signatures"
-    if not os.path.exists(signature_folder):
-        os.makedirs(signature_folder)
-
-    file_path = os.path.join(signature_folder, filename)
-    file.save(file_path)
-
-    # Update the user record
-    #user = User.query.filter_by(email=session["user"]["email"]).first() MOVED TO TOP OF DEF
-    user.signature_path = f"signatures/{filename}"
-    user.updated_at = datetime.utcnow()  # Force timestamp update
-    db.session.commit()
-
-    # Refresh session data
-    session["user"]["signature_path"] = user.signature_path  # Ensure session reflects new path
-    session.modified = True
-
-    flash("Signature uploaded successfully!", "success")
-    return redirect(url_for("dashboard"))
-
-# upload signature page
-@app.route("/upload_rcl_page")
-def upload_rcl_page():
-    if not session.get("user"):
-        flash("Please log in first.", "warning")
-        return redirect(url_for("home"))
-    
-    return render_template("upload_rcl.html")
-
-@app.route("/upload_rcl", methods=['POST'])
-def upload_rcl():
-     #queries the user info from records table
-    user = User.query.filter_by(email=session["user"]["email"]).first()
-    
-    if not session.get("user"):
-        flash("Please log in first.", "warning")
-        return redirect(url_for("home"))
-
-    if "rcl" not in request.files or request.files["rcl"].filename == "":
-        flash("No file selected!", "danger")
-        return redirect(url_for("upload_rcl_page"))
-    
-    file = request.files["rcl"]
-    filename = secure_filename(file.filename)
-
-    # Ensure the directory exists
-    signature_folder = "static/rcl_forms"
-    if not os.path.exists(signature_folder):
-        os.makedirs(signature_folder)
-
-    
-    file_path = os.path.join(signature_folder, filename)
-    file.save(file_path)
-
-    # Update the user record
-     #user = User.query.filter_by(email=session["user"]["email"]).first() MOVED TO TOP OF DEF 
-    user.rcl_path = f"rcl_forms/{filename}"
-    user.updated_at = datetime.utcnow()  # Force timestamp update
-    db.session.commit()
-
-    # Refresh session data
-    session["user"]["rcl_path"] = user.rcl_path  # Ensure session reflects new path
-    session.modified = True
-
-    flash("Signature uploaded successfully!", "success")
-    return redirect(url_for("dashboard"))
-
-if __name__ == '__main__':
-    app.run(debug=True, host="localhost")

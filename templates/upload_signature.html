@@ -6,7 +6,7 @@
     <div class="gray-box">
         <h1>Upload Your Signature</h1>
 
-        <form class="sig-form" action="{{ url_for('upload_signature') }}" method="POST" enctype="multipart/form-data">
+        <form class="sig-form" action="{{ url_for('form.upload_signature') }}" method="POST" enctype="multipart/form-data">
             <label for="signature">Select Signature File (JPG only):</label>
             <input type="file" name="signature" accept=".jpg, .jpeg" required>
             <br><br>
