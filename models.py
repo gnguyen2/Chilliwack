@@ -35,7 +35,7 @@ class User(db.Model):
     status = db.relationship('Status', backref=db.backref('users', lazy=True))
 
     #establish a relationship with ApprovalProcess
-    approvals = db.relationship("ApprovalProcess", back_populates="approver")
+    approvals = db.relationship("ApprovalProcess", back_populates="approver", lazy=True)
     #store the signature file path
     signature_path = db.Column(db.String(255), nullable=True)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -52,7 +52,7 @@ class Request(db.Model):
     status = db.Column(db.String(50), default="draft")  # draft, pending, approved, rejected
     pdf_path = db.Column(db.String(255))  # Stores the generated PDF path
 
-    approval_process = db.relationship("ApprovalProcess", back_populates="request", cascade="all, delete-orphan")
+    approvals = db.relationship("ApprovalProcess", back_populates="request", cascade="all, delete-orphan")
 
 class ApprovalProcess(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -62,6 +62,10 @@ class ApprovalProcess(db.Model):
     decision_date = db.Column(db.DateTime)  # Timestamp of approval/rejection
     comments = db.Column(db.Text)  # Any comments from the approver
     signature_path = db.Column(db.String(255))  # Path to the approver's signature
+
+    # Relationships
+    request = db.relationship("Request", back_populates="approvals")
+    approver = db.relationship("User", foreign_keys=[approver_id], back_populates="approvals")
 
     def __repr__(self):
         return f"<Approval {self.id} - Request: {self.request_id} - Status: {self.status}>"
