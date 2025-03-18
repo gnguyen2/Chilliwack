@@ -165,7 +165,6 @@ def fill_tw_form():
 
     return render_template("tw_form.html", response=existing_response)
 
-
 @form_bp.route("/save_tw_progress", methods=["POST"])
 def save_tw_progress():
     """Saves the current form progress asynchronously."""
@@ -212,4 +211,12 @@ def save_tw_progress():
     response.last_updated = datetime.utcnow()
 
     db.session.commit()
+    return jsonify({"message": "Form progress saved successfully!"}), 200
+
+@form_bp.route("/rcl_form", methods=['GET', 'POST'])
+def fill_rcl_form():
+    return render_template("rcl_form.html")
+
+@form_bp.route("/save_rcl_progress", methods=['GET', 'POST'])
+def save_rcl_progress():
     return jsonify({"message": "Form progress saved successfully!"}), 200

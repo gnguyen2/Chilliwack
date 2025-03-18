@@ -16,7 +16,7 @@
         </div>
 
         <!-- Form to Capture Inputs -->
-        <form action="/submit-rcl-form" method="post">
+        <form id="rcl_form" action="/submit-rcl-form" method="post">
             <!-- Section 1: Academic Difficulty -->
             <h2>1. Academic Difficulty (First Semester Only)</h2>
             <p>
@@ -135,6 +135,28 @@
                 <button type="submit" class="button">Submit Form</button>
             </p>
         </form>
+
+        <!-- Dashboard Button -->
+        <button type="button" id="dashboardButton" class="btn btn-secondary">Go to Dashboard</button>
     </div>
 </body>
 </html>
+
+<script>
+    document.getElementById("dashboardButton").addEventListener("click", function(event) {
+        event.preventDefault();  // Prevent immediate redirection
+    
+        let formData = new FormData(document.getElementById("rcl_form"));
+    
+        fetch("{{ url_for('form.save_rcl_progress') }}", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);  // Show save success message
+            window.location.href = "{{ url_for('dashboard') }}";  // Redirect to dashboard after save
+        })
+        .catch(error => console.error("Error saving form:", error));
+    });
+    </script>
