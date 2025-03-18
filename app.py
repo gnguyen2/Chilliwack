@@ -1,7 +1,7 @@
 from flask import Flask, render_template, url_for, redirect, flash, request, session
 from flask_session import Session
 from flask_migrate import Migrate
-from models import db, User, Role, Status
+from models import db, User, Role, Status, Request
 from decorators import role_not_allowed
 from sqlalchemy.orm import joinedload
 
@@ -90,6 +90,15 @@ def upload_signature_page():
     
     return render_template("upload_signature.html")
 
+# input information for form
+@app.route("/rcl_form")
+def rcl_form():
+    if not session.get("user"):
+        flash("Please log in first.", "warning")
+        return redirect(url_for("home"))
+    
+    return render_template("rcl_form.html")
+
 
 
 @app.route("/upload_signature", methods=["POST"])
@@ -131,17 +140,17 @@ def upload_rcl_page():
     
     return render_template("upload_rcl.html")
 
-@app.route("/upload_rcl", methods=['POST'])
+@app.route("/edit_rcl", methods=['POST'])
 def upload_rcl():
     if not session.get("user"):
         flash("Please log in first.", "warning")
         return redirect(url_for("home"))
 
-    if "rcl" not in request.files or request.files["rcl"].filename == "":
+    if "rcl_forms" not in request.files or request.files["rcl_forms"].filename == "":
         flash("No file selected!", "danger")
         return redirect(url_for("upload_rcl_page"))
     
-    file = request.files["rcl"]
+    file = request.files["rcl_forms"]
     filename = secure_filename(file.filename)
 
     # Ensure the directory exists
@@ -153,17 +162,27 @@ def upload_rcl():
     file.save(file_path)
 
     # Update the user record
-    user = User.query.filter_by(email=session["user"]["email"]).first()
-    user.rcl_path = f"rcl/{filename}"
-    user.updated_at = datetime.utcnow()  # Force timestamp update
+    new_request = Request(
+        student_email = session["email"],
+        request_type = "RCL",
+        status = "draft"
+    )
+    new_request.pdf_path = f"rcl_forms/{filename}"
+    # user.updated_at = datetime.utcnow()   Force timestamp update
+    db.session.add(new_request)
     db.session.commit()
 
+    session["user_request"] = {
+        "pdf_path": new_request.pdf_path,
+        "status": new_request.status
+    }
+
     # Refresh session data
-    session["user"]["rcl_path"] = user.rcl_path  # Ensure session reflects new path
+    print("Request session data:", session["user_request"])  # Log user info
     session.modified = True
 
-    flash("Signature uploaded successfully!", "success")
-    return redirect(url_for("dashboard"))
+    flash("PDF form uploaded successfully!", "success")
+    return redirect(url_for("upload_rcl_form"))
 
 if __name__ == '__main__':
     app.run(debug=True, host="localhost")

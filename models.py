@@ -44,7 +44,7 @@ class User(db.Model):
     
 class Request(db.Model):  
     id = db.Column(db.Integer, primary_key=True)
-    student_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    student_email = db.Column(db.String(100), db.ForeignKey('user.email'), nullable=True)
     request_type = db.Column(db.String(50), nullable=False)  # "RCL" or "TW"
     semester = db.Column(db.String(20), nullable=True)  # Optional fields depending on type
     year = db.Column(db.Integer, nullable=True)

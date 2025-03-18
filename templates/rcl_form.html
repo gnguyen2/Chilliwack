@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>RCL - Input Form</title>
+    <link rel="stylesheet" href="static/admindashboard.css">
+</head>
+<body>
+    <div class="admin-container">
+        <h1>Input Basic Information</h1>
+
+        <!-- Flash Message Example -->
+        <div class="flash-message">
+            Please fill out the form below.
+        </div>
+
+        <!-- Form for Inputting Basic Information -->
+        <form action="/submit-form" method="post">
+            <!-- Text Input Fields -->
+            <p>
+                <label for="name">Full Name:</label><br>
+                <input type="text" id="name" name="name" placeholder="Enter your full name" required>
+            </p>
+
+            <p>
+                <label for="email">Email Address:</label><br>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+            </p>
+
+            <p>
+                <label for="phone">Phone Number:</label><br>
+                <input type="tel" id="phone" name="phone" placeholder="Enter your phone number">
+            </p>
+
+            <!-- Checkbox Input Fields -->
+            <p>
+                <label>Select your interests:</label><br>
+                <input type="checkbox" id="interest1" name="interests" value="Technology">
+                <label for="interest1">Technology</label><br>
+
+                <input type="checkbox" id="interest2" name="interests" value="Sports">
+                <label for="interest2">Sports</label><br>
+
+                <input type="checkbox" id="interest3" name="interests" value="Art">
+                <label for="interest3">Art</label><br>
+
+                <input type="checkbox" id="interest4" name="interests" value="Music">
+                <label for="interest4">Music</label>
+            </p>
+
+            <!-- Submit Button -->
+            <p>
+                <button type="submit" class="button">Submit</button>
+            </p>
+        </form>
+    </div>
+</body>
+</html>
