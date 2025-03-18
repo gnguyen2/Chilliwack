@@ -45,23 +45,32 @@ class User(db.Model):
 class Request(db.Model):  
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    request_type = db.Column(db.String(50), nullable=False)  # "RCL" or "TW"
-    semester = db.Column(db.String(20), nullable=True)  # Optional fields depending on type
-    year = db.Column(db.Integer, nullable=True)
-    details = db.Column(db.Text, nullable=True)  # Stores extra info like dropped courses
-    status = db.Column(db.String(50), default="draft")  # draft, pending, approved, rejected
-    pdf_path = db.Column(db.String(255))  # Stores the generated PDF path
+    student = db.relationship("User", backref="requests")
 
-    approval_process = db.relationship("ApprovalProcess", back_populates="request", cascade="all, delete-orphan")
+    status = db.Column(db.String(50), default="draft")  # draft, submitted, returned, approved, rejected
+    pdf_path = db.Column(db.String(255), nullable=True)  # Stores the generated PDF path
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationship to ApprovalProcess, tracks approvals history
+    approvals = db.relationship("ApprovalProcess", back_populates="request", cascade="all, delete-orphan")
+
+    def __repr__(self):
+        return f"<Request {self.id} - Student: {self.student.name} - Status: {self.status}>"
 
 class ApprovalProcess(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     request_id = db.Column(db.Integer, db.ForeignKey('request.id'), nullable=False)
-    approver_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    status = db.Column(db.String(50), default="pending")  # pending, approved, rejected
-    decision_date = db.Column(db.DateTime)  # Timestamp of approval/rejection
-    comments = db.Column(db.Text)  # Any comments from the approver
-    signature_path = db.Column(db.String(255))  # Path to the approver's signature
+    request = db.relationship("Request", back_populates="approvals")
 
-    request = db.relationship("Request", back_populates="approval_process")
+    approver_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)  # Nullable, any admin can approve
     approver = db.relationship("User", back_populates="approvals")
+
+    status = db.Column(db.String(50), default="pending")  # pending, approved, rejected
+    decision_date = db.Column(db.DateTime, default=datetime.utcnow)  # Timestamp of approval/rejection
+    comments = db.Column(db.Text, nullable=True)  # Any comments from the approver
+    signature_path = db.Column(db.String(255), nullable=True)  # Path to the approver's signature
+
+    def __repr__(self):
+        return f"<Approval {self.id} - Request: {self.request_id} - Status: {self.status}>"
