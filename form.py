@@ -1,5 +1,5 @@
-from flask import Blueprint, session, redirect, url_for, flash, request, render_template
-from models import db, User
+from flask import Blueprint, session, redirect, url_for, flash, request, render_template, jsonify
+from models import db, User, TWResponses
 from werkzeug.utils import secure_filename
 import os
 from datetime import datetime
@@ -70,3 +70,102 @@ def upload_signature():
 
     flash("Signature uploaded successfully!", "success")
     return redirect(url_for("dashboard"))
+
+@form_bp.route("/tw_form", methods=['GET', 'POST'])
+def fill_tw_form():
+    if "user" not in session:
+        flash("Please log in first.", "warning")
+        return redirect(url_for("home"))
+
+    user_id = session["user"]["id"]
+    existing_response = TWResponses.query.filter_by(user_id=user_id, is_finalized=False).first()
+
+    if request.method == 'POST':
+        response = existing_response if existing_response else TWResponses(user_id=user_id)
+
+        # Text Inputs
+        response.student_name = request.form.get("student_name")
+        response.ps_id = request.form.get("student_id")
+        response.phone = request.form.get("phone")
+        response.email = request.form.get("email")
+        response.program = request.form.get("program")
+        response.academic_career = request.form.get("academic_career")
+
+        # Fix Checkboxes - If key is missing, default to False
+        response.financial_aid_ack = "financial_aid" in request.form
+        response.international_students_ack = "international_students" in request.form
+        response.student_athlete_ack = "student_athletes" in request.form
+        response.veterans_ack = "veterans" in request.form
+        response.graduate_students_ack = "graduate_students" in request.form
+        response.doctoral_students_ack = "doctoral_students" in request.form
+        response.housing_ack = "housing" in request.form
+        response.dining_ack = "dining" in request.form
+        response.parking_ack = "parking" in request.form
+
+        # Fix Dropdown
+        withdrawal_term = request.form.get("withdrawal_term")
+        response.withdrawal_term_fall = withdrawal_term == "Fall"
+        response.withdrawal_term_spring = withdrawal_term == "Spring"
+        response.withdrawal_term_summer = withdrawal_term == "Summer"
+        response.withdrawal_year = request.form.get("year")
+
+        # Track last update
+        response.last_updated = datetime.utcnow()
+
+        # Check if form is finalized
+        is_finalized = "confirm_acknowledgment" in request.form
+        response.is_finalized = is_finalized
+
+        db.session.add(response)
+        db.session.commit()
+
+        # If finalized, remove any unfinished drafts
+        if is_finalized:
+            TWResponses.query.filter_by(user_id=user_id, is_finalized=False).delete()
+            db.session.commit()
+            flash("Form submitted successfully!", "success")
+            return redirect(url_for("dashboard"))
+
+        flash("Form saved successfully!", "success")
+        return redirect(url_for("form.fill_tw_form"))
+
+    return render_template("tw_form.html", response=existing_response)
+
+
+
+
+@form_bp.route("/save_tw_progress", methods=["POST"])
+def save_tw_progress():
+    """Saves the current form progress asynchronously."""
+    if "user" not in session:
+        return jsonify({"error": "User not logged in"}), 401
+
+    user_id = session["user"]["id"]
+
+    # Check for existing draft
+    response = TWResponses.query.filter_by(user_id=user_id, is_finalized=False).first()
+    
+    if not response:
+        response = TWResponses(user_id=user_id)
+        db.session.add(response)
+
+    # Update with form data
+    withdrawal_term = request.form.get("withdrawal_term")
+    response.withdrawal_term_fall = (withdrawal_term == "Fall")
+    response.withdrawal_term_spring = (withdrawal_term == "Spring")
+    response.withdrawal_term_summer = (withdrawal_term == "Summer")
+
+    response.financial_aid_ack = "financial_aid" in request.form
+    response.international_students_ack = "international_students" in request.form
+    response.student_athlete_ack = "student_athletes" in request.form
+    response.veterans_ack = "veterans" in request.form
+    response.graduate_students_ack = "graduate_students" in request.form
+    response.doctoral_students_ack = "doctoral_students" in request.form
+    response.housing_ack = "housing" in request.form
+    response.dining_ack = "dining" in request.form
+    response.parking_ack = "parking" in request.form
+
+    response.last_updated = datetime.utcnow()
+
+    db.session.commit()
+    return jsonify({"message": "Form progress saved successfully!"}), 200

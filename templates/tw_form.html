@@ -1,43 +1,76 @@
-<form action="{{ url_for('submit_withdrawal_request') }}" method="POST" enctype="multipart/form-data">
+<form id="twForm" action="{{ url_for('form.fill_tw_form') }}" method="POST" enctype="multipart/form-data">
     <label>Student Name:</label>
-    <input type="text" name="student_name" required>
+    <input type="text" name="student_name" id="student_name" value="{{ response.student_name if response else '' }}" required>
 
     <label>myUH ID:</label>
-    <input type="text" name="student_id" required>
+    <input type="text" name="student_id" id="student_id" value="{{ response.ps_id if response else '' }}" required>
 
     <label>Phone:</label>
-    <input type="text" name="phone" required>
+    <input type="text" name="phone" id="phone" value="{{ response.phone if response else '' }}" required>
 
     <label>Email:</label>
-    <input type="email" name="email" required>
+    <input type="email" name="email" id="email" value="{{ response.email if response else '' }}" required>
 
     <label>Program/Plan:</label>
-    <input type="text" name="program" required>
+    <input type="text" name="program" id="program" value="{{ response.program if response else '' }}" required>
 
     <label>Academic Career:</label>
-    <input type="text" name="academic_career" required>
+    <input type="text" name="academic_career" id="academic_career" value="{{ response.academic_career if response else '' }}" required>
 
     <label>Withdrawal Term:</label>
-    <select name="withdrawal_term">
-        <option value="Fall">Fall</option>
-        <option value="Spring">Spring</option>
-        <option value="Summer">Summer</option>
+    <select name="withdrawal_term" id="withdrawal_term">
+        <option value="Fall" {% if response and response.withdrawal_term_fall %}selected{% endif %}>Fall</option>
+        <option value="Spring" {% if response and response.withdrawal_term_spring %}selected{% endif %}>Spring</option>
+        <option value="Summer" {% if response and response.withdrawal_term_summer %}selected{% endif %}>Summer</option>
     </select>
-    <input type="number" name="year" placeholder="Year" required>
+    <input type="number" name="year" id="year" value="{{ response.withdrawal_year if response else '' }}" placeholder="Year" required>
+
 
     <label>Initial Required Checkboxes:</label><br>
-    <input type="checkbox" name="financial_aid"> I understand the financial aid implications.<br>
-    <input type="checkbox" name="international_students"> I have obtained ISSSO authorization.<br>
-    <input type="checkbox" name="student_athletes"> I have met with the Office of Athletics' Compliance.<br>
-    <input type="checkbox" name="veterans"> I understand the impact on my GI Bill benefits.<br>
-    <input type="checkbox" name="graduate_students"> I have met with my Academic Advisor.<br>
-    <input type="checkbox" name="doctoral_students"> I have filed a leave of absence.<br>
-    <input type="checkbox" name="housing"> I will complete housing check-out procedures.<br>
-    <input type="checkbox" name="dining"> I will submit a meal plan petition if applicable.<br>
-    <input type="checkbox" name="parking"> I will return my parking permit if applicable.<br>
+    <input type="checkbox" name="financial_aid" id="financial_aid" {% if response and response.financial_aid_ack %}checked{% endif %}> I understand the financial aid implications.<br>
+
+<input type="checkbox" name="international_students" id="international_students" {% if response and response.international_students_ack %}checked{% endif %}> I have obtained ISSSO authorization.<br>
+
+<input type="checkbox" name="student_athletes" id="student_athletes" {% if response and response.student_athlete_ack %}checked{% endif %}> I have met with the Office of Athletics' Compliance.<br>
+
+<input type="checkbox" name="veterans" id="veterans" {% if response and response.veterans_ack %}checked{% endif %}> I understand the impact on my GI Bill benefits.<br>
+
+<input type="checkbox" name="graduate_students" id="graduate_students" {% if response and response.graduate_students_ack %}checked{% endif %}> I have met with my Academic Advisor.<br>
+
+<input type="checkbox" name="doctoral_students" id="doctoral_students" {% if response and response.doctoral_students_ack %}checked{% endif %}> I have filed a leave of absence.<br>
+
+<input type="checkbox" name="housing" id="housing" {% if response and response.housing_ack %}checked{% endif %}> I will complete housing check-out procedures.<br>
+
+<input type="checkbox" name="dining" id="dining" {% if response and response.dining_ack %}checked{% endif %}> I will submit a meal plan petition if applicable.<br>
+
+<input type="checkbox" name="parking" id="parking" {% if response and response.parking_ack %}checked{% endif %}> I will return my parking permit if applicable.<br>
+
 
     <label>Supporting Documents (if applicable):</label>
     <input type="file" name="supporting_documents">
 
     <button type="submit">Submit Withdrawal Request</button>
 </form>
+
+<!-- Dashboard Button -->
+<button type="button" id="dashboardButton" class="btn btn-secondary">Go to Dashboard</button>
+
+<script>
+    document.getElementById("dashboardButton").addEventListener("click", function(event) {
+        event.preventDefault();  // Prevent immediate redirection
+    
+        let formData = new FormData(document.getElementById("twForm"));
+    
+        fetch("{{ url_for('form.save_tw_progress') }}", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);  // Show save success message
+            window.location.href = "{{ url_for('dashboard') }}";  // Redirect to dashboard after save
+        })
+        .catch(error => console.error("Error saving form:", error));
+    });
+    </script>
+    
