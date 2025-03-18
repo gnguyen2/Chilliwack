@@ -8,6 +8,7 @@ from sqlalchemy.orm import joinedload
 from config import Config
 from auth import auth_bp
 from admin import admin_bp
+from form import form_bp
 import os
 from werkzeug.utils import secure_filename
 from datetime import datetime
@@ -20,11 +21,11 @@ app.config.from_object(Config)
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(admin_bp)
+app.register_blueprint(form_bp)
 
 # Initialize SQLAlchemy & Migrate
 db.init_app(app)
 migrate = Migrate(app, db)  # Enables migrations
-
 Session(app)
 
 # Initializes roles
@@ -80,109 +81,6 @@ def dashboard():
         user = User.query.options(joinedload(User.role), joinedload(User.status)).filter_by(email=session["user"]["email"]).first()
 
     return render_template('dashboard.html', user=user)
-
-# upload signature page
-@app.route("/upload_signature_page")
-def upload_signature_page():
-    if not session.get("user"):
-        flash("Please log in first.", "warning")
-        return redirect(url_for("home"))
-    
-    return render_template("upload_signature.html")
-
-# input information for form
-@app.route("/rcl_form")
-def rcl_form():
-    if not session.get("user"):
-        flash("Please log in first.", "warning")
-        return redirect(url_for("home"))
-    
-    return render_template("rcl_form.html")
-
-
-
-@app.route("/upload_signature", methods=["POST"])
-def upload_signature():
-    if "signature" not in request.files or request.files["signature"].filename == "":
-        flash("No file selected!", "danger")
-        return redirect(url_for("upload_signature_page"))
-
-    file = request.files["signature"]
-    filename = secure_filename(file.filename)
-
-    # Ensure the directory exists
-    signature_folder = "static/signatures"
-    if not os.path.exists(signature_folder):
-        os.makedirs(signature_folder)
-
-    file_path = os.path.join(signature_folder, filename)
-    file.save(file_path)
-
-    # Update the user record
-    user = User.query.filter_by(email=session["user"]["email"]).first()
-    user.signature_path = f"signatures/{filename}"
-    user.updated_at = datetime.utcnow()  # Force timestamp update
-    db.session.commit()
-
-    # Refresh session data
-    session["user"]["signature_path"] = user.signature_path  # Ensure session reflects new path
-    session.modified = True
-
-    flash("Signature uploaded successfully!", "success")
-    return redirect(url_for("dashboard"))
-
-# upload signature page
-@app.route("/upload_rcl_page")
-def upload_rcl_page():
-    if not session.get("user"):
-        flash("Please log in first.", "warning")
-        return redirect(url_for("home"))
-    
-    return render_template("upload_rcl.html")
-
-@app.route("/edit_rcl", methods=['POST'])
-def upload_rcl():
-    if not session.get("user"):
-        flash("Please log in first.", "warning")
-        return redirect(url_for("home"))
-
-    if "rcl_forms" not in request.files or request.files["rcl_forms"].filename == "":
-        flash("No file selected!", "danger")
-        return redirect(url_for("upload_rcl_page"))
-    
-    file = request.files["rcl_forms"]
-    filename = secure_filename(file.filename)
-
-    # Ensure the directory exists
-    signature_folder = "static/rcl_forms"
-    if not os.path.exists(rcl_forms):
-        os.makedirs(rcl_forms)
-
-    file_path = os.path.join(rcl_forms, filename)
-    file.save(file_path)
-
-    # Update the user record
-    new_request = Request(
-        student_email = session["email"],
-        request_type = "RCL",
-        status = "draft"
-    )
-    new_request.pdf_path = f"rcl_forms/{filename}"
-    # user.updated_at = datetime.utcnow()   Force timestamp update
-    db.session.add(new_request)
-    db.session.commit()
-
-    session["user_request"] = {
-        "pdf_path": new_request.pdf_path,
-        "status": new_request.status
-    }
-
-    # Refresh session data
-    print("Request session data:", session["user_request"])  # Log user info
-    session.modified = True
-
-    flash("PDF form uploaded successfully!", "success")
-    return redirect(url_for("upload_rcl_form"))
 
 if __name__ == '__main__':
     app.run(debug=True, host="localhost")
