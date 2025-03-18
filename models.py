@@ -74,3 +74,66 @@ class ApprovalProcess(db.Model):
 
     def __repr__(self):
         return f"<Approval {self.id} - Request: {self.request_id} - Status: {self.status}>"
+    
+class RCLResponses(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user = db.relationship("User", backref="responses")
+
+    request_id = db.Column(db.Integer, db.ForeignKey('request.id'), nullable=True)  # Nullable for drafts
+    request = db.relationship("Request", backref="form_responses")
+
+    # Student Information
+    student_name = db.Column(db.String(100), nullable=True)
+    ps_id = db.Column(db.String(20), nullable=True)
+    student_signature = db.Column(db.String(255), nullable=True)  # Path to signature file
+    submission_date = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Type of Reduced Course Load
+    academic_difficulty = db.Column(db.Boolean, default=False)
+    initial_adjustment_issues = db.Column(db.Boolean, default=False)
+    initial_adjustment_explanation = db.Column(db.Text, nullable=True)
+
+    improper_course_level_placement = db.Column(db.Boolean, default=False)
+    iclp_class1 = db.Column(db.String(50), nullable=True)
+    iclp_professor1 = db.Column(db.String(100), nullable=True)
+    iclp_professor_signature1 = db.Column(db.String(255), nullable=True)  # Path to professor signature file
+    iclp_date1 = db.Column(db.DateTime, nullable=True)
+
+    iclp_class2 = db.Column(db.String(50), nullable=True)
+    iclp_professor2 = db.Column(db.String(100), nullable=True)
+    iclp_professor_signature2 = db.Column(db.String(255), nullable=True)  # Path to professor signature file
+    iclp_date2 = db.Column(db.DateTime, nullable=True)
+
+    # Medical Reason
+    medical_reason = db.Column(db.Boolean, default=False)
+    medical_letter_attached = db.Column(db.Boolean, default=False)
+
+    # Final Semester
+    final_semester = db.Column(db.Boolean, default=False)
+    final_semester_hours_needed = db.Column(db.Integer, nullable=True)
+
+    # Concurrent Enrollment
+    concurrent_enrollment = db.Column(db.Boolean, default=False)
+    concurrent_university_name = db.Column(db.String(100), nullable=True)
+    concurrent_hours_uh = db.Column(db.Integer, nullable=True)
+    concurrent_hours_other = db.Column(db.Integer, nullable=True)
+    concurrent_proof_attached = db.Column(db.Boolean, default=False)
+
+    # Semester Information
+    semester_fall = db.Column(db.Boolean, default=False)
+    semester_spring = db.Column(db.Boolean, default=False)
+    drop_courses = db.Column(db.String(255), nullable=True)  # Store comma-separated course numbers
+    remaining_hours_uh = db.Column(db.Integer, nullable=True)
+
+    # Approval Signatures
+    advisor_name = db.Column(db.String(100), nullable=True)
+    advisor_signature = db.Column(db.String(255), nullable=True)  # Path to signature file
+    advisor_date = db.Column(db.DateTime, nullable=True)
+
+    isss_signature = db.Column(db.String(255), nullable=True)  # Path to ISSSO signature file
+    isss_date = db.Column(db.DateTime, nullable=True)
+
+    # Track whether the form is finalized or still in progress
+    is_finalized = db.Column(db.Boolean, default=False)
+    last_updated = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
