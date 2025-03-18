@@ -1,5 +1,5 @@
 from flask import Blueprint, session, redirect, url_for, flash, request, render_template, jsonify
-from models import db, User, TWResponses, TWDocuments
+from models import db, User, TWResponses, TWDocuments, RCLDocuments, RCLResponses
 from werkzeug.utils import secure_filename
 import os
 from datetime import datetime
@@ -165,7 +165,6 @@ def fill_tw_form():
         return redirect(url_for("form.fill_tw_form"))
 
     return render_template("tw_form.html", response=existing_response)
-
 
 @form_bp.route("/save_tw_progress", methods=["POST"])
 def save_tw_progress():
@@ -339,54 +338,233 @@ def save_tw_progress():
 
     return jsonify({"message": "Form progress saved successfully!"}), 200
 
-@form_bp.route("/preview_TW", methods = ["POST"])
-def preview_TW():
+@form_bp.route("/rcl_form", methods=['GET', 'POST'])
+def fill_rcl_form():
+    if "user" not in session:
+        flash("Please log in first.", "warning")
+        return redirect(url_for("home"))
+
+    user_id = session["user"]["id"]
+    # Try to load an existing draft
+    existing_response = RCLResponses.query.filter_by(user_id=user_id, is_finalized=False).first()
+
+    if request.method == 'POST':
+        # If a draft exists, reuse it; otherwise create new
+        response = existing_response if existing_response else RCLResponses(user_id=user_id)
+
+        # 1) Handle multiple file uploads (if any)
+        files = request.files.getlist("supporting_documents")
+        for file in files:
+            if file and document_allowed_file(file.filename):
+                filename = secure_filename(f"user_{user_id}_{file.filename}")
+                file_path = os.path.join(DOCUMENTS_UPLOAD_FOLDER, filename)
+                file.save(file_path)
+
+                # Link each file to the RCLResponses
+                new_doc = RCLDocuments(
+                    response=response,
+                    file_name=file.filename,
+                    file_path=filename
+                )
+                db.session.add(new_doc)
+
+        # 2) Parse main_option (radio)
+        main_option = request.form.get("main_option", "")
+        # Convert radio choice into booleans on the RCLResponses model
+        response.initial_adjustment_issues = (main_option == "IAI")
+        response.improper_course_level_placement = (main_option == "ICLP")
+        response.medical_reason = (main_option == "Medical Reason")
+        response.final_semester = (main_option == "Final Semester")
+        response.concurrent_enrollment = (main_option == "Concurrent Enrollment")
+
+        # 3) Handle suboptions
+
+        ## A) IAI suboptions
+        if response.initial_adjustment_issues:
+            suboptions = request.form.getlist("iai_suboption")  # e.g. ["English Language", "Reading Requirements"]
+            # We can store them in initial_adjustment_explanation
+            if suboptions:
+                response.initial_adjustment_explanation = ", ".join(suboptions)
+            else:
+                response.initial_adjustment_explanation = None
+        else:
+            response.initial_adjustment_explanation = None
+
+        ## B) Medical Reason suboption
+        # If user selected "Medical Reason" and also checked "medical_confirmation"
+        if response.medical_reason and "medical_confirmation" in request.form:
+            response.medical_letter_attached = True
+        else:
+            response.medical_letter_attached = False
+
+        ## C) Final Semester suboption
+        if response.final_semester:
+            # The user can enter the # of hours
+            # Convert it safely to an integer
+            final_hours_str = request.form.get("non_thesis_hours", "0")
+            response.final_semester_hours_needed = int(final_hours_str) if final_hours_str.isdigit() else None
+        else:
+            response.final_semester_hours_needed = None
+
+        ## D) Concurrent Enrollment suboption
+        if response.concurrent_enrollment:
+            uh_str = request.form.get("uh_hours", "0")
+            other_str = request.form.get("other_school_hours", "0")
+            response.concurrent_hours_uh = int(uh_str) if uh_str.isdigit() else None
+            response.concurrent_hours_other = int(other_str) if other_str.isdigit() else None
+            response.concurrent_university_name = request.form.get("other_school_name", "")
+        else:
+            response.concurrent_hours_uh = None
+            response.concurrent_hours_other = None
+            response.concurrent_university_name = None
+
+        # 4) Additional fields: RCL semester & dropped courses
+        # e.g. the user selects a semester: "fall" or "spring"
+        sem = request.form.get("semester", "")
+        response.semester_fall = (sem == "fall")
+        response.semester_spring = (sem == "spring")
+
+        # year
+        year_str = request.form.get("year", "")
+        # you might store it in e.g. response.year
+        response.year_last_digit = None  # If you don't need this, remove it
+        # Or store the entire year as integer
+        if year_str.isdigit():
+            # If the model has a year column
+            # e.g. response.my_semester_year = int(year_str)
+            pass
+
+        # Dropped courses
+        course1 = request.form.get("course1", "").strip()
+        course2 = request.form.get("course2", "").strip()
+        course3 = request.form.get("course3", "").strip()
+        response.drop_courses = "; ".join([c for c in [course1, course2, course3] if c])
+
+        # After drop: total_hours
+        total_str = request.form.get("total_hours", "0")
+        if total_str.isdigit():
+            response.remaining_hours_uh = int(total_str)
+
+        # year_hours
+        year_hours_str = request.form.get("year_hours", "")
+        # If you have a separate column for year_hours, convert it
+        # e.g. response.year_hours = int(year_hours_str) if year_hours_str.isdigit() else None
+
+        # 5) Basic fields (student info)
+        response.student_name = request.form.get("student_name", "")
+        response.ps_id = request.form.get("ps_id", "")
+        response.student_signature = request.form.get("student_signature", "")
+        # Possibly store the date if you have a column for it
+        # e.g. response.submission_date = request.form.get("date", datetime.utcnow())
+
+        # 6) Check if form is finalized
+        is_finalized = "confirm_acknowledgment" in request.form
+        response.is_finalized = is_finalized
+        response.last_updated = datetime.utcnow()
+
+        db.session.add(response)
+        db.session.commit()
+
+        # If user finalized the form, remove other drafts
+        if is_finalized:
+            RCLResponses.query.filter_by(user_id=user_id, is_finalized=False).delete()
+            db.session.commit()
+            flash("RCL Form submitted successfully!", "success")
+            return redirect(url_for("dashboard"))
+
+        flash("RCL Form saved successfully!", "success")
+        return redirect(url_for("form.fill_rcl_form"))
+
+    # If GET request, show the form with any existing data
+    return render_template("rcl_form.html", response=existing_response)
+
+
+@form_bp.route("/save_rcl_progress", methods=["POST"])
+def save_rcl_progress():
     if "user" not in session:
         return jsonify({"error": "User not logged in"}), 401
 
     user_id = session["user"]["id"]
+    response = RCLResponses.query.filter_by(user_id=user_id, is_finalized=False).first()
 
-    # Check for existing draft
-    response = TWResponses.query.filter_by(user_id=user_id, is_finalized=False).first()
-    
     if not response:
-        response = TWResponses(user_id=user_id)
+        response = RCLResponses(user_id=user_id)
         db.session.add(response)
 
-    # Update with form data
+    # Parse main_option
+    main_option = request.form.get("main_option", "")
+    response.initial_adjustment_issues = (main_option == "IAI")
+    response.improper_course_level_placement = (main_option == "ICLP")
+    response.medical_reason = (main_option == "Medical Reason")
+    response.final_semester = (main_option == "Final Semester")
+    response.concurrent_enrollment = (main_option == "Concurrent Enrollment")
 
-    # Correctly get the text value from the form:
+    # IAI suboptions
+    if response.initial_adjustment_issues:
+        suboptions = request.form.getlist("iai_suboption")  # e.g. ["English Language","Reading Requirements"]
+        if suboptions:
+            response.initial_adjustment_explanation = ", ".join(suboptions)
+        else:
+            response.initial_adjustment_explanation = None
+    else:
+        response.initial_adjustment_explanation = None
+
+    # Medical Reason
+    if response.medical_reason and "medical_confirmation" in request.form:
+        response.medical_letter_attached = True
+    else:
+        response.medical_letter_attached = False
+
+    # Final semester hours
+    if response.final_semester:
+        final_hours_str = request.form.get("non_thesis_hours", "0")
+        response.final_semester_hours_needed = int(final_hours_str) if final_hours_str.isdigit() else None
+    else:
+        response.final_semester_hours_needed = None
+
+    # Concurrent enrollment
+    if response.concurrent_enrollment:
+        uh_str = request.form.get("uh_hours", "0")
+        other_str = request.form.get("other_school_hours", "0")
+        response.concurrent_hours_uh = int(uh_str) if uh_str.isdigit() else None
+        response.concurrent_hours_other = int(other_str) if other_str.isdigit() else None
+        response.concurrent_university_name = request.form.get("other_school_name", "")
+    else:
+        response.concurrent_hours_uh = None
+        response.concurrent_hours_other = None
+        response.concurrent_university_name = None
+
+    # Additional fields
     response.student_name = request.form.get("student_name", "")
-    response.ps_id = request.form.get("student_id", "")
-    response.phone = request.form.get("phone", "")
-    response.email = request.form.get("email", "")
-    response.program = request.form.get("program", "")
-    response.academic_career = request.form.get("academic_career", "")
+    response.ps_id = request.form.get("ps_id", "")
+    response.student_signature = request.form.get("student_signature", "")
 
-    withdrawal_term = request.form.get("withdrawal_term", "")
-    response.withdrawal_term_fall = (withdrawal_term == "Fall")
-    response.withdrawal_term_spring = (withdrawal_term == "Spring")
-    response.withdrawal_term_summer = (withdrawal_term == "Summer")
+    # Semester info, etc.
+    sem = request.form.get("semester", "")
+    response.semester_fall = (sem == "fall")
+    response.semester_spring = (sem == "spring")
 
-    year_str = request.form.get("year", "")
-    response.withdrawal_year = int(year_str) if year_str.isdigit() else None
+    year_str = request.form.get("year", "0")
+    # If you have 'year' or 'year_last_digit' in your DB:
+    # response.my_semester_year = int(year_str) if year_str.isdigit() else None
 
-    response.financial_aid_ack = "financial_aid" in request.form
-    response.international_students_ack = "international_students" in request.form
-    response.student_athlete_ack = "student_athletes" in request.form
-    response.veterans_ack = "veterans" in request.form
-    response.graduate_students_ack = "graduate_students" in request.form
-    response.doctoral_students_ack = "doctoral_students" in request.form
-    response.housing_ack = "housing" in request.form
-    response.dining_ack = "dining" in request.form
-    response.parking_ack = "parking" in request.form
+    # Dropped courses
+    course1 = request.form.get("course1", "").strip()
+    course2 = request.form.get("course2", "").strip()
+    course3 = request.form.get("course3", "").strip()
+    response.drop_courses = "; ".join([c for c in [course1, course2, course3] if c])
 
+    # total_hours => stored in remaining_hours_uh
+    total_hrs = request.form.get("total_hours","0")
+    response.remaining_hours_uh = int(total_hrs) if total_hrs.isdigit() else None
+
+    # year_hours
+    year_hours_str = request.form.get("year_hours","0")
+    # e.g. response.year_hours = int(year_hours_str) if year_hours_str.isdigit() else None
+
+    # last updated
     response.last_updated = datetime.utcnow()
 
-    #thsi block splits the full given name into individual
+    db.session.commit()
 
-    
-
-
-
-    return 0
+    return jsonify({"message": "RCL Form progress saved successfully!"}), 200
