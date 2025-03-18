@@ -1,5 +1,5 @@
 <form id="twForm" action="{{ url_for('form.fill_tw_form') }}" method="POST" enctype="multipart/form-data">
-    <label>Student Name:</label>
+    <label>Student Name (First     Middle Initial      Last):</label>
     <input type="text" name="student_name" id="student_name" value="{{ response.student_name if response else '' }}" required>
 
     <label>myUH ID:</label>
@@ -71,11 +71,18 @@
     <label for="confirm_acknowledgment">I confirm that I understand the academic and financial implications of withdrawal.</label>
 
 
-    <button type="submit" name=>Submit Withdrawal Request</button>
+    <button type="submit" id="dashboardButton" name=>Submit Withdrawal Request</button>
 </form>
 
 <!-- Dashboard Button -->
 <button type="button" id="dashboardButton" class="btn btn-secondary">Go to Dashboard</button>
+
+</b>
+<div class="role_check_box">
+    <a href="{{ url_for('form.preview_TW') }}">
+        <button type="button" class="color_change_button_noauth">Preview Form</button>
+    </a>
+</div>
 
 <script>
     document.getElementById("dashboardButton").addEventListener("click", function(event) {
