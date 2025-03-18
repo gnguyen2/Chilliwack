@@ -1,0 +1,173 @@
+/* static/admindashboard.css */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600&display=swap');
+
+:root {
+    --primary-bg: #ffffff;
+    --secondary-bg: #f7f7f7;
+    --text-color: #000000;
+    --accent-color: #ff3b3b;
+    --border-color: #000000;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+body {
+    background: var(--primary-bg);
+    color: var(--text-color);
+    text-align: center;
+    padding: 20px;
+}
+
+h1 {
+    font-size: 40px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border-bottom: 2px solid var(--border-color);
+    display: inline-block;
+    padding-bottom: 5px;
+}
+
+.admin-container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 40px;
+    text-align: left;
+}
+
+p {
+    font-size: 18px;
+    margin: 10px 0;
+}
+
+a.button {
+    display: inline-block;
+    padding: 12px 24px;
+    background: var(--text-color);
+    color: var(--primary-bg);
+    border: 2px solid var(--text-color);
+    border-radius: 3px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    letter-spacing: 1px;
+}
+
+    a.button:hover {
+        background: var(--primary-bg);
+        color: var(--text-color);
+    }
+
+.form-container {
+    text-align: left;
+    width: 100%;
+    background-color: #e0e0e0; /* Grey background */
+    padding: 20px;
+    border-radius: 12px; /* Rounded edges */
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2); /* Slightly stronger shadow */
+}
+
+.file-form{
+    display: flex;
+    gap: 20px;
+    align-items: left;
+    margin-left: 20px;
+}
+
+.file-form label{
+    display: inline-block;
+}
+
+
+.form-title {
+
+    text-align: center;
+    font-size: 30px;
+    margin-bottom: 20px;
+}
+
+.form-flex {
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping into multiple rows */
+    gap: 20px; /* Space between items */
+}
+
+.form-group {
+    flex: 1 1 calc(50% - 20px); /* Two columns with gap */
+    display: flex;
+    align-items: center;
+    gap: 20px
+}
+
+.form-group label {
+    flex: 0 0 140px;
+}
+
+.form-group select{
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.number-input{
+    display:flex;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+
+.form-group input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.checkbox-item {
+    display: flex; /* Use flexbox to align the checkbox and label */
+    align-items: flex-start; /* Align items at the top */
+    margin-bottom: 10px; /* Add space between checkbox items */
+}
+
+.checkbox-group {
+    text-align: left;
+}
+
+.checkbox-group label {
+    margin-bottom: 5px;
+    font-weight: normal;
+    display: inline-block;
+    margin-left: 10px;
+    width: calc(100% - 30px);
+}
+
+.checkbox-group input[type="checkbox"] {
+    vertical-align: top; /* Align the checkbox with the top of the label */
+    margin-top: 3px; /* Ensure no extra space above the checkbox */
+    cursor: pointer;
+}
+
+.submit-button {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    align-self: center;
+}
+
+.submit-button:hover {
+    background-color: #0056b3;
+}

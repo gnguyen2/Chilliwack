@@ -1,102 +1,193 @@
-<form id="twForm" action="{{ url_for('form.fill_tw_form') }}" method="POST" enctype="multipart/form-data">
-    <label>Student Name (First     Middle Initial      Last):</label>
-    <input type="text" name="student_name" id="student_name" value="{{ response.student_name if response else '' }}" required>
+<head>
+    <link rel="stylesheet" href="static/form.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Term Withdrawal Form</title>
+</head>
+<body>
+    <h1 class="form-title"> Term Withdrawal Form</h1>
+    <br>
+    <form class="form-container" id="twForm" action="{{ url_for('form.fill_tw_form') }}" method="POST" enctype="multipart/form-data" >
+        
+        <div class="form-flex">
+            <div class="form-group">
+                <label for="student_name">Student Name:</label>
+                <input type="text" name="student_name" id="student_name" value="{{ response.student_name if response else '' }}" required>
+            </div>
 
-    <label>myUH ID:</label>
-    <input type="text" name="student_id" id="student_id" value="{{ response.ps_id if response else '' }}" required>
+            <div class="form-group">
+                <label for="student_id">myUH ID:</label>
+                <input type="text" name="student_id" id="student_id" value="{{ response.ps_id if response else '' }}" required>
+            </div>
 
-    <label>Phone:</label>
-    <input type="text" name="phone" id="phone" value="{{ response.phone if response else '' }}" required>
+            <div class="form-group">
+                <label for="student_id">Phone:</label>
+                <input type="text" name="phone" id="phone" value="{{ response.phone if response else '' }}" required>
+            </div>
 
-    <label>Email:</label>
-    <input type="email" name="email" id="email" value="{{ response.email if response else '' }}" required>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" name="email" id="email" value="{{ response.email if response else '' }}" required>
+            </div>
 
-    <label>Program/Plan:</label>
-    <input type="text" name="program" id="program" value="{{ response.program if response else '' }}" required>
+            <div class="form-group">
+                <label for="program">Program/Plan:</label>
+                <input type="text" name="program" id="program" value="{{ response.program if response else '' }}" required>
+            </div>
 
-    <label>Academic Career:</label>
-    <input type="text" name="academic_career" id="academic_career" value="{{ response.academic_career if response else '' }}" required>
+            <div class="form-group">
+                <label for="academic_career">Academic Career:</label>
+                <input type="text" name="academic_career" id="academic_career" value="{{ response.academic_career if response else '' }}" required>
+            </div>
+        </div>
 
-    <label>Withdrawal Term:</label>
-    <select name="withdrawal_term" id="withdrawal_term">
-        <option value="Fall" {% if response and response.withdrawal_term_fall %}selected{% endif %}>Fall</option>
-        <option value="Spring" {% if response and response.withdrawal_term_spring %}selected{% endif %}>Spring</option>
-        <option value="Summer" {% if response and response.withdrawal_term_summer %}selected{% endif %}>Summer</option>
-    </select>
-    <input type="number" name="year" id="year" value="{{ response.withdrawal_year if response else '' }}" placeholder="Year" required>
+        <br>
+        <div class="form-group">
+            <label for="withdrawal_term">Withdrawal Term:</label>
+            <select name="withdrawal_term" id="withdrawal_term">
+                <option value="Fall" {% if response and response.withdrawal_term_fall %}selected{% endif %}>Fall</option>
+                <option value="Spring" {% if response and response.withdrawal_term_spring %}selected{% endif %}>Spring</option>
+                <option value="Summer" {% if response and response.withdrawal_term_summer %}selected{% endif %}>Summer</option>
+            </select>
+        <input type="number" class="number-input" name="year" id="year" value="{{ response.withdrawal_year if response else '' }}" placeholder="Year" min = "25" required>
+        </div>
+        
+    
+        <br><label>Check all that apply:</label><br><br>
+        <div class="checkbox-group">
+            <div class="checkbox-item">
+                <input type="checkbox" name="financial_aid" id="financial_aid" {% if response and response.financial_aid_ack %}checked{% endif %}>
+                <label for="financial_aid"> STUDENTS RECEIVING FINANCIAL AID — I understand that if I withdrawal from ALL classes I may owe financial aid back
+                to the university based on federal regulations that require a refund calculation to determine the Federal Title IV Funds I
+                earned. I understand that any future financial aid will be canceled. I understand that if I withdrawal prior to the Official
+                Reporting Day of a term, all state and institutional aid will be canceled and I will owe this to the university. I understand that
+                withdrawing from classes will impact my Satisfactory Academic Progress standing and may cause me to lose my future
+                financial aid eligibility. I understand that if I am receiving a university scholarship I may lose scholarship eligibility</label>
+            </div>
+            
+            <div class="checkbox-item">
+                <input type="checkbox" name="international_students" id="international_students" {% if response and response.international_students_ack %}checked{% endif %}> 
+                <label for="international_students">INTERNATIONAL STUDENTS HOLDING F-1 OR J-1 STUDENT VISAS — I understand that federal regulations require me
+            to obtain authorization for a reduced course load from the International Student and Scholar Services Office (ISSSO) prior to
+            withdrawing from the university and that I have obtained such authorization.</label>
+            </div>
+            
+            <div class="checkbox-item">
+                <input type="checkbox" name="student_athletes" id="student_athletes" {% if response and response.student_athlete_ack %}checked{% endif %}> 
+                <label for="student_athletes">STUDENT-ATHLETES — I understand that I must clear any financial holds related to student-athlete services and return all
+            textbooks, uniforms, and equipment to avoid being charged for those items. I must also meet with Student-Athlete
+            Development and the Office of Athletics’ Compliance for information about current and future academic eligibility status and
+            cancellation of remaining aid.</label>
+            </div>
+            
+            <div class="checkbox-item">
+                <input type="checkbox" name="veterans" id="veterans" {% if response and response.veterans_ack %}checked{% endif %}> 
+                <label for="veterans">VETERANS — I understand that an official term withdrawal from the university will automatically initiate a recalculation of
+            tuition, fees and the rate of pursuit (enrollment status) reported to the VA. I Understand that withdrawing from the university
+            may impact my GI Bill benefits, holding me responsible for the repayment of a portion of my tuition, fees and housing as
+            determined by the VA. For more information, I will consult with a Certifying Official for Veteran Educational Benefits at the
+            Office of the University Registrar counter in the Welcome Center.</label>
+            </div>
 
+            <div class="checkbox-item">
+                <input type="checkbox" name="graduate_students" id="graduate_students" {% if response and response.graduate_students_ack %}checked{% endif %}> 
+                <label for="graduate_students">GRADUATE/PROFESSIONAL STUDENTS — I understand that any university support (i.e. graduate assignment, DSTF) will
+            be cancelled. Withdrawals after the official reporting day require that I meet with my Academic Advisor and provide
+            instructor-approved drop forms for each class (attached).</label>
+            </div>
+            
+            <div class="file-form">
+                <label for="supporting_documents">Included instuctor approved drop forms (if applicable) <b>(PDF, DOC, JPG, PNG)</b>:</label>
+                <input type="file" name="supporting_documents" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" multiple>
+            
+                {% if response and response.supporting_documents_attached %}
+                    <p>Uploaded File: <a href="{{ url_for('form.download_supporting_document', filename=response.supporting_document_path) }}" target="_blank">View Document</a></p>
+                {% endif %}
+            
+                {% if response and response.documents %}
+                    <h4>Previously Uploaded Documents</h4>
+                    <ul>
+                    {% for doc in response.documents %}
+                        <li>
+                            <a href="{{ url_for('form.download_supporting_document', filename=doc.file_path) }}" target="_blank">
+                                {{ doc.file_name }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+            <br>
 
-    <label>Initial Required Checkboxes:</label><br>
-    <input type="checkbox" name="financial_aid" id="financial_aid" {% if response and response.financial_aid_ack %}checked{% endif %}> I understand the financial aid implications.<br>
-
-<input type="checkbox" name="international_students" id="international_students" {% if response and response.international_students_ack %}checked{% endif %}> I have obtained ISSSO authorization.<br>
-
-<input type="checkbox" name="student_athletes" id="student_athletes" {% if response and response.student_athlete_ack %}checked{% endif %}> I have met with the Office of Athletics' Compliance.<br>
-
-<input type="checkbox" name="veterans" id="veterans" {% if response and response.veterans_ack %}checked{% endif %}> I understand the impact on my GI Bill benefits.<br>
-
-<input type="checkbox" name="graduate_students" id="graduate_students" {% if response and response.graduate_students_ack %}checked{% endif %}> I have met with my Academic Advisor.<br>
-
-<input type="checkbox" name="doctoral_students" id="doctoral_students" {% if response and response.doctoral_students_ack %}checked{% endif %}> I have filed a leave of absence.<br>
-
-<input type="checkbox" name="housing" id="housing" {% if response and response.housing_ack %}checked{% endif %}> I will complete housing check-out procedures.<br>
-
-<input type="checkbox" name="dining" id="dining" {% if response and response.dining_ack %}checked{% endif %}> I will submit a meal plan petition if applicable.<br>
-
-<input type="checkbox" name="parking" id="parking" {% if response and response.parking_ack %}checked{% endif %}> I will return my parking permit if applicable.<br>
-
-
-    <label>Supporting Documents (if applicable) **(PDF, DOC, JPG, PNG)**:</label>
-    <input type="file" name="supporting_documents" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" multiple>
-
-    {% if response and response.supporting_documents_attached %}
-        <p>Uploaded File: <a href="{{ url_for('form.download_supporting_document', filename=response.supporting_document_path) }}" target="_blank">View Document</a></p>
-    {% endif %}
-
-    {% if response and response.documents %}
-        <h4>Previously Uploaded Documents</h4>
-        <ul>
-        {% for doc in response.documents %}
-            <li>
-                <a href="{{ url_for('form.download_supporting_document', filename=doc.file_path) }}" target="_blank">
-                    {{ doc.file_name }}
-                </a>
-            </li>
-        {% endfor %}
-        </ul>
-    {% endif %}
-
-
-    <input type="checkbox" name="confirm_acknowledgment" required>
-    <label for="confirm_acknowledgment">I confirm that I understand the academic and financial implications of withdrawal.</label>
-
-
-    <button type="submit" id="dashboardButton" name=>Submit Withdrawal Request</button>
-</form>
-
-<!-- Dashboard Button -->
-<button type="button" id="dashboardButton" class="btn btn-secondary">Go to Dashboard</button>
-
+            <div class="checkbox-item">
+                <input type="checkbox" name="doctoral_students" id="doctoral_students" {% if response and response.doctoral_students_ack %}checked{% endif %}>
+                <label for="doctoral_students">DOCTORAL STUDENTS — I understand that I must file a leave of absence with the Office of Graduate and Professional
+            Studies.</label>
+            </div>
+        
+            <div class="checkbox-item">
+                <input type="checkbox" name="housing" id="housing" {% if response and response.housing_ack %}checked{% endif %}> 
+                <label for="housing">STUDENT HOUSING — I understand that my housing agreement outlines important information regarding housing
+            cancelation and refunds. I understand that I need to check out of my room, complete all check out processes, and return my
+            keys to avoid additional fees.</label>
+            </div>
+        
+            <div class="checkbox-item">
+                <input type="checkbox" name="dining" id="dining" {% if response and response.dining_ack %}checked{% endif %}> 
+                <label for="dining">DINING SERVICES — I understand that withdrawing from the university does not automatically relieve me of my obligation to
+            pay outstanding charges stemming from my purchase of a UH Dining Services meal plan. To receive any available credit for 
+            the unused portion of my meal plan I must submit a meal plan petition requesting approval for cancellation. Visit <a href = "http://www.uh.edu/auxiliaryservices/dining/mealpetition.htm" target="_blank">HERE</a> for instructions on filing meal plan petitions.</label>
+            </div>
+        
+            <div class="checkbox-item">
+                <input type="checkbox" name="parking" id="parking" {% if response and response.parking_ack %}checked{% endif %}> 
+                <label for="parking">PARKING AND TRANSPORTATION — I understand that withdrawing from the university does not relieve me of my
+            obligation to pay outstanding charges stemming from my purchase of a UH parking permit or parking citations received. To
+            receive any available credit for my unused parking permit I understand that I must return the permit to Parking and
+            for instructions on filing meal plan petitions. Transportation Services.</label>
+            </div>
+        
+            
+        </div>
+        
+        <br>
+        <div class="checkbox-group">
+            <div class="checkbox-item">
+                <input type="checkbox" name="confirm_acknowledgment" id="confirm_acknowledgment" required>
+                <label for="confirm_acknowledgment"><b>I confirm that I understand the academic and financial implications of withdrawal.</b></label>
+            </div>   
+        </div>
+        
+        
+        <br>
+    
+        <button type="submit" class="submit-button" id="dashboardButton" name="submitButton">Submit Withdrawal Request</button>
+    </form>
+    <br><br>
+    <!-- Dashboard Button -->
+    <button type="button" id="dashboardButton" class="btn btn-secondary">Go to Dashboard</button>
+    
 <form action="{{ url_for('form.preview_TW') }}" method="POST" target="_blank">
     <button type="submit">Preview TW Form</button>
 </form>
 
-<script>
-    document.getElementById("dashboardButton").addEventListener("click", function(event) {
-        event.preventDefault();  // Prevent immediate redirection
-    
-        let formData = new FormData(document.getElementById("twForm"));
-    
-        fetch("{{ url_for('form.save_tw_progress') }}", {
-            method: "POST",
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            alert(data.message);  // Show save success message
-            window.location.href = "{{ url_for('dashboard') }}";  // Redirect to dashboard after save
-        })
-        .catch(error => console.error("Error saving form:", error));
-    });
+    <script>
+        document.getElementById("dashboardButton").addEventListener("click", function(event) {
+            event.preventDefault();  // Prevent immediate redirection
+        
+            let formData = new FormData(document.getElementById("twForm"));
+        
+            fetch("{{ url_for('form.save_tw_progress') }}", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);  // Show save success message
+                window.location.href = "{{ url_for('dashboard') }}";  // Redirect to dashboard after save
+            })
+            .catch(error => console.error("Error saving form:", error));
+        });
     </script>
+</body>
+
     
