@@ -3,8 +3,8 @@
 ## **Setup and Installation**
 ### **1. Clone the Repository**
 ```bash
-git clone <your-repo-url>
-cd <your-project-folder>
+git clone https://github.com/gnguyen2/Chilliwack.git
+cd Chilliwack
 ```
 
 ### **2. Create a Virtual Environment (Recommended)**
