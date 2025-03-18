@@ -81,3 +81,6 @@ def dashboard():
         user = User.query.options(joinedload(User.role), joinedload(User.status)).filter_by(email=session["user"]["email"]).first()
 
     return render_template('dashboard.html', user=user)
+
+if __name__ == '__main__':
+    app.run(debug=True, host="localhost")
