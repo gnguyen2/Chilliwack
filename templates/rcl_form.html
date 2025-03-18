@@ -5,7 +5,7 @@
     <!-- Initial Adjustment Issues (IAI) -->
     <p>
         <label>
-            <input type="radio" id="iai_option" name="main_option" value="IAI">
+            <input type="radio" id="iai_option" name="main_option" value="IAI" {% if response and response.iai_option %}checked{% endif %}>
             Initial Adjustment Issues (IAI)
         </label><br>
 
@@ -20,7 +20,7 @@
     <!-- Improper Course Level Placement (ICLP) -->
     <p>
         <label>
-            <input type="radio" name="main_option" value="ICLP">
+            <input type="radio" id= "ICLP_option" name="main_option" value="ICLP" {% if response and response.ICLP_option %}checked{% endif %}>
             Improper Course Level Placement (ICLP)
         </label>
     </p>
@@ -28,41 +28,41 @@
     <!-- Medical Reason -->
     <p>
         <label>
-            <input type="radio" id="medical_option" name="main_option" value="Medical Reason">
+            <input type="radio" id="medical_option" name="main_option" value="Medical Reason" {% if response and response.medical_option %}checked{% endif %}>
             Medical Reason (Requires doctor's letter)
         </label>
     </p>
 
     <!-- Medical Letter Confirmation (Only if Medical Reason is selected) -->
     <div id="medical_suboption" style="display: none; margin-left: 20px;">
-        <label><input type="checkbox" name="medical_confirmation"> I confirm that I have attached a medical letter.</label>
+        <label><input type="checkbox" name="medical_confirmation" {% if response and response.medical_confirmation %}checked{% endif %}> I confirm that I have attached a medical letter.</label>
     </div>
 
     <!-- Final Semester -->
     <p>
         <label>
-            <input type="radio" id="final_semester_option" name="main_option" value="Final Semester">
+            <input type="radio" id="final_semester_option" name="main_option" value="Final Semester" {% if response and response.final_semester_option %}checked{% endif %}>
             This is my expected final semester and I only need:
         </label>
-        <input type="number" id="final_hours" name="non_thesis_hours" min="1" max="9" disabled> hours of course work to complete my degree program.
+        <input type="number" id="final_hours" name="non_thesis_hours" min="1" max="9" disabled value="{{ response.final_hours if response else '' }}"> hours of course work to complete my degree program.
     </p>
 
     <!-- Concurrent Enrollment -->
     <p>
         <label>
-            <input type="radio" id="concurrent_option" name="main_option" value="Concurrent Enrollment">
+            <input type="radio" id="concurrent_option" name="main_option" value="Concurrent Enrollment" {% if response and response.concurrent_option %}checked{% endif %}>
             Concurrent Enrollment:
         </label>
         <br>
         <label>
             I will have 
-            <input type="number" id="concurrent_hours_uh" name="uh_hours" min="1" max="9" disabled> hours at UH
+            <input type="number" id="concurrent_hours_uh" name="uh_hours" min="1" max="9" disabled value="{{ response.concurrent_hours_uh if response else '' }}"> hours at UH
         </label>
         <br>
         <label>
             and 
-            <input type="number" id="concurrent_hours_other" name="other_school_hours" min="1" max="9" disabled> hours at
-            <input type="text" id="other_school_name" name="other_school_name" placeholder="Enter school name" disabled>.
+            <input type="number" id="concurrent_hours_other" name="other_school_hours" min="1" max="9" disabled value="{{ response.concurrent_hours_other if response else '' }}"> hours at
+            <input type="text" id="other_school_name" name="other_school_name" placeholder="Enter school name" disabled value="{{ response.other_school_name if response else '' }}">.
         </label>
     </p>
 
@@ -75,7 +75,7 @@
                 <option value="fall">Fall</option>
                 <option value="spring">Spring</option>
             </select>
-            semester of 20 <input type="number" name="year" min="2024" max="2099" required>.
+            semester of <input type="number" name="year" min="2024" max="2099" required value="{{ response.year if response else '' }}">.
         </label>
     </p>
     <p>
@@ -94,7 +94,7 @@
                 <option value="fall">Fall</option>
                 <option value="spring">Spring</option>
             </select>
-            semester of 20 <input type="number" name="year_hours" min="2024" max="2099" required>.
+            semester of <input type="number" name="year_hours" min="2024" max="2099" required>.
         </label>
     </p>
 
@@ -103,19 +103,19 @@
     <p>
         <label>
             Your Name:
-            <input type="text" name="student_name" placeholder="Enter your full name" required>
+            <input type="text" name="student_name" placeholder="Enter your full name" value="{{ response.student_name if response else '' }}" required>
         </label>
     </p>
     <p>
         <label>
             Signature:
-            <input type="button" name="student_signature" value="Click here to add your Signature" required>
+            <input type="button" name="student_signature" value="Click here to add your Signature" value="{{ response.student_signature if response else '' }}" required>
         </label>
     </p>
     <p>
         <label>
             PS ID:
-            <input type="text" name="ps_id" placeholder="Enter your PS ID" required>
+            <input type="text" name="ps_id" placeholder="Enter your PS ID" value="{{ response.ps_id if response else '' }}" required>
         </label>
     </p>
     <p>
@@ -141,6 +141,9 @@
             {% endfor %}
         </ul>
     {% endif %}
+
+    <input type="checkbox" name="confirm_acknowledgment" required>
+    <label for="confirm_acknowledgment">I confirm that I understand the academic and financial implications of withdrawal.</label>
 
     <!-- Submit Button -->
     <p>
@@ -190,4 +193,22 @@
         }
         return true;
     }
+
+    document.getElementById("dashboardButton").addEventListener("click", function(event) {
+        event.preventDefault();
+    
+        let formData = new FormData(document.getElementById("rcl_form"));
+    
+        fetch("{{ url_for('form.save_rcl_progress') }}", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+            window.location.href = "{{ url_for('dashboard') }}";
+        })
+        .catch(error => console.error("Error saving form:", error));
+    });
+
 </script>
