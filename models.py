@@ -137,3 +137,59 @@ class RCLResponses(db.Model):
     # Track whether the form is finalized or still in progress
     is_finalized = db.Column(db.Boolean, default=False)
     last_updated = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+class TWResponses(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user = db.relationship("User", backref="withdrawal_responses")
+
+    request_id = db.Column(db.Integer, db.ForeignKey('request.id'), nullable=True)  # Nullable for drafts
+    request = db.relationship("Request", backref="withdrawal_responses")
+
+    # Student Information
+    student_name = db.Column(db.String(100), nullable=True)
+    ps_id = db.Column(db.String(20), nullable=True)
+    student_signature = db.Column(db.String(255), nullable=True)  # Path to signature file
+    submission_date = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Withdrawal Term
+    withdrawal_term_fall = db.Column(db.Boolean, default=False)
+    withdrawal_term_spring = db.Column(db.Boolean, default=False)
+    withdrawal_term_summer = db.Column(db.Boolean, default=False)
+    withdrawal_year = db.Column(db.Integer, nullable=True)
+
+    # Initial Acknowledgments
+    financial_aid_ack = db.Column(db.Boolean, default=False)
+    international_students_ack = db.Column(db.Boolean, default=False)
+    student_athlete_ack = db.Column(db.Boolean, default=False)
+    veterans_ack = db.Column(db.Boolean, default=False)
+    graduate_students_ack = db.Column(db.Boolean, default=False)
+    doctoral_students_ack = db.Column(db.Boolean, default=False)
+    housing_ack = db.Column(db.Boolean, default=False)
+    dining_ack = db.Column(db.Boolean, default=False)
+    parking_ack = db.Column(db.Boolean, default=False)
+
+    # Supporting Documents
+    supporting_documents_attached = db.Column(db.Boolean, default=False)
+    supporting_document_path = db.Column(db.String(255), nullable=True)  # Path to uploaded documents
+
+    # Approval Signatures
+    financial_aid_signature = db.Column(db.String(255), nullable=True)  # Path to Financial Aid signature file
+    financial_aid_date = db.Column(db.DateTime, nullable=True)
+
+    isss_signature = db.Column(db.String(255), nullable=True)  # Path to ISSSO signature file
+    isss_date = db.Column(db.DateTime, nullable=True)
+
+    athletics_signature = db.Column(db.String(255), nullable=True)  # Path to Athletics signature file
+    athletics_date = db.Column(db.DateTime, nullable=True)
+
+    veterans_signature = db.Column(db.String(255), nullable=True)  # Path to Veterans' Office signature file
+    veterans_date = db.Column(db.DateTime, nullable=True)
+
+    advisor_name = db.Column(db.String(100), nullable=True)
+    advisor_signature = db.Column(db.String(255), nullable=True)  # Path to Advisor signature file
+    advisor_date = db.Column(db.DateTime, nullable=True)
+
+    # Status Tracking
+    is_finalized = db.Column(db.Boolean, default=False)
+    last_updated = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
