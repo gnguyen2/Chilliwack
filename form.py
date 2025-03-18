@@ -329,7 +329,7 @@ def save_tw_progress():
     filename = secure_filename(filename)
 
     # Define the path where the document should be saved
-    save_path = os.path.join('static', 'documents', filename)
+    save_path = os.path.join('static', 'documents', 'TW', filename)
 
     # Save the document (assuming 'doc' is a document object with a 'save' method)
     doc.save(save_path)
@@ -363,7 +363,7 @@ def preview_TW():
     filename = secure_filename(filename)
 
     # Define the path to the existing PDF (make sure this path is correct)
-    pdf_path = os.path.join('static', 'documents', filename)
+    pdf_path = os.path.join('static', 'documents', "TW", filename)
 
     # Check if the file exists
     if not os.path.exists(pdf_path):
