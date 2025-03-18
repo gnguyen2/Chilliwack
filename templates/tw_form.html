@@ -46,8 +46,12 @@
 <input type="checkbox" name="parking" id="parking" {% if response and response.parking_ack %}checked{% endif %}> I will return my parking permit if applicable.<br>
 
 
-    <label>Supporting Documents (if applicable):</label>
-    <input type="file" name="supporting_documents">
+    <label>Supporting Documents (if applicable) **(PDF, DOC, JPG, PNG)**:</label>
+    <input type="file" name="supporting_documents" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+
+    {% if response and response.supporting_documents_attached %}
+        <p>Uploaded File: <a href="{{ url_for('form.download_supporting_document', filename=response.supporting_document_path) }}" target="_blank">View Document</a></p>
+    {% endif %}
 
     <input type="checkbox" name="confirm_acknowledgment" required>
     <label for="confirm_acknowledgment">I confirm that I understand the academic and financial implications of withdrawal.</label>

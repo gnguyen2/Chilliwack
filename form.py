@@ -7,16 +7,27 @@ from datetime import datetime
 form_bp = Blueprint("form", __name__)
 
 # Allowed extensions
-ALLOWED_EXTENSIONS = {"jpg", "jpeg"}
-UPLOAD_FOLDER = "static/signatures"
+SIGNATURE_ALLOWED_EXTENSIONS = {"jpg", "jpeg"}
+SIGNATURE_UPLOAD_FOLDER = "static/signatures"
+DOCUMENTS_ALLOWED_EXTENSIONS = {"pdf", "doc", "docx", "jpg", "jpeg", "png"}
+DOCUMENTS_UPLOAD_FOLDER = "static/documents"
 
 # Ensure upload folder exists
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
+if not os.path.exists(SIGNATURE_UPLOAD_FOLDER):
+    os.makedirs(SIGNATURE_UPLOAD_FOLDER)
 
-def allowed_file(filename):
+# Ensure upload folder exists
+if not os.path.exists(DOCUMENTS_UPLOAD_FOLDER):
+    os.makedirs(DOCUMENTS_UPLOAD_FOLDER)
+
+def signature_allowed_file(filename):
     """ Check if the file has a valid extension """
-    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in SIGNATURE_ALLOWED_EXTENSIONS
+
+def document_allowed_file(filename):
+    """ Check if the file has a valid extension """
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in DOCUMENTS_ALLOWED_EXTENSIONS
+
 
 # Upload signature page
 @form_bp.route("/upload_signature_page")
@@ -39,7 +50,7 @@ def upload_signature():
 
     file = request.files["signature"]
 
-    if not allowed_file(file.filename):
+    if not signature_allowed_file(file.filename):
         flash("Invalid file type! Only JPG and JPEG are allowed.", "danger")
         return redirect(url_for("upload_signature_page"))
 
@@ -56,7 +67,7 @@ def upload_signature():
     filename = secure_filename(filename)
 
     # Save the file
-    file_path = os.path.join(UPLOAD_FOLDER, filename)
+    file_path = os.path.join(SIGNATURE_UPLOAD_FOLDER, filename)
     file.save(file_path)
 
     # Update user's signature path in the database
@@ -82,6 +93,24 @@ def fill_tw_form():
 
     if request.method == 'POST':
         response = existing_response if existing_response else TWResponses(user_id=user_id)
+
+        # Ensure is not None, default to empty string
+        response.student_name = request.form.get("student_name", "").strip() or ""
+        response.email = request.form.get("email", "").strip() or ""
+        response.ps_id = request.form.get("student_id", "").strip() or ""
+        response.phone = request.form.get("phone", "").strip() or ""
+        response.program = request.form.get("program", "").strip() or ""
+        response.academic_career = request.form.get("academic_career", "").strip() or ""
+
+        # Handle File Upload
+        if "supporting_documents" in request.files:
+            file = request.files["supporting_documents"]
+            if file and document_allowed_file(file.filename):
+                filename = secure_filename(f"user_{user_id}_{file.filename}")
+                file_path = os.path.join(DOCUMENTS_UPLOAD_FOLDER, filename)
+                file.save(file_path)
+                response.supporting_document_path = file_path  # Save path in DB
+                response.supporting_documents_attached = True
 
         # Text Inputs
         response.student_name = request.form.get("student_name")
@@ -132,8 +161,6 @@ def fill_tw_form():
     return render_template("tw_form.html", response=existing_response)
 
 
-
-
 @form_bp.route("/save_tw_progress", methods=["POST"])
 def save_tw_progress():
     """Saves the current form progress asynchronously."""
@@ -150,10 +177,22 @@ def save_tw_progress():
         db.session.add(response)
 
     # Update with form data
-    withdrawal_term = request.form.get("withdrawal_term")
+
+    # Correctly get the text value from the form:
+    response.student_name = request.form.get("student_name", "")
+    response.ps_id = request.form.get("student_id", "")
+    response.phone = request.form.get("phone", "")
+    response.email = request.form.get("email", "")
+    response.program = request.form.get("program", "")
+    response.academic_career = request.form.get("academic_career", "")
+
+    withdrawal_term = request.form.get("withdrawal_term", "")
     response.withdrawal_term_fall = (withdrawal_term == "Fall")
     response.withdrawal_term_spring = (withdrawal_term == "Spring")
     response.withdrawal_term_summer = (withdrawal_term == "Summer")
+
+    year_str = request.form.get("year", "")
+    response.withdrawal_year = int(year_str) if year_str.isdigit() else None
 
     response.financial_aid_ack = "financial_aid" in request.form
     response.international_students_ack = "international_students" in request.form

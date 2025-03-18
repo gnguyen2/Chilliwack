@@ -144,6 +144,10 @@ class TWResponses(db.Model):
     # Student Information
     student_name = db.Column(db.String(100), nullable=True)
     ps_id = db.Column(db.String(20), nullable=True)
+    phone = db.Column(db.String(20), nullable=True)
+    email = db.Column(db.String(100), nullable=True)
+    program = db.Column(db.String(100), nullable=True)
+    academic_career = db.Column(db.String(100), nullable=True)
     student_signature = db.Column(db.String(255), nullable=True)  # Path to signature file
     submission_date = db.Column(db.DateTime, default=datetime.utcnow)
 
