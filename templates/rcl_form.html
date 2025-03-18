@@ -1,140 +1,214 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reduced Course Load (RCL) Form for Graduate Students</title>
-    <link rel="stylesheet" href="static/admindashboard.css">
-</head>
-<body>
-    <div class="admin-container">
-        <h1>Reduced Course Load (RCL) Form for Graduate Students</h1>
+<form id="rcl_form" action="{{ url_for('form.fill_rcl_form') }}" method="POST" enctype="multipart/form-data" onsubmit="return validateForm()">
 
-        <!-- Flash Message -->
-        <div class="flash-message">
-            Please fill out the form below to request a reduced course load.
+    <h2>Select One Option (Required)</h2>
+    
+    <!-- Initial Adjustment Issues (IAI) -->
+    <p>
+        <label>
+            <input type="radio" id="iai_option" name="main_option" value="IAI" {% if response and response.iai_option %}checked{% endif %}>
+            Initial Adjustment Issues (IAI)
+        </label><br>
+
+        <!-- IAI Suboptions -->
+        <div id="iai_suboptions" style="display: none; margin-left: 20px;">
+            <label><input type="checkbox" name="iai_suboption" value="English Language"> English Language</label><br>
+            <label><input type="checkbox" name="iai_suboption" value="Reading Requirements"> Reading Requirements</label><br>
+            <label><input type="checkbox" name="iai_suboption" value="Unfamiliarity with American Teaching Methods"> Unfamiliarity with American teaching methods</label>
         </div>
+    </p>
 
-        <!-- Form to Capture Inputs -->
-        <form action="/submit-rcl-form" method="post">
-            <!-- Section 1: Academic Difficulty -->
-            <h2>1. Academic Difficulty (First Semester Only)</h2>
-            <p>
-                <label>
-                    <input type="checkbox" name="academic_difficulty" value="Initial Adjustment Issues (IAI)">
-                    Initial Adjustment Issues (IAI)
-                </label><br>
-                <label>
-                    <input type="checkbox" name="academic_difficulty" value="English Language">
-                    [ ] the English language
-                </label><br>
-                <label>
-                    <input type="checkbox" name="academic_difficulty" value="Reading Requirements">
-                    [ ] reading requirements
-                </label><br>
-                <label>
-                    <input type="checkbox" name="academic_difficulty" value="Unfamiliarity with American Teaching Methods">
-                    [ ] unfamiliarity with American teaching methods
-                </label>
-            </p>
-            <p>
-                <label>
-                    <input type="checkbox" name="academic_difficulty" value="Improper Course Level Placement (ICLP)">
-                    Improper Course Level Placement (ICLP)
-                </label><br>
-                <label>
-                    I am having difficulty with my class(es) due to improper course level placement.
-                </label>
-            </p>
+    <!-- Improper Course Level Placement (ICLP) -->
+    <p>
+        <label>
+            <input type="radio" id= "ICLP_option" name="main_option" value="ICLP" {% if response and response.ICLP_option %}checked{% endif %}>
+            Improper Course Level Placement (ICLP)
+        </label>
+    </p>
 
-            <!-- Section 2: Medical Reason -->
-            <h2>2. Medical Reason</h2>
-            <p>
-                <label>
-                    <input type="checkbox" name="medical_reason" value="Medical Reason">
-                    □ Letter from a licensed medical doctor, doctor of osteopathy, a licensed psychologist/clinical psychologist is attached.
-                </label>
-            </p>
+    <!-- Medical Reason -->
+    <p>
+        <label>
+            <input type="radio" id="medical_option" name="main_option" value="Medical Reason" {% if response and response.medical_option %}checked{% endif %}>
+            Medical Reason (Requires doctor's letter)
+        </label>
+    </p>
 
-            <!-- Section 3: Full-Time Equivalency for Final Semester -->
-            <h2>3. Full-Time Equivalency for Final Semester</h2>
-            <p>
-                <label>
-                    <input type="radio" name="final_semester" value="Non-Thesis Track">
-                    □ Reduced Course Load for Non-Thesis Track: This is my expected final semester and I only need
-                    <input type="number" name="non_thesis_hours" min="1" max="9"> hours of course work to complete my degree program.
-                </label>
-            </p>
-            <p>
-                <label>
-                    <input type="radio" name="final_semester" value="Thesis/Dissertation Track">
-                    □ Full-time Equivalency for Thesis/Dissertation Track: I am expecting this semester to be my final semester. I have completed all course work and I am only working on my thesis or dissertation. I am approved to take
-                    <input type="number" name="thesis_hours" min="1" max="9"> hours of thesis/dissertation.
-                </label>
-            </p>
-
-            <!-- Semester and Course Drop Information -->
-            <h2>Semester and Course Drop Information</h2>
-            <p>
-                <label>
-                    I am applying for a reduced course load for the
-                    <select name="semester">
-                        <option value="fall">Fall semester of 20__</option>
-                        <option value="spring">Spring semester of 20__</option>
-                    </select>
-                </label>
-            </p>
-            <p>
-                <label>
-                    I want to drop the following class(es):
-                    <input type="text" name="course1" placeholder="Course Number">
-                    <input type="text" name="course2" placeholder="Course Number">
-                    <input type="text" name="course3" placeholder="Course Number">
-                </label>
-            </p>
-            <p>
-                <label>
-                    After the drop, I will have a total of
-                    <input type="number" name="total_hours" min="1" max="9"> hours for the
-                    <select name="semester_hours">
-                        <option value="fall">Fall semester 20__</option>
-                        <option value="spring">Spring semester of 20__</option>
-                    </select>
-                </label>
-            </p>
-
-            <!-- Student Information -->
-            <h2>Student Information</h2>
-            <p>
-                <label>
-                    Your Name:
-                    <input type="text" name="student_name" placeholder="Enter your full name" required>
-                </label>
-            </p>
-            <p>
-                <label>
-                    Signature:
-                    <input type="text" name="student_signature" placeholder="Enter your signature" required>
-                </label>
-            </p>
-            <p>
-                <label>
-                    PS ID:
-                    <input type="text" name="ps_id" placeholder="Enter your PS ID" required>
-                </label>
-            </p>
-            <p>
-                <label>
-                    Date:
-                    <input type="date" name="date" required>
-                </label>
-            </p>
-
-            <!-- Submit Button -->
-            <p>
-                <button type="submit" class="button">Submit Form</button>
-            </p>
-        </form>
+    <!-- Medical Letter Confirmation (Only if Medical Reason is selected) -->
+    <div id="medical_suboption" style="display: none; margin-left: 20px;">
+        <label><input type="checkbox" name="medical_confirmation" {% if response and response.medical_confirmation %}checked{% endif %}> I confirm that I have attached a medical letter.</label>
     </div>
+
+    <!-- Final Semester -->
+    <p>
+        <label>
+            <input type="radio" id="final_semester_option" name="main_option" value="Final Semester" {% if response and response.final_semester_option %}checked{% endif %}>
+            This is my expected final semester and I only need:
+        </label>
+        <input type="number" id="final_hours" name="non_thesis_hours" min="1" max="9" disabled value="{{ response.final_hours if response else '' }}"> hours of course work to complete my degree program.
+    </p>
+
+    <!-- Concurrent Enrollment -->
+    <p>
+        <label>
+            <input type="radio" id="concurrent_option" name="main_option" value="Concurrent Enrollment" {% if response and response.concurrent_option %}checked{% endif %}>
+            Concurrent Enrollment:
+        </label>
+        <br>
+        <label>
+            I will have 
+            <input type="number" id="concurrent_hours_uh" name="uh_hours" min="1" max="9" disabled value="{{ response.concurrent_hours_uh if response else '' }}"> hours at UH
+        </label>
+        <br>
+        <label>
+            and 
+            <input type="number" id="concurrent_hours_other" name="other_school_hours" min="1" max="9" disabled value="{{ response.concurrent_hours_other if response else '' }}"> hours at
+            <input type="text" id="other_school_name" name="other_school_name" placeholder="Enter school name" disabled value="{{ response.other_school_name if response else '' }}">.
+        </label>
+    </p>
+
+    <!-- Semester & Dropped Course Information -->
+    <h2>Reduced Course Load Information</h2>
+    <p>
+        <label>
+            I am applying for a reduced course load for the
+            <select name="semester">
+                <option value="fall">Fall</option>
+                <option value="spring">Spring</option>
+            </select>
+            semester of <input type="number" name="year" min="2024" max="2099" required value="{{ response.year if response else '' }}">.
+        </label>
+    </p>
+    <p>
+        <label>
+            I want to drop the following class(es):
+            <input type="text" name="course1" placeholder="Course Number">
+            <input type="text" name="course2" placeholder="Course Number">
+            <input type="text" name="course3" placeholder="Course Number">
+        </label>
+    </p>
+    <p>
+        <label>
+            After the drop, I will have a total of
+            <input type="number" name="total_hours" min="1" max="9" required> hours at UH for the:
+            <select name="semester_hours">
+                <option value="fall">Fall</option>
+                <option value="spring">Spring</option>
+            </select>
+            semester of <input type="number" name="year_hours" min="2024" max="2099" required>.
+        </label>
+    </p>
+
+    <!-- Student Information -->
+    <h2>Student Information</h2>
+    <p>
+        <label>
+            Your Name:
+            <input type="text" name="student_name" placeholder="Enter your full name" value="{{ response.student_name if response else '' }}" required>
+        </label>
+    </p>
+    <p>
+        <label>
+            Signature:
+            <input type="button" name="student_signature" value="Click here to add your Signature" value="{{ response.student_signature if response else '' }}" required>
+        </label>
+    </p>
+    <p>
+        <label>
+            PS ID:
+            <input type="text" name="ps_id" placeholder="Enter your PS ID" value="{{ response.ps_id if response else '' }}" required>
+        </label>
+    </p>
+    <p>
+        <label>
+            Date:
+            <input type="date" name="date" required>
+        </label>
+    </p>
+
+    <!-- Supporting Documents -->
+    <label>Supporting Documents (if applicable) **(PDF, DOC, JPG, PNG)**:</label>
+    <input type="file" name="supporting_documents" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" multiple>
+
+    {% if response and response.documents %}
+        <h3>Previously Uploaded Documents</h3>
+        <ul>
+            {% for doc in response.documents %}
+                <li>
+                    <a href="{{ url_for('form.download_rcl_document', filename=doc.file_path) }}" target="_blank">
+                        {{ doc.file_name }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <input type="checkbox" name="confirm_acknowledgment" required>
+    <label for="confirm_acknowledgment">I confirm that I understand the academic and financial implications of withdrawal.</label>
+
+    <!-- Submit Button -->
+    <p>
+        <button type="submit" class="button">Submit Form</button>
+    </p>
+</form>
+
+<!-- Dashboard Button -->
+<button type="button" id="dashboardButton" class="btn btn-secondary">Go to Dashboard</button>
+
 </body>
 </html>
+
+<script>
+    document.getElementById("iai_option").addEventListener("change", function() {
+        let suboptions = document.getElementById("iai_suboptions");
+        suboptions.style.display = this.checked ? "block" : "none";
+
+        if (!this.checked) {
+            document.querySelectorAll("input[name='iai_suboption']").forEach(input => input.checked = false);
+        }
+    });
+
+    document.getElementById("medical_option").addEventListener("change", function() {
+        let medicalSuboption = document.getElementById("medical_suboption");
+        medicalSuboption.style.display = this.checked ? "block" : "none";
+
+        if (!this.checked) {
+            document.querySelector("input[name='medical_confirmation']").checked = false;
+        }
+    });
+
+    document.getElementById("final_semester_option").addEventListener("change", function() {
+        document.getElementById("final_hours").disabled = !this.checked;
+    });
+
+    document.getElementById("concurrent_option").addEventListener("change", function() {
+        let concurrentInputs = ["concurrent_hours_uh", "concurrent_hours_other", "other_school_name"];
+        concurrentInputs.forEach(id => document.getElementById(id).disabled = !this.checked);
+    });
+
+    function validateForm() {
+        let selectedOption = document.querySelector("input[name='main_option']:checked");
+        if (!selectedOption) {
+            alert("You must select one option.");
+            return false;
+        }
+        return true;
+    }
+
+    document.getElementById("dashboardButton").addEventListener("click", function(event) {
+        event.preventDefault();
+    
+        let formData = new FormData(document.getElementById("rcl_form"));
+    
+        fetch("{{ url_for('form.save_rcl_progress') }}", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+            window.location.href = "{{ url_for('dashboard') }}";
+        })
+        .catch(error => console.error("Error saving form:", error));
+    });
+
+</script>

@@ -71,6 +71,8 @@ class ApprovalProcess(db.Model):
         return f"<Approval {self.id} - Request: {self.request_id} - Status: {self.status}>"
     
 class RCLResponses(db.Model):
+    __tablename__ = "rcl_responses"
+
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship("User", backref="responses")
@@ -85,7 +87,6 @@ class RCLResponses(db.Model):
     submission_date = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Type of Reduced Course Load
-    academic_difficulty = db.Column(db.Boolean, default=False)
     initial_adjustment_issues = db.Column(db.Boolean, default=False)
     initial_adjustment_explanation = db.Column(db.Text, nullable=True)
 
@@ -113,11 +114,11 @@ class RCLResponses(db.Model):
     concurrent_university_name = db.Column(db.String(100), nullable=True)
     concurrent_hours_uh = db.Column(db.Integer, nullable=True)
     concurrent_hours_other = db.Column(db.Integer, nullable=True)
-    concurrent_proof_attached = db.Column(db.Boolean, default=False)
 
     # Semester Information
     semester_fall = db.Column(db.Boolean, default=False)
     semester_spring = db.Column(db.Boolean, default=False)
+    year_last_digit = db.Column(db.Integer, default=False)
     drop_courses = db.Column(db.String(255), nullable=True)  # Store comma-separated course numbers
     remaining_hours_uh = db.Column(db.Integer, nullable=True)
 
@@ -132,7 +133,25 @@ class RCLResponses(db.Model):
     # Track whether the form is finalized or still in progress
     is_finalized = db.Column(db.Boolean, default=False)
     last_updated = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
+
+    # Add a relationship for multiple documents
+    documents = db.relationship("RCLDocuments", back_populates="response", cascade="all, delete-orphan")
+
+class RCLDocuments(db.Model):
+    __tablename__ = "rcl_documents"
+
+    id = db.Column(db.Integer, primary_key=True)
+    response_id = db.Column(db.Integer, db.ForeignKey("rcl_responses.id"), nullable=False)
+    file_name = db.Column(db.String(255), nullable=True)
+    file_path = db.Column(db.String(255), nullable=True)
+    uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relationship back to RCLResponses
+    response = db.relationship("RCLResponses", back_populates="documents")
+
+    def __repr__(self):
+        return f"<RCLDocuments {self.id} - {self.file_name}>"
+
 class TWResponses(db.Model):
     __tablename__ = "tw_responses"
 
