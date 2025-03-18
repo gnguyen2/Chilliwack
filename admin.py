@@ -1,6 +1,6 @@
 from flask import Blueprint, request, flash, redirect, url_for, session, render_template
 from decorators import role_required
-from models import db, User, Role, Status
+from models import db, User, Role, Status, RCLResponses, TWResponses
 from sqlalchemy.orm import joinedload
 
 admin_bp = Blueprint("admin", __name__)
@@ -25,11 +25,18 @@ def admindashboard():
     # Get distinct status values
     statuses = Status.query.all()
 
+    # Fetch pending RCL and Withdrawal requests
+    pending_rcl_requests = RCLResponses.query.filter_by(is_finalized=False).all()
+    pending_tw_requests = TWResponses.query.filter_by(is_finalized=False).all()
+
+    # Combine RCL and TW requests into a single list
+    pending_requests = pending_rcl_requests + pending_tw_requests
+
     # Check if bypass is requested
     if request.args.get("bypass") == "true":
-        return render_template("admindashboard.html", user=user, users=users, roles=roles, statuses=statuses)
+            return render_template('admindashboard.html', user=user, users=users, roles=roles, statuses=statuses, pending_requests=pending_requests)
     
-    return render_template('admindashboard.html', user=user, users=users, roles=roles, statuses=statuses)
+    return render_template('admindashboard.html', user=user, users=users, roles=roles, statuses=statuses, pending_requests=pending_requests)
 
 #update users
 @admin_bp.route("/admin/update_role", methods=["POST"])
@@ -87,5 +94,48 @@ def change_status():
         flash("User status updated successfully!", "success")
     else:
         flash("Failed to update user status.", "warning")
+
+    return redirect(url_for("admin.admindashboard"))
+
+#handle requests
+@admin_bp.route("/admin/approve_request/<int:request_id>", methods=["POST"])
+@role_required("administrator")
+def approve_request(request_id):
+    # Try finding the request in RCLResponses
+    request_entry = RCLResponses.query.get(request_id)
+    
+    if not request_entry:
+        # If not found in RCL, check in TWResponses
+        request_entry = TWResponses.query.get(request_id)
+
+    if request_entry:
+        request_entry.is_finalized = True  # Mark as finalized
+        request_entry.status = "approved"
+        db.session.commit()
+        
+        flash(f"Request {request_id} has been approved.", "success")
+    else:
+        flash(f"Request {request_id} not found.", "warning")
+
+    return redirect(url_for("admin.admindashboard"))
+
+@admin_bp.route("/admin/reject_request/<int:request_id>", methods=["POST"])
+@role_required("administrator")
+def reject_request(request_id):
+    # Try finding the request in RCLResponses
+    request_entry = RCLResponses.query.get(request_id)
+    
+    if not request_entry:
+        # If not found in RCL, check in TWResponses
+        request_entry = TWResponses.query.get(request_id)
+
+    if request_entry:
+        request_entry.is_finalized = True  # Mark as finalized
+        request_entry.status = "rejected"
+        db.session.commit()
+        
+        flash(f"Request {request_id} has been rejected.", "danger")
+    else:
+        flash(f"Request {request_id} not found.", "warning")
 
     return redirect(url_for("admin.admindashboard"))

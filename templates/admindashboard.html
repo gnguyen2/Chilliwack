@@ -65,4 +65,32 @@
         </tr>
         {% endfor %}
     </table>
+    <h2>Pending Requests</h2>
+    <table>
+        <tr>
+            <th>Request ID</th>
+            <th>Student Name</th>
+            <th>Request Type</th>
+            <th>Reason</th>
+            <th>Submission Date</th>
+            <th>Actions</th>
+        </tr>
+        {% for request in pending_requests %}
+        <tr>
+            <td>{{ request.id }}</td>
+            <td>{{ request.student_name }}</td>
+            <td>{{ "RCL" if request.is_rcl else "Withdrawal" }}</td>
+            <td>{{ request.reason }}</td>
+            <td>{{ request.submission_date.strftime('%Y-%m-%d') }}</td>
+            <td>
+                <form action="{{ url_for('admin.approve_request', request_id=request.id) }}" method="POST">
+                    <button type="submit" class="approve-button">Approve</button>
+                </form>
+                <form action="{{ url_for('admin.reject_request', request_id=request.id) }}" method="POST">
+                    <button type="submit" class="reject-button">Reject</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
 </body>
