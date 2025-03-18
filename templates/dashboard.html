@@ -33,6 +33,11 @@
             <p>No signature uploaded.</p>
             {% endif %}
 
+
+            <br>
+            <a href="{{ url_for('form.upload_signature_page') }}" class="button">Upload Signature</a>
+            <br><br>
+            <a href="{{ url_for('auth.logout') }}">Logout</a>
         </div>
 
         <br> <!-- New line added here -->

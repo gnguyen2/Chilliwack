@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reduced Course Load (RCL) Form for Graduate Students</title>
+    <link rel="stylesheet" href="static/admindashboard.css">
+</head>
+<body>
+    <div class="admin-container">
+        <h1>Reduced Course Load (RCL) Form for Graduate Students</h1>
+
+        <!-- Flash Message -->
+        <div class="flash-message">
+            Please fill out the form below to request a reduced course load.
+        </div>
+
+        <!-- Form to Capture Inputs -->
+        <form action="/submit-rcl-form" method="post">
+            <!-- Section 1: Academic Difficulty -->
+            <h2>1. Academic Difficulty (First Semester Only)</h2>
+            <p>
+                <label>
+                    <input type="checkbox" name="academic_difficulty" value="Initial Adjustment Issues (IAI)">
+                    Initial Adjustment Issues (IAI)
+                </label><br>
+                <label>
+                    <input type="checkbox" name="academic_difficulty" value="English Language">
+                    [ ] the English language
+                </label><br>
+                <label>
+                    <input type="checkbox" name="academic_difficulty" value="Reading Requirements">
+                    [ ] reading requirements
+                </label><br>
+                <label>
+                    <input type="checkbox" name="academic_difficulty" value="Unfamiliarity with American Teaching Methods">
+                    [ ] unfamiliarity with American teaching methods
+                </label>
+            </p>
+            <p>
+                <label>
+                    <input type="checkbox" name="academic_difficulty" value="Improper Course Level Placement (ICLP)">
+                    Improper Course Level Placement (ICLP)
+                </label><br>
+                <label>
+                    I am having difficulty with my class(es) due to improper course level placement.
+                </label>
+            </p>
+
+            <!-- Section 2: Medical Reason -->
+            <h2>2. Medical Reason</h2>
+            <p>
+                <label>
+                    <input type="checkbox" name="medical_reason" value="Medical Reason">
+                    □ Letter from a licensed medical doctor, doctor of osteopathy, a licensed psychologist/clinical psychologist is attached.
+                </label>
+            </p>
+
+            <!-- Section 3: Full-Time Equivalency for Final Semester -->
+            <h2>3. Full-Time Equivalency for Final Semester</h2>
+            <p>
+                <label>
+                    <input type="radio" name="final_semester" value="Non-Thesis Track">
+                    □ Reduced Course Load for Non-Thesis Track: This is my expected final semester and I only need
+                    <input type="number" name="non_thesis_hours" min="1" max="9"> hours of course work to complete my degree program.
+                </label>
+            </p>
+            <p>
+                <label>
+                    <input type="radio" name="final_semester" value="Thesis/Dissertation Track">
+                    □ Full-time Equivalency for Thesis/Dissertation Track: I am expecting this semester to be my final semester. I have completed all course work and I am only working on my thesis or dissertation. I am approved to take
+                    <input type="number" name="thesis_hours" min="1" max="9"> hours of thesis/dissertation.
+                </label>
+            </p>
+
+            <!-- Semester and Course Drop Information -->
+            <h2>Semester and Course Drop Information</h2>
+            <p>
+                <label>
+                    I am applying for a reduced course load for the
+                    <select name="semester">
+                        <option value="fall">Fall semester of 20__</option>
+                        <option value="spring">Spring semester of 20__</option>
+                    </select>
+                </label>
+            </p>
+            <p>
+                <label>
+                    I want to drop the following class(es):
+                    <input type="text" name="course1" placeholder="Course Number">
+                    <input type="text" name="course2" placeholder="Course Number">
+                    <input type="text" name="course3" placeholder="Course Number">
+                </label>
+            </p>
+            <p>
+                <label>
+                    After the drop, I will have a total of
+                    <input type="number" name="total_hours" min="1" max="9"> hours for the
+                    <select name="semester_hours">
+                        <option value="fall">Fall semester 20__</option>
+                        <option value="spring">Spring semester of 20__</option>
+                    </select>
+                </label>
+            </p>
+
+            <!-- Student Information -->
+            <h2>Student Information</h2>
+            <p>
+                <label>
+                    Your Name:
+                    <input type="text" name="student_name" placeholder="Enter your full name" required>
+                </label>
+            </p>
+            <p>
+                <label>
+                    Signature:
+                    <input type="text" name="student_signature" placeholder="Enter your signature" required>
+                </label>
+            </p>
+            <p>
+                <label>
+                    PS ID:
+                    <input type="text" name="ps_id" placeholder="Enter your PS ID" required>
+                </label>
+            </p>
+            <p>
+                <label>
+                    Date:
+                    <input type="date" name="date" required>
+                </label>
+            </p>
+
+            <!-- Submit Button -->
+            <p>
+                <button type="submit" class="button">Submit Form</button>
+            </p>
+        </form>
+    </div>
+</body>
+</html>
