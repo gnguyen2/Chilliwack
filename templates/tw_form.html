@@ -1,0 +1,43 @@
+<form action="{{ url_for('submit_withdrawal_request') }}" method="POST" enctype="multipart/form-data">
+    <label>Student Name:</label>
+    <input type="text" name="student_name" required>
+
+    <label>myUH ID:</label>
+    <input type="text" name="student_id" required>
+
+    <label>Phone:</label>
+    <input type="text" name="phone" required>
+
+    <label>Email:</label>
+    <input type="email" name="email" required>
+
+    <label>Program/Plan:</label>
+    <input type="text" name="program" required>
+
+    <label>Academic Career:</label>
+    <input type="text" name="academic_career" required>
+
+    <label>Withdrawal Term:</label>
+    <select name="withdrawal_term">
+        <option value="Fall">Fall</option>
+        <option value="Spring">Spring</option>
+        <option value="Summer">Summer</option>
+    </select>
+    <input type="number" name="year" placeholder="Year" required>
+
+    <label>Initial Required Checkboxes:</label><br>
+    <input type="checkbox" name="financial_aid"> I understand the financial aid implications.<br>
+    <input type="checkbox" name="international_students"> I have obtained ISSSO authorization.<br>
+    <input type="checkbox" name="student_athletes"> I have met with the Office of Athletics' Compliance.<br>
+    <input type="checkbox" name="veterans"> I understand the impact on my GI Bill benefits.<br>
+    <input type="checkbox" name="graduate_students"> I have met with my Academic Advisor.<br>
+    <input type="checkbox" name="doctoral_students"> I have filed a leave of absence.<br>
+    <input type="checkbox" name="housing"> I will complete housing check-out procedures.<br>
+    <input type="checkbox" name="dining"> I will submit a meal plan petition if applicable.<br>
+    <input type="checkbox" name="parking"> I will return my parking permit if applicable.<br>
+
+    <label>Supporting Documents (if applicable):</label>
+    <input type="file" name="supporting_documents">
+
+    <button type="submit">Submit Withdrawal Request</button>
+</form>

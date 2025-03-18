@@ -3,9 +3,10 @@
     "",
     "\\migrations",
     "\\static",
+    "\\static\\signatures",
     "\\templates",
     "\\venv"
   ],
-  "SelectedNode": "\\app.py",
+  "SelectedNode": "\\templates\\upload_signature.html",
   "PreviewInSolutionExplorer": false
 }
