@@ -47,11 +47,25 @@
 
 
     <label>Supporting Documents (if applicable) **(PDF, DOC, JPG, PNG)**:</label>
-    <input type="file" name="supporting_documents" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+    <input type="file" name="supporting_documents" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" multiple>
 
     {% if response and response.supporting_documents_attached %}
         <p>Uploaded File: <a href="{{ url_for('form.download_supporting_document', filename=response.supporting_document_path) }}" target="_blank">View Document</a></p>
     {% endif %}
+
+    {% if response and response.documents %}
+        <h4>Previously Uploaded Documents</h4>
+        <ul>
+        {% for doc in response.documents %}
+            <li>
+                <a href="{{ url_for('form.download_supporting_document', filename=doc.file_path) }}" target="_blank">
+                    {{ doc.file_name }}
+                </a>
+            </li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+
 
     <input type="checkbox" name="confirm_acknowledgment" required>
     <label for="confirm_acknowledgment">I confirm that I understand the academic and financial implications of withdrawal.</label>

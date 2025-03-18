@@ -134,6 +134,8 @@ class RCLResponses(db.Model):
     last_updated = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
 class TWResponses(db.Model):
+    __tablename__ = "tw_responses"
+
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship("User", backref="withdrawal_responses")
@@ -192,3 +194,21 @@ class TWResponses(db.Model):
     # Status Tracking
     is_finalized = db.Column(db.Boolean, default=False)
     last_updated = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Add a relationship to store multiple documents
+    documents = db.relationship("TWDocuments", back_populates="response", cascade="all, delete-orphan")
+
+class TWDocuments(db.Model):
+    __tablename__ = "tw_documents"
+
+    id = db.Column(db.Integer, primary_key=True)
+    response_id = db.Column(db.Integer, db.ForeignKey("tw_responses.id"), nullable=False)
+    file_name = db.Column(db.String(255), nullable=True)
+    file_path = db.Column(db.String(255), nullable=True)
+    uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relationship back to TWResponses
+    response = db.relationship("TWResponses", back_populates="documents")
+
+    def __repr__(self):
+        return f"<TWDocuments {self.id} - {self.file_name}>"

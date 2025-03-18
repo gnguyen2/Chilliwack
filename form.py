@@ -1,5 +1,5 @@
 from flask import Blueprint, session, redirect, url_for, flash, request, render_template, jsonify
-from models import db, User, TWResponses
+from models import db, User, TWResponses, TWDocuments
 from werkzeug.utils import secure_filename
 import os
 from datetime import datetime
@@ -102,15 +102,20 @@ def fill_tw_form():
         response.program = request.form.get("program", "").strip() or ""
         response.academic_career = request.form.get("academic_career", "").strip() or ""
 
-        # Handle File Upload
-        if "supporting_documents" in request.files:
-            file = request.files["supporting_documents"]
+        files = request.files.getlist("supporting_documents")  # Because 'multiple' is used
+        for file in files:
             if file and document_allowed_file(file.filename):
                 filename = secure_filename(f"user_{user_id}_{file.filename}")
                 file_path = os.path.join(DOCUMENTS_UPLOAD_FOLDER, filename)
                 file.save(file_path)
-                response.supporting_document_path = file_path  # Save path in DB
-                response.supporting_documents_attached = True
+
+                # Store each file in TWDocuments
+                new_doc = TWDocuments(
+                    response=response,
+                    file_name=file.filename,
+                    file_path=filename  # store relative path or full path
+                )
+                db.session.add(new_doc)
 
         # Text Inputs
         response.student_name = request.form.get("student_name")
