@@ -33,36 +33,6 @@ h1 {
     padding-bottom: 5px;
 }
 
-.admin-container {
-    max-width: 1200px;
-    margin: auto;
-    padding: 40px;
-    text-align: left;
-}
-
-p {
-    font-size: 18px;
-    margin: 10px 0;
-}
-
-a.button {
-    display: inline-block;
-    padding: 12px 24px;
-    background: var(--text-color);
-    color: var(--primary-bg);
-    border: 2px solid var(--text-color);
-    border-radius: 3px;
-    text-decoration: none;
-    font-weight: bold;
-    transition: all 0.3s ease;
-    letter-spacing: 1px;
-}
-
-    a.button:hover {
-        background: var(--primary-bg);
-        color: var(--text-color);
-    }
-
 .form-container {
     text-align: left;
     width: 100%;
@@ -136,6 +106,20 @@ a.button {
     display: flex; /* Use flexbox to align the checkbox and label */
     align-items: flex-start; /* Align items at the top */
     margin-bottom: 10px; /* Add space between checkbox items */
+}
+
+.checkbox-item label{
+    margin-left: 10px;
+}
+
+.arount-input-label{
+    margin: 0px;
+}
+
+.checkbox-item input[type="radio"],
+.checkbox-item input[type="checkbox"] {
+    margin-top: 3px;
+    cursor: pointer;
 }
 
 .checkbox-group {

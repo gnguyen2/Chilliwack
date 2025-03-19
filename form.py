@@ -245,10 +245,72 @@ def save_tw_progress():
 
     db.session.commit()
 
+@form_bp.route("/view_pdf/<int:request_id>")
+def view_pdf(request_id):
+    """Find and display the latest generated PDF for a request."""
+    request_entry = RCLResponses.query.get(request_id) or TWResponses.query.get(request_id)
 
+    if request_entry:
+        # Construct expected PDF filename
+        filename = f"{request_entry.user_id}_{request_entry.student_name[0].upper()}.pdf"
+        pdf_path = os.path.join("static/documents", filename)
+
+        if os.path.exists(pdf_path):
+            return send_file(pdf_path, mimetype="application/pdf")
+
+    flash("PDF not found!", "warning")
+    return redirect(url_for("admin.admindashboard"))
+
+@form_bp.route("/download_pdf/<int:request_id>")
+def download_pdf(request_id):
+    """Find and allow download of the generated PDF."""
+    request_entry = RCLResponses.query.get(request_id) or TWResponses.query.get(request_id)
+
+    if request_entry:
+        # Construct expected PDF filename
+        filename = f"{request_entry.user_id}_{request_entry.student_name[0].upper()}.pdf"
+        pdf_path = os.path.join("static/documents", filename)
+
+        if os.path.exists(pdf_path):
+            return send_file(pdf_path, mimetype="application/pdf", as_attachment=True)
+
+    flash("PDF not found!", "warning")
+    return redirect(url_for("admin.admindashboard"))
+
+@form_bp.route("/view_pdf/<int:request_id>")
+def view_pdf(request_id):
+    """Find and display the latest generated PDF for a request."""
+    request_entry = RCLResponses.query.get(request_id) or TWResponses.query.get(request_id)
+
+    if request_entry:
+        # Construct expected PDF filename
+        filename = f"{request_entry.user_id}_{request_entry.student_name[0].upper()}.pdf"
+        pdf_path = os.path.join("static/documents", filename)
+
+        if os.path.exists(pdf_path):
+            return send_file(pdf_path, mimetype="application/pdf")
+
+    flash("PDF not found!", "warning")
+    return redirect(url_for("admin.admindashboard"))
+
+@form_bp.route("/download_pdf/<int:request_id>")
+def download_pdf(request_id):
+    """Find and allow download of the generated PDF."""
+    request_entry = RCLResponses.query.get(request_id) or TWResponses.query.get(request_id)
+
+    if request_entry:
+        # Construct expected PDF filename
+        filename = f"{request_entry.user_id}_{request_entry.student_name[0].upper()}.pdf"
+        pdf_path = os.path.join("static/documents", filename)
+
+        if os.path.exists(pdf_path):
+            return send_file(pdf_path, mimetype="application/pdf", as_attachment=True)
+
+    flash("PDF not found!", "warning")
+    return redirect(url_for("admin.admindashboard"))
 
     #---------- This part down is for building the PDF ----------
-
+ 
     # Ensure the student_name is not None and has at least one name
     name_parts = (response.student_name or "").strip().split()
 
@@ -257,8 +319,6 @@ def save_tw_progress():
     middle = name_parts[1] if len(name_parts) > 1 else ""
     last = name_parts[2] if len(name_parts) > 2 else ""
 
-
-    #print("TEST: ", first, middle, last)
 
     doc = fitz.open("static/emptyforms/TW/TW.pdf") # open pdf
 
@@ -295,14 +355,15 @@ def save_tw_progress():
         "dining_ack": (50, 545), #dining_ack
         "parking_ack": (50, 590), #parking_ack
     }
-  
+
     # If the field exists (is not None), insert the value into the PDF
     # Iterate through the student_map
-# Iterate through the student_map
+    # Iterate through the student_map
     for field, position in student_map.items():
         # Get the field value from the response object
         field_value = getattr(response, field, None)
-        # Prevent errors by ensuring initials exist before accessing
+
+    # Prevent errors by ensuring initials exist before accessing
         initials = (first[0] if first else "") + (last[0] if last else "")
         #print("FIELD: ", field, " FIELD_VALIE: ", field_value)
         if isinstance(field_value, bool):  # If the value is a boolean
@@ -323,7 +384,6 @@ def save_tw_progress():
     # Handle other cases if needed
     else:
         page.insert_text(position, " ", fontname=font, fontsize=size, color=color)
-
 
     if first or last:  # Only insert name if at least one part exists
         page.insert_text((120, 130), last, fontname=font, fontsize=size, color=color)
@@ -353,13 +413,9 @@ def save_tw_progress():
     except Exception as e:
         print(f"Error inserting student signature: {e}")
 
-
-
-
     user=session["user"]
 
     # Avoid accessing first[0] or last[0] if empty
-    user_initial = first[0].upper() if first else "U"  # Default to 'U' if first name is missing
     filename = f"{user_id}.pdf"
     filename = secure_filename(filename)
 
@@ -371,6 +427,40 @@ def save_tw_progress():
 
 
     return jsonify({"message": "Form progress saved successfully!"}), 200
+ 
+@form_bp.route("/view_pdf/<int:request_id>")
+def view_pdf(request_id):
+    """Find and display the latest generated PDF for a request."""
+    request_entry = RCLResponses.query.get(request_id) or TWResponses.query.get(request_id)
+
+    if request_entry:
+        # Construct expected PDF filename
+        filename = f"{request_entry.user_id}_{request_entry.student_name[0].upper()}.pdf"
+        pdf_path = os.path.join("static/documents", filename)
+
+        if os.path.exists(pdf_path):
+            return send_file(pdf_path, mimetype="application/pdf")
+
+    flash("PDF not found!", "warning")
+    return redirect(url_for("admin.admindashboard"))
+
+@form_bp.route("/download_pdf/<int:request_id>")
+def download_pdf(request_id):
+    """Find and allow download of the generated PDF."""
+    request_entry = RCLResponses.query.get(request_id) or TWResponses.query.get(request_id)
+
+    print("TEST: ", request_entry)
+    if request_entry:
+        # Construct expected PDF filename
+        filename = f"{request_entry.user_id}.pdf"
+        print("TEST: ", filename)
+        pdf_path = os.path.join("static/documents", filename)
+
+        if os.path.exists(pdf_path):
+            return send_file(pdf_path, mimetype="application/pdf", as_attachment=True)
+
+    flash("PDF not found!", "warning")
+    return redirect(url_for("admin.admindashboard"))
 
 @form_bp.route("/preview_TW", methods=["POST"])
 def preview_TW():
@@ -379,19 +469,7 @@ def preview_TW():
 
     user_id = session["user"]["id"]
 
-    full_name = session["user"]["name"]
-    print("recieved value" + full_name)
-
-    # Split by comma
-    last, first_middle = full_name.split(", ")
-
-    # Split the first and middle parts by space
-    first_name_parts = first_middle.split(" ")
-
-    first = first_name_parts[0]  # First name
-
-    # Last name is already separated
-    last_name = last.strip()
+    save_tw_progress()
 
     # Define the file name (You should specify the location where your PDFs are saved)
     filename = f"{user_id}.pdf"
