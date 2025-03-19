@@ -366,25 +366,34 @@ def download_pdf(request_id):
     flash("PDF not found!", "warning")
     return redirect(url_for("admin.admindashboard"))
 
-@form_bp.route("/preview_TW", methods=["POST"])
-def preview_TW():
+@form_bp.route("/preview_form", methods=["POST"])
+def preview_form():
     if "user" not in session:
         return jsonify({"error": "User not logged in"}), 401
 
     user_id = session["user"]["id"]
+    form_type = request.form.get("form_type")  # Get the form type (TW or RCL)
 
-    save_tw_progress()
+    # Validate form type
+    if form_type not in ["TW", "RCL"]:
+        return jsonify({"error": "Invalid form type"}), 400
 
-    # Define the file name (You should specify the location where your PDFs are saved)
+    # Call the appropriate save function
+    if form_type == "TW":
+        save_tw_progress()
+    elif form_type == "RCL":
+        save_rcl_progress()
+
+    # Define the file name (Make sure your PDFs are saved in the right location)
     filename = f"{user_id}.pdf"
     filename = secure_filename(filename)
 
-    # Define the path to the existing PDF (make sure this path is correct)
-    pdf_path = os.path.join('static', 'documents', "TW", filename)
+    # Construct the correct file path based on form type
+    pdf_path = os.path.join('static', 'documents', form_type, filename)
 
     # Check if the file exists
     if not os.path.exists(pdf_path):
-        return jsonify({"error": "PDF not found"}), 404
+        return jsonify({"error": f"{form_type} PDF not found"}), 404
 
     # Return the existing PDF for display in the browser (opens in a new tab)
     return send_file(pdf_path, as_attachment=False, download_name=filename, mimetype="application/pdf")
