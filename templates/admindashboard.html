@@ -71,7 +71,7 @@
             <th>Request ID</th>
             <th>Student Name</th>
             <th>Request Type</th>
-            <th>Reason</th>
+            <th>Status</th>
             <th>Submission Date</th>
             <th>Actions</th>
         </tr>
@@ -80,7 +80,15 @@
             <td>{{ request.id }}</td>
             <td>{{ request.student_name }}</td>
             <td>{{ "RCL" if request.is_rcl else "Withdrawal" }}</td>
-            <td>{{ request.reason }}</td>
+            <td>
+                {% if request.status == 'approved' %}
+                Approved
+                {% elif request.status == 'rejected' %}
+                Rejected
+                {% else %}
+                Pending
+                {% endif %}
+            </td>
             <td>{{ request.submission_date.strftime('%Y-%m-%d') }}</td>
             <td>
                 <a href="{{ url_for('admin.view_request', request_id=request.id) }}" class="view-button">View Form</a>

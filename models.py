@@ -49,7 +49,7 @@ class Request(db.Model):
     semester = db.Column(db.String(20), nullable=True)  # Optional fields depending on type
     year = db.Column(db.Integer, nullable=True)
     details = db.Column(db.Text, nullable=True)  # Stores extra info like dropped courses
-    status = db.Column(db.String(50), default="draft")  # draft, pending, approved, rejected
+    status = db.Column(db.String(50), default="pending")  # pending, approved, rejected
     pdf_path = db.Column(db.String(255))  # Stores the generated PDF path
 
     approvals = db.relationship("ApprovalProcess", back_populates="request", cascade="all, delete-orphan")
