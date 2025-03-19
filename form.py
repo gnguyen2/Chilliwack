@@ -454,17 +454,40 @@ def fill_rcl_form():
         if total_str.isdigit():
             response.remaining_hours_uh = int(total_str)
 
-        # year_hours
-        year_hours_str = request.form.get("year_hours", "")
-        # If you have a separate column for year_hours, convert it
-        # e.g. response.year_hours = int(year_hours_str) if year_hours_str.isdigit() else None
-
         # 5) Basic fields (student info)
         response.student_name = request.form.get("student_name", "")
         response.ps_id = request.form.get("ps_id", "")
+        response.email = request.form.get("email", "")
         response.student_signature = request.form.get("student_signature", "")
         # Possibly store the date if you have a column for it
         # e.g. response.submission_date = request.form.get("date", datetime.utcnow())
+
+        user_email = session["user"]["email"]  # if you rely on the session email
+
+        user_exists = User.query.filter_by(email=user_email).first()
+        if not user_exists:
+            flash("Error: The email associated with this request does not exist in the system.", "danger")
+            return redirect(url_for("form.fill_rcl_form"))
+        
+        request_entry = Request.query.filter_by(
+            student_email=user_email,
+            request_type="RCL"
+        ).first()
+
+        if not request_entry:
+            # If none, create a new Request
+            new_request = Request(
+                student_email=user_email,
+                request_type="RCL",     # or "RCL_Grad" as needed
+                semester=("fall" if response.semester_fall else "spring"),  # or None if you want
+                year=year_str,          # or int(year_str) if you store it as int
+                status="draft"          # default status
+            )
+            db.session.add(new_request)
+            db.session.commit()
+            response.request_id = new_request.id
+        else:
+            response.request_id = request_entry.id
 
         # 6) Check if form is finalized
         is_finalized = "confirm_acknowledgment" in request.form
@@ -545,6 +568,7 @@ def save_rcl_progress():
     # Additional fields
     response.student_name = request.form.get("student_name", "")
     response.ps_id = request.form.get("ps_id", "")
+    response.email = request.form.get("email", "")
     response.student_signature = request.form.get("student_signature", "")
 
     # Semester info, etc.
