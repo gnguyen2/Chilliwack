@@ -107,6 +107,7 @@ def change_status():
 @admin_bp.route("/admin/approve_request/<int:request_id>", methods=["POST"])
 @role_required("administrator")
 def approve_request(request_id):
+    print("REQUEST: ", request_id)
     # Try finding the request in RCLResponses
     request_entry = RCLResponses.query.get(request_id)
     
