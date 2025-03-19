@@ -63,7 +63,7 @@ def delete_user(user_id):
 
     if not user:
         flash("User not found.", "warning")
-        return redirect(url_for("admindashboard"))
+        return redirect(url_for("admin.admindashboard"))
 
     # Check if the logged-in admin is deleting their own account
     if session.get("user") and session["user"].get("email") == user.email:
@@ -78,7 +78,7 @@ def delete_user(user_id):
     db.session.commit()
     flash("User deleted successfully!", "success")
 
-    return redirect(url_for("admindashboard"))
+    return redirect(url_for("admin.admindashboard"))
 
 #updates a users status
 @admin_bp.route("/admin/status_update", methods=["POST"])
