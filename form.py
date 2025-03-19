@@ -638,33 +638,51 @@ def preview_form():
 @form_bp.route("/view_pdf/<int:request_id>")
 def view_pdf(request_id):
     """Find and display the latest generated PDF for a request."""
+    # Try to find an RCLResponses or TWResponses record
     request_entry = RCLResponses.query.get(request_id) or TWResponses.query.get(request_id)
 
-    if request_entry:
-        # Construct expected PDF filename
-        filename = f"{request_entry.user_id}.pdf"
-        pdf_path = os.path.join("static/documents", filename)
+    if not request_entry:
+        flash("PDF not found!", "warning")
+        return redirect(url_for("admin.admindashboard"))
 
-        if os.path.exists(pdf_path):
-            return send_file(pdf_path, mimetype="application/pdf")
+    # Determine if it's RCL or TW
+    if isinstance(request_entry, RCLResponses):
+        form_type = "RCL"
+    else:
+        form_type = "TW"
+
+    # Construct the PDF filename and path
+    filename = f"{request_entry.user_id}.pdf"
+    pdf_path = os.path.join("static", "documents", form_type, filename)
+    print("TEST ", pdf_path)
+
+    if os.path.exists(pdf_path):
+        return send_file(pdf_path, mimetype="application/pdf")
 
     flash("PDF not found!", "warning")
     return redirect(url_for("admin.admindashboard"))
+
 
 @form_bp.route("/download_pdf/<int:request_id>")
 def download_pdf(request_id):
     """Find and allow download of the generated PDF."""
     request_entry = RCLResponses.query.get(request_id) or TWResponses.query.get(request_id)
 
-    print("TEST: ", request_entry)
-    if request_entry:
-        # Construct expected PDF filename
-        filename = f"{request_entry.user_id}.pdf"
-        print("TEST: ", filename)
-        pdf_path = os.path.join("static/documents", filename)
+    if not request_entry:
+        flash("PDF not found!", "warning")
+        return redirect(url_for("admin.admindashboard"))
 
-        if os.path.exists(pdf_path):
-            return send_file(pdf_path, mimetype="application/pdf", as_attachment=True)
+    # Distinguish RCL vs. TW
+    if isinstance(request_entry, RCLResponses):
+        form_type = "RCL"
+    else:
+        form_type = "TW"
+
+    filename = f"{request_entry.user_id}.pdf"
+    pdf_path = os.path.join("static", "documents", form_type, filename)
+
+    if os.path.exists(pdf_path):
+        return send_file(pdf_path, mimetype="application/pdf", as_attachment=True)
 
     flash("PDF not found!", "warning")
     return redirect(url_for("admin.admindashboard"))
