@@ -25,16 +25,22 @@ def admindashboard():
     # Get distinct status values
     statuses = Status.query.all()
 
-    # Fetch pending RCL and Withdrawal requests
-    pending_rcl_requests = RCLResponses.query.filter_by(is_finalized=False).all()
-    pending_tw_requests = TWResponses.query.filter_by(is_finalized=False).all()
+        # Fetch only submitted (finalized) requests where request_id is not null
+    submitted_rcl_requests = RCLResponses.query.filter(
+        RCLResponses.is_finalized == True,
+        RCLResponses.request_id.isnot(None)
+    ).all()
+    submitted_tw_requests = TWResponses.query.filter(
+        TWResponses.is_finalized == True,
+        TWResponses.request_id.isnot(None)
+    ).all()
 
     # Combine RCL and TW requests into a single list
-    pending_requests = pending_rcl_requests + pending_tw_requests
+    pending_requests = submitted_rcl_requests + submitted_tw_requests
 
     # Check if bypass is requested
     if request.args.get("bypass") == "true":
-            return render_template('admindashboard.html', user=user, users=users, roles=roles, statuses=statuses, pending_requests=pending_requests)
+        return render_template('admindashboard.html', user=user, users=users, roles=roles, statuses=statuses, pending_requests=pending_requests)
     
     return render_template('admindashboard.html', user=user, users=users, roles=roles, statuses=statuses, pending_requests=pending_requests)
 
