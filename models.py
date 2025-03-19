@@ -194,23 +194,6 @@ class TWResponses(db.Model):
     supporting_documents_attached = db.Column(db.Boolean, default=False)
     supporting_document_path = db.Column(db.String(255), nullable=True)  # Path to uploaded documents
 
-    # Approval Signatures
-    financial_aid_signature = db.Column(db.String(255), nullable=True)  # Path to Financial Aid signature file
-    financial_aid_date = db.Column(db.DateTime, nullable=True)
-
-    isss_signature = db.Column(db.String(255), nullable=True)  # Path to ISSSO signature file
-    isss_date = db.Column(db.DateTime, nullable=True)
-
-    athletics_signature = db.Column(db.String(255), nullable=True)  # Path to Athletics signature file
-    athletics_date = db.Column(db.DateTime, nullable=True)
-
-    veterans_signature = db.Column(db.String(255), nullable=True)  # Path to Veterans' Office signature file
-    veterans_date = db.Column(db.DateTime, nullable=True)
-
-    advisor_name = db.Column(db.String(100), nullable=True)
-    advisor_signature = db.Column(db.String(255), nullable=True)  # Path to Advisor signature file
-    advisor_date = db.Column(db.DateTime, nullable=True)
-
     # Status Tracking
     is_finalized = db.Column(db.Boolean, default=False)
     last_updated = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
