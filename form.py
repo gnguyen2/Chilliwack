@@ -662,7 +662,6 @@ def view_pdf(request_id):
     flash("PDF not found!", "warning")
     return redirect(url_for("admin.admindashboard"))
 
-
 @form_bp.route("/download_pdf/<int:request_id>")
 def download_pdf(request_id):
     """Find and allow download of the generated PDF."""
