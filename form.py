@@ -320,7 +320,6 @@ def save_tw_progress():
     user=session["user"]
 
     # Avoid accessing first[0] or last[0] if empty
-    user_initial = first[0].upper() if first else "U"  # Default to 'U' if first name is missing
     filename = f"{user_id}.pdf"
     filename = secure_filename(filename)
 
@@ -333,9 +332,6 @@ def save_tw_progress():
 
     return jsonify({"message": "Form progress saved successfully!"}), 200
  
-
-
-
 @form_bp.route("/view_pdf/<int:request_id>")
 def view_pdf(request_id):
     """Find and display the latest generated PDF for a request."""
@@ -377,19 +373,7 @@ def preview_TW():
 
     user_id = session["user"]["id"]
 
-    full_name = session["user"]["name"]
-    print("recieved value" + full_name)
-
-    # Split by comma
-    last, first_middle = full_name.split(", ")
-
-    # Split the first and middle parts by space
-    first_name_parts = first_middle.split(" ")
-
-    first = first_name_parts[0]  # First name
-
-    # Last name is already separated
-    last_name = last.strip()
+    save_tw_progress()
 
     # Define the file name (You should specify the location where your PDFs are saved)
     filename = f"{user_id}.pdf"
