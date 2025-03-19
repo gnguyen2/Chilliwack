@@ -1,5 +1,5 @@
 from flask import Blueprint, session, redirect, url_for, flash, request, render_template, jsonify, send_file
-from models import db, User, TWResponses, TWDocuments, RCLDocuments, RCLResponses
+from models import db, User, TWResponses, TWDocuments, RCLDocuments, RCLResponses, Request
 from werkzeug.utils import secure_filename
 import os
 from datetime import datetime
@@ -100,7 +100,33 @@ def fill_tw_form():
         response.program = request.form.get("program", "").strip() or ""
         response.academic_career = request.form.get("academic_career", "").strip() or ""
 
-        files = request.files.getlist("supporting_documents")  # Because 'multiple' is used
+        # Check if student_email exists in the User table
+        user_exists = User.query.filter_by(email=response.email).first()
+
+        if not user_exists:
+            flash("Error: The email associated with this request does not exist in the system.", "danger")
+            return redirect(url_for("form.fill_tw_form"))
+
+        # Check if request already exists
+        request_entry = Request.query.filter_by(student_email=response.email, request_type="TW").first()
+
+        if not request_entry:
+            # Create a new request if one doesn't exist
+            new_request = Request(
+                student_email=response.email,
+                request_type="TW",
+                semester=request.form.get("withdrawal_term"),
+                year=request.form.get("year"),
+                status="draft"
+            )
+            db.session.add(new_request)
+            db.session.commit()
+            response.request_id = new_request.id
+        else:
+            response.request_id = request_entry.id
+
+        # Process file uploads
+        files = request.files.getlist("supporting_documents")
         for file in files:
             if file and document_allowed_file(file.filename):
                 filename = secure_filename(f"user_{user_id}_{file.filename}")
@@ -111,19 +137,11 @@ def fill_tw_form():
                 new_doc = TWDocuments(
                     response=response,
                     file_name=file.filename,
-                    file_path=filename  # store relative path or full path
+                    file_path=filename
                 )
                 db.session.add(new_doc)
 
-        # Text Inputs
-        response.student_name = request.form.get("student_name")
-        response.ps_id = request.form.get("student_id")
-        response.phone = request.form.get("phone")
-        response.email = request.form.get("email")
-        response.program = request.form.get("program")
-        response.academic_career = request.form.get("academic_career")
-
-        # Fix Checkboxes - If key is missing, default to False
+        # Checkboxes - If key is missing, default to False
         response.financial_aid_ack = "financial_aid" in request.form
         response.international_students_ack = "international_students" in request.form
         response.student_athlete_ack = "student_athletes" in request.form
@@ -209,6 +227,125 @@ def save_tw_progress():
     response.last_updated = datetime.utcnow()
 
     db.session.commit()
+
+    #---------- This part down is for building the PDF ----------
+
+    # Ensure the student_name is not None and has at least one name
+    name_parts = (response.student_name or "").strip().split()
+
+    # Assign default empty values if any name part is missing
+    first = name_parts[0] if len(name_parts) > 0 else ""
+    middle = name_parts[1] if len(name_parts) > 1 else ""
+    last = name_parts[2] if len(name_parts) > 2 else ""
+
+
+    doc = fitz.open("static/emptyforms/TW/TW.pdf") # open pdf
+
+    # Choose the page to write on (0-indexed)
+    page = doc.load_page(0)  # For the first page
+
+    # Define text style (font, size, color, etc.)
+    font = "helv"  # Use font name as string (e.g., 'helv' for Helvetica)
+    size = 12  # Font size
+    color = (0, 0, 0)  # Black color in RGB (0, 0, 0)
+
+    # Define the student map with coordinates
+    student_map = {
+        "ps_id": (480, 130),
+        "phone": (100, 150),
+        "email": (300, 150),
+        "program": (120, 167),
+        "academic_career": (460, 167),
+
+        # Withdrawal Term
+        "withdrawal_term_fall": (203, 187), #Fall
+        "withdrawal_term_spring": (253, 187), #spring
+        "withdrawal_term_summer": (308, 187), #summer
+        "withdrawal_year": (115, 187),
+
+        # Initial Acknowledgments
+        "financial_aid_ack": (50, 265), #fin aid
+        "international_students_ack": (50, 300), #internationl stu
+        "student_athlete_ack": (50, 350), #student_athlete_ack
+        "veterans_ack": (50, 405), #veterans_ack
+        "graduate_students_ack": (50, 440), #graduate_students_ack
+        "doctoral_students_ack": (50, 465), #doctoral_students_ack
+        "housing_ack": (50, 500), #housing_ack
+        "dining_ack": (50, 545), #dining_ack
+        "parking_ack": (50, 590), #parking_ack
+    }
+
+    # If the field exists (is not None), insert the value into the PDF
+    # Iterate through the student_map
+    # Iterate through the student_map
+    for field, position in student_map.items():
+        # Get the field value from the response object
+        field_value = getattr(response, field, None)
+
+    # Prevent errors by ensuring initials exist before accessing
+        initials = (first[0] if first else "") + (last[0] if last else "")
+        #print("FIELD: ", field, " FIELD_VALIE: ", field_value)
+        if isinstance(field_value, bool):  # If the value is a boolean
+            if field_value:  # If True,
+                    if field == "withdrawal_term_fall" or field == "withdrawal_term_spring" or field == "withdrawal_term_summer":  # For Fall term, output "X" if True, initials if False
+                        page.insert_text(position, "x", fontname=font, fontsize=size, color=color)
+                    else:
+                        page.insert_text(position, initials, fontname=font, fontsize=size, color=color)
+            else:  # If False, output nothing
+                page.insert_text(position, " ", fontname=font, fontsize=size, color=color)
+        elif isinstance(field_value, (str, int)):  # If the value is a string or integer
+            if field_value:  # If the string or integer is not empty
+                #print("FIELD: ", field, " FIELD_VALUE: ", field_value)
+                page.insert_text(position, str(field_value), fontname=font, fontsize=size, color=color)
+            else:  # If the string is empty, output nothing
+                page.insert_text(position, " ", fontname=font, fontsize=size, color=color)
+
+    # Handle other cases if needed
+    else:
+        page.insert_text(position, " ", fontname=font, fontsize=size, color=color)
+
+    if first or last:  # Only insert name if at least one part exists
+        page.insert_text((120, 130), last, fontname=font, fontsize=size, color=color)
+        page.insert_text((240, 130), first, fontname=font, fontsize=size, color=color)
+        if middle:
+            page.insert_text((360, 130), middle[0], fontname=font, fontsize=size, color=color)
+    #"student_signature": (100, 738)
+    current_date = datetime.utcnow().strftime("%m/%d/%Y")
+    # Insert the formatted date into the PDF
+    page.insert_text((295, 738), current_date, fontname=font, fontsize=size, color=color)
+
+    filename = f"{user_id}.jpg"
+    filename = secure_filename(filename)
+
+    # Save the file
+    file_path = os.path.join("static/signatures", filename)
+
+    # List all files in the SIGNATURE_UPLOAD_FOLDER
+        # Position for student signature
+    student_signature_position = (100, 720)  # The coordinates (x, y) where the signature will be inserted
+    # Insert Student Signature (JPG image)
+    try:
+        img_rect = fitz.Rect(student_signature_position[0], student_signature_position[1], 
+                            student_signature_position[0] + 100, student_signature_position[1] + 50)  # Adjust size if needed
+        page.insert_image(img_rect, filename = file_path)
+        print("SUCCESS")
+    except Exception as e:
+        print(f"Error inserting student signature: {e}")
+
+    user=session["user"]
+
+    # Avoid accessing first[0] or last[0] if empty
+    filename = f"{user_id}.pdf"
+    filename = secure_filename(filename)
+
+    # Define the path where the document should be saved
+    save_path = os.path.join('static', 'documents', 'TW', filename)
+
+    # Save the document (assuming 'doc' is a document object with a 'save' method)
+    doc.save(save_path)
+
+
+    return jsonify({"message": "Form progress saved successfully!"}), 200
 
 @form_bp.route("/rcl_form", methods=['GET', 'POST'])
 def fill_rcl_form():
@@ -438,7 +575,9 @@ def save_rcl_progress():
 
     db.session.commit()
 
-    return jsonify({"message": "RCL Form progress saved successfully!"}), 200
+    #---------- This part down is for building the PDF (Alex can you work on this) ----------
+
+    return jsonify({"message": "Form progress saved successfully!"}), 200
 
 @form_bp.route("/preview_form", methods=["POST"])
 def preview_form():
@@ -471,7 +610,7 @@ def preview_form():
 
     # Return the existing PDF for display in the browser (opens in a new tab)
     return send_file(pdf_path, as_attachment=False, download_name=filename, mimetype="application/pdf")
-
+    
 @form_bp.route("/view_pdf/<int:request_id>")
 def view_pdf(request_id):
     """Find and display the latest generated PDF for a request."""
