@@ -1,4 +1,4 @@
-from flask import Blueprint, request, flash, redirect, url_for, session, render_template
+from flask import Blueprint, request, flash, redirect, url_for, session, render_template, send_file
 from decorators import role_required
 from models import db, User, Role, Status, RCLResponses, TWResponses
 from sqlalchemy.orm import joinedload
@@ -63,7 +63,7 @@ def delete_user(user_id):
 
     if not user:
         flash("User not found.", "warning")
-        return redirect(url_for("admindashboard"))
+        return redirect(url_for("admin.admindashboard"))
 
     # Check if the logged-in admin is deleting their own account
     if session.get("user") and session["user"].get("email") == user.email:
@@ -78,7 +78,7 @@ def delete_user(user_id):
     db.session.commit()
     flash("User deleted successfully!", "success")
 
-    return redirect(url_for("admindashboard"))
+    return redirect(url_for("admin.admindashboard"))
 
 #updates a users status
 @admin_bp.route("/admin/status_update", methods=["POST"])
@@ -139,3 +139,26 @@ def reject_request(request_id):
         flash(f"Request {request_id} not found.", "warning")
 
     return redirect(url_for("admin.admindashboard"))
+
+@admin_bp.route("/admin/view_request/<int:request_id>")
+@role_required("administrator")
+def view_request(request_id):
+    # Fetch the request, checking both RCL and Withdrawal tables
+    request_entry = RCLResponses.query.get(request_id) or TWResponses.query.get(request_id)
+
+    if not request_entry:
+        flash(f"Request {request_id} not found.", "warning")
+        return redirect(url_for("admin.admindashboard"))
+
+    return render_template("view_request.html", request=request_entry)
+
+@admin_bp.route("/admin/download_pdf/<int:request_id>")
+@role_required("administrator")
+def download_pdf(request_id):
+    request_entry = RCLResponses.query.get(request_id) or TWResponses.query.get(request_id)
+
+    if request_entry and request_entry.pdf_path:
+        return send_file(request_entry.pdf_path, as_attachment=True)
+
+    flash("PDF not found for this request!", "warning")
+    return redirect(url_for("admin.view_request", request_id=request_id))

@@ -83,6 +83,7 @@
             <td>{{ request.reason }}</td>
             <td>{{ request.submission_date.strftime('%Y-%m-%d') }}</td>
             <td>
+                <a href="{{ url_for('admin.view_request', request_id=request.id) }}" class="view-button">View Form</a>
                 <form action="{{ url_for('admin.approve_request', request_id=request.id) }}" method="POST">
                     <button type="submit" class="approve-button">Approve</button>
                 </form>

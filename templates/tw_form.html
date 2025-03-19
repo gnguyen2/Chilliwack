@@ -10,7 +10,7 @@
         
         <div class="form-flex">
             <div class="form-group">
-                <label for="student_name">Student Name:</label>
+                <label for="student_name">Student Name (First, Middle Initial, Last):</label>
                 <input type="text" name="student_name" id="student_name" value="{{ response.student_name if response else '' }}" required>
             </div>
 
@@ -160,18 +160,18 @@
         
         <br>
     
-        <button type="submit" class="submit-button" id="dashboardButton" name="submitButton">Submit Withdrawal Request</button>
+        <button type="submit" class="submit-button" id="submitTWButton" name="submitButton">Submit Withdrawal Request</button>
     </form>
     <br><br>
     <!-- Dashboard Button -->
-    <button type="button" id="dashboardButton" class="btn btn-secondary">Go to Dashboard</button>
+    <button type="button" id="goToDashboardButton" class="btn btn-secondary">Go to Dashboard</button>
     
 <form action="{{ url_for('form.preview_TW') }}" method="POST" target="_blank">
     <button type="submit">Preview TW Form</button>
 </form>
 
     <script>
-        document.getElementById("dashboardButton").addEventListener("click", function(event) {
+        document.getElementById("goToDashboardButton").addEventListener("click", function(event) {
             event.preventDefault();  // Prevent immediate redirection
         
             let formData = new FormData(document.getElementById("twForm"));
