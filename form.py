@@ -29,7 +29,6 @@ def document_allowed_file(filename):
     """ Check if the file has a valid extension """
     return "." in filename and filename.rsplit(".", 1)[1].lower() in DOCUMENTS_ALLOWED_EXTENSIONS
 
-
 # Upload signature page
 @form_bp.route("/upload_signature_page")
 def upload_signature_page():
@@ -61,11 +60,9 @@ def upload_signature():
         flash("User not found!", "danger")
         return redirect(url_for("home"))
 
-    # Generate a unique filename: userID_initials.jpg
-    user_initial = user.name[0].upper()
+    # Generate a unique filename: userID.jpg
     filename = f"{user.id}.jpg"
     filename = secure_filename(filename)
-
 
     # Save the file
     file_path = os.path.join("static/signatures", filename)
@@ -166,22 +163,6 @@ def fill_tw_form():
 
     return render_template("tw_form.html", response=existing_response)
 
-@form_bp.route("/view_pdf/<int:request_id>")
-def view_pdf(request_id):
-    """Find and display the latest generated PDF for a request."""
-    request_entry = RCLResponses.query.get(request_id) or TWResponses.query.get(request_id)
-
-    if request_entry:
-        # Construct expected PDF filename
-        filename = f"{request_entry.user_id}.pdf"
-        pdf_path = os.path.join("static/documents", filename)
-
-        if os.path.exists(pdf_path):
-            return send_file(pdf_path, mimetype="application/pdf")
-
-    flash("PDF not found!", "warning")
-    return redirect(url_for("admin.admindashboard"))
-
 @form_bp.route("/save_tw_progress", methods=["POST"])
 def save_tw_progress():
     """Saves the current form progress asynchronously."""
@@ -228,58 +209,6 @@ def save_tw_progress():
     response.last_updated = datetime.utcnow()
 
     db.session.commit()
-
-@form_bp.route("/download_pdf/<int:request_id>")
-def download_pdf(request_id):
-    """Find and allow download of the generated PDF."""
-    request_entry = RCLResponses.query.get(request_id) or TWResponses.query.get(request_id)
-
-    print("TEST: ", request_entry)
-    if request_entry:
-        # Construct expected PDF filename
-        filename = f"{request_entry.user_id}.pdf"
-        print("TEST: ", filename)
-        pdf_path = os.path.join("static/documents", filename)
-
-        if os.path.exists(pdf_path):
-            return send_file(pdf_path, mimetype="application/pdf", as_attachment=True)
-
-    flash("PDF not found!", "warning")
-    return redirect(url_for("admin.admindashboard"))
-
-@form_bp.route("/preview_form", methods=["POST"])
-def preview_form():
-    if "user" not in session:
-        return jsonify({"error": "User not logged in"}), 401
-
-    user_id = session["user"]["id"]
-    form_type = request.form.get("form_type")  # Get the form type (TW or RCL)
-
-    # Validate form type
-    if form_type not in ["TW", "RCL"]:
-        return jsonify({"error": "Invalid form type"}), 400
-
-    # Call the appropriate save function
-    if form_type == "TW":
-        save_tw_progress()
-    elif form_type == "RCL":
-        save_rcl_progress()
-
-    # Define the file name (Make sure your PDFs are saved in the right location)
-    filename = f"{user_id}.pdf"
-    filename = secure_filename(filename)
-
-    # Construct the correct file path based on form type
-    pdf_path = os.path.join('static', 'documents', form_type, filename)
-
-    # Check if the file exists
-    if not os.path.exists(pdf_path):
-        return jsonify({"error": f"{form_type} PDF not found"}), 404
-
-    # Return the existing PDF for display in the browser (opens in a new tab)
-    return send_file(pdf_path, as_attachment=False, download_name=filename, mimetype="application/pdf")
-
-
 
 @form_bp.route("/rcl_form", methods=['GET', 'POST'])
 def fill_rcl_form():
@@ -421,7 +350,6 @@ def fill_rcl_form():
     # If GET request, show the form with any existing data
     return render_template("rcl_form.html", response=existing_response)
 
-
 @form_bp.route("/save_rcl_progress", methods=["POST"])
 def save_rcl_progress():
     if "user" not in session:
@@ -511,3 +439,69 @@ def save_rcl_progress():
     db.session.commit()
 
     return jsonify({"message": "RCL Form progress saved successfully!"}), 200
+
+@form_bp.route("/preview_form", methods=["POST"])
+def preview_form():
+    if "user" not in session:
+        return jsonify({"error": "User not logged in"}), 401
+
+    user_id = session["user"]["id"]
+    form_type = request.form.get("form_type")  # Get the form type (TW or RCL)
+
+    # Validate form type
+    if form_type not in ["TW", "RCL"]:
+        return jsonify({"error": "Invalid form type"}), 400
+
+    # Call the appropriate save function
+    if form_type == "TW":
+        save_tw_progress()
+    elif form_type == "RCL":
+        save_rcl_progress()
+
+    # Define the file name (Make sure your PDFs are saved in the right location)
+    filename = f"{user_id}.pdf"
+    filename = secure_filename(filename)
+
+    # Construct the correct file path based on form type
+    pdf_path = os.path.join('static', 'documents', form_type, filename)
+
+    # Check if the file exists
+    if not os.path.exists(pdf_path):
+        return jsonify({"error": f"{form_type} PDF not found"}), 404
+
+    # Return the existing PDF for display in the browser (opens in a new tab)
+    return send_file(pdf_path, as_attachment=False, download_name=filename, mimetype="application/pdf")
+
+@form_bp.route("/view_pdf/<int:request_id>")
+def view_pdf(request_id):
+    """Find and display the latest generated PDF for a request."""
+    request_entry = RCLResponses.query.get(request_id) or TWResponses.query.get(request_id)
+
+    if request_entry:
+        # Construct expected PDF filename
+        filename = f"{request_entry.user_id}.pdf"
+        pdf_path = os.path.join("static/documents", filename)
+
+        if os.path.exists(pdf_path):
+            return send_file(pdf_path, mimetype="application/pdf")
+
+    flash("PDF not found!", "warning")
+    return redirect(url_for("admin.admindashboard"))
+
+@form_bp.route("/download_pdf/<int:request_id>")
+def download_pdf(request_id):
+    """Find and allow download of the generated PDF."""
+    request_entry = RCLResponses.query.get(request_id) or TWResponses.query.get(request_id)
+
+    print("TEST: ", request_entry)
+    if request_entry:
+        # Construct expected PDF filename
+        filename = f"{request_entry.user_id}.pdf"
+        print("TEST: ", filename)
+        pdf_path = os.path.join("static/documents", filename)
+
+        if os.path.exists(pdf_path):
+            return send_file(pdf_path, mimetype="application/pdf", as_attachment=True)
+
+    flash("PDF not found!", "warning")
+    return redirect(url_for("admin.admindashboard"))
