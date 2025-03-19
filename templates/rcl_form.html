@@ -153,6 +153,11 @@
         </p>
     </form>
 
+    <form action="{{ url_for('form.preview_form') }}" method="POST" target="_blank">
+        <input type="hidden" name="form_type" value="RCL">
+        <button type="submit">Preview RCL Form</button>
+    </form>
+
     <!-- Dashboard Button -->
     <button type="button" id="dashboardButton" class="btn btn-secondary">Go to Dashboard</button>
 
