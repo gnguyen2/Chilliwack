@@ -49,5 +49,6 @@ if you get an error stating ODBC timed out you just have to keep rerunning it
 You can use the temp admin script to change your role to test some of the role restricted functionality, there is also currently a link on the regular dashboard that will take you to the admin dash board as a basic user. It will be removed but for now allows you to view the admin page as a basic user.
 
 
-
+### **4. Latex Files for blank forms**
+They are found in the static folder then in TW and RCL folder respectivley
 
