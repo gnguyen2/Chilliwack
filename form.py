@@ -357,9 +357,11 @@ def download_pdf(request_id):
     """Find and allow download of the generated PDF."""
     request_entry = RCLResponses.query.get(request_id) or TWResponses.query.get(request_id)
 
+    print("TEST: ", request_entry)
     if request_entry:
         # Construct expected PDF filename
-        filename = f"{request_entry.user_id}_{request_entry.student_name[0].upper()}.pdf"
+        filename = f"{request_entry.user_id}.pdf"
+        print("TEST: ", filename)
         pdf_path = os.path.join("static/documents", filename)
 
         if os.path.exists(pdf_path):
