@@ -199,31 +199,30 @@ def save_tw_progress():
     # Update with form data
 
     # Correctly get the text value from the form:
-    response.student_name = request.form.get("student_name", "")
-    response.ps_id = request.form.get("student_id", "")
-    response.phone = request.form.get("phone", "")
-    response.email = request.form.get("email", "")
-    response.program = request.form.get("program", "")
-    response.academic_career = request.form.get("academic_career", "")
+    response.student_name = request.form.get("student_name") or response.student_name
+    response.ps_id = request.form.get("student_id") or response.ps_id
+    response.phone = request.form.get("phone") or response.phone
+    response.email = request.form.get("email") or response.email
+    response.program = request.form.get("program") or response.program
+    response.academic_career = request.form.get("academic_career") or response.academic_career
 
-    withdrawal_term = request.form.get("withdrawal_term", "")
-    response.withdrawal_term_fall = (withdrawal_term == "Fall")
-    response.withdrawal_term_spring = (withdrawal_term == "Spring")
-    response.withdrawal_term_summer = (withdrawal_term == "Summer")
+    withdrawal_term = request.form.get("withdrawal_term") or response.withdrawal_term_fall or response.withdrawal_term_spring or response.withdrawal_term_summer
+    response.withdrawal_term_fall = (withdrawal_term == "Fall") if withdrawal_term else response.withdrawal_term_fall
+    response.withdrawal_term_spring = (withdrawal_term == "Spring") if withdrawal_term else response.withdrawal_term_spring
+    response.withdrawal_term_summer = (withdrawal_term == "Summer") if withdrawal_term else response.withdrawal_term_summer
 
-    year_str = request.form.get("year", "")
-    response.withdrawal_year = int(year_str) if year_str.isdigit() else None
+    year_str = request.form.get("year") or (str(response.withdrawal_year) if response.withdrawal_year else "")
+    response.withdrawal_year = int(year_str) if year_str.isdigit() else response.withdrawal_year
 
-    response.financial_aid_ack = "financial_aid" in request.form
-    response.international_students_ack = "international_students" in request.form
-    response.student_athlete_ack = "student_athletes" in request.form
-    response.veterans_ack = "veterans" in request.form
-    response.graduate_students_ack = "graduate_students" in request.form
-    response.doctoral_students_ack = "doctoral_students" in request.form
-    response.housing_ack = "housing" in request.form
-    response.dining_ack = "dining" in request.form
-    response.parking_ack = "parking" in request.form
-
+    response.financial_aid_ack = ("financial_aid" in request.form) if "financial_aid" in request.form else response.financial_aid_ack
+    response.international_students_ack = ("international_students" in request.form) if "international_students" in request.form else response.international_students_ack
+    response.student_athlete_ack = ("student_athletes" in request.form) if "student_athletes" in request.form else response.student_athlete_ack
+    response.veterans_ack = ("veterans" in request.form) if "veterans" in request.form else response.veterans_ack
+    response.graduate_students_ack = ("graduate_students" in request.form) if "graduate_students" in request.form else response.graduate_students_ack
+    response.doctoral_students_ack = ("doctoral_students" in request.form) if "doctoral_students" in request.form else response.doctoral_students_ack
+    response.housing_ack = ("housing" in request.form) if "housing" in request.form else response.housing_ack
+    response.dining_ack = ("dining" in request.form) if "dining" in request.form else response.dining_ack
+    response.parking_ack = ("parking" in request.form) if "parking" in request.form else response.parking_ack
     response.last_updated = datetime.utcnow()
 
     db.session.commit()
