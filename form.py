@@ -225,6 +225,20 @@ def save_tw_progress():
     response.parking_ack = "parking" in request.form
 
     response.last_updated = datetime.utcnow()
+    
+    # Print all the fields
+    print("Student Name:", response.student_name)
+    print("Student ID:", response.ps_id)
+    print("Phone:", response.phone)
+    print("Email:", response.email)
+    print("Program:", response.program)
+    print("Academic Career:", response.academic_career)
+
+    print("Withdrawal Term Fall:", response.withdrawal_term_fall)
+    print("Withdrawal Term Spring:", response.withdrawal_term_spring)
+    print("Withdrawal Term Summer:", response.withdrawal_term_summer)
+    print("Withdrawal Year:", response.withdrawal_year)
+
     print("Financial Aid Acknowledgment:", response.financial_aid_ack)
     print("International Students Acknowledgment:", response.international_students_ack)
     print("Student Athlete Acknowledgment:", response.student_athlete_ack)
@@ -234,6 +248,7 @@ def save_tw_progress():
     print("Housing Acknowledgment:", response.housing_ack)
     print("Dining Acknowledgment:", response.dining_ack)
     print("Parking Acknowledgment:", response.parking_ack)
+
 
 # Optionally print the whole response object
     print("Complete Response Object:", response)
@@ -251,7 +266,13 @@ def save_tw_progress():
     last = name_parts[2] if len(name_parts) > 2 else ""
 
 
-    doc = fitz.open("static/emptyforms/TW/TW.pdf") # open pdf
+
+    try:
+        doc = fitz.open("static/emptyforms/TW/TW.pdf")  # open pdf
+        print("PDF successfully opened!")
+    except Exception as e:
+        print(f"Failed to open PDF: {e}")
+
 
     # Choose the page to write on (0-indexed)
     page = doc.load_page(0)  # For the first page
@@ -293,7 +314,7 @@ def save_tw_progress():
     for field, position in student_map.items():
         # Get the field value from the response object
         field_value = getattr(response, field, None)
-
+        print("FIELD: ", field)
     # Prevent errors by ensuring initials exist before accessing
         initials = (first[0] if first else "") + (last[0] if last else "")
         #print("FIELD: ", field, " FIELD_VALIE: ", field_value)
@@ -571,17 +592,17 @@ def save_rcl_progress():
         other_str = request.form.get("other_school_hours", "0")
         response.concurrent_hours_uh = int(uh_str) if uh_str.isdigit() else None
         response.concurrent_hours_other = int(other_str) if other_str.isdigit() else None
-        response.concurrent_university_name = request.form.get("other_school_name", "")
+        response.concurrent_university_name = request.form.get("other_school_name", "") or response.concurrent_university_name
     else:
         response.concurrent_hours_uh = None
         response.concurrent_hours_other = None
         response.concurrent_university_name = None
 
     # Additional fields
-    response.student_name = request.form.get("student_name", "")
-    response.ps_id = request.form.get("ps_id", "")
-    response.email = request.form.get("email", "")
-    response.student_signature = request.form.get("student_signature", "")
+    response.student_name = request.form.get("student_name", "") or response.student_name
+    response.ps_id = request.form.get("ps_id", "") or response.ps_id
+    response.email = request.form.get("email", "") or response.email
+    response.student_signature = request.form.get("student_signature", "") or response.student_signature
 
     # Semester info, etc.
     sem = request.form.get("semester", "")
@@ -599,17 +620,18 @@ def save_rcl_progress():
     response.drop_courses = "; ".join([c for c in [course1, course2, course3] if c])
 
     # total_hours => stored in remaining_hours_uh
-    total_hrs = request.form.get("total_hours","0")
+    total_hrs = request.form.get("total_hours", "0")
     response.remaining_hours_uh = int(total_hrs) if total_hrs.isdigit() else None
 
     # year_hours
-    year_hours_str = request.form.get("year_hours","0")
+    year_hours_str = request.form.get("year_hours", "0")
     # e.g. response.year_hours = int(year_hours_str) if year_hours_str.isdigit() else None
 
     # last updated
     response.last_updated = datetime.utcnow()
 
     db.session.commit()
+
 
     #---------- This part down is for building the PDF (Alex can you work on this) ----------
 
@@ -668,7 +690,7 @@ def save_rcl_progress():
     middle = name_parts[1] if len(name_parts) > 1 else ""
     last = name_parts[2] if len(name_parts) > 2 else ""
 
-    doc = fitz.open("static/emptyforms/TW/TW.pdf") # open pdf
+    doc = fitz.open("static/emptyforms/RCL/RCL.pdf") # open pdf
 
     # Choose the page to write on (0-indexed)
     page = doc.load_page(0)  # For the first page
@@ -716,7 +738,7 @@ def save_rcl_progress():
 
     # List all files in the SIGNATURE_UPLOAD_FOLDER
         # Position for student signature
-    student_signature_position = (279.58, 688.70)  # The coordinates (x, y) where the signature will be inserted
+    student_signature_position = (279.58, 640.70)  # The coordinates (x, y) where the signature will be inserted
     # Insert Student Signature (JPG image)
     try:
         img_rect = fitz.Rect(student_signature_position[0], student_signature_position[1], 
