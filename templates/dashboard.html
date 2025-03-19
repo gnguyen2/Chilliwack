@@ -27,10 +27,8 @@
         <div class="role_check_box">
             <h2>Your Signature</h2>
             {% if user.signature_path %}
-            <img src="{{ url_for('static', filename=user.signature_path) }}{% if user.updated_at %}?t={{ user.updated_at.timestamp() }}{% endif %}"
-                 alt="Signature" width="200">
-            {% else %}
-            <p>No signature uploaded.</p>
+                <img src="{{ url_for('static', filename=user.signature_path) }}{% if user.updated_at %}?t={{ user.updated_at.timestamp() }}{% endif %}"
+                    alt="No signature uploaded." width="200">
             {% endif %}
             <br>
         </div>
