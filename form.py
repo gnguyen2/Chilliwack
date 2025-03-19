@@ -225,7 +225,19 @@ def save_tw_progress():
     response.parking_ack = "parking" in request.form
 
     response.last_updated = datetime.utcnow()
+    print("Financial Aid Acknowledgment:", response.financial_aid_ack)
+    print("International Students Acknowledgment:", response.international_students_ack)
+    print("Student Athlete Acknowledgment:", response.student_athlete_ack)
+    print("Veterans Acknowledgment:", response.veterans_ack)
+    print("Graduate Students Acknowledgment:", response.graduate_students_ack)
+    print("Doctoral Students Acknowledgment:", response.doctoral_students_ack)
+    print("Housing Acknowledgment:", response.housing_ack)
+    print("Dining Acknowledgment:", response.dining_ack)
+    print("Parking Acknowledgment:", response.parking_ack)
 
+# Optionally print the whole response object
+    print("Complete Response Object:", response)
+    print("committed")
     db.session.commit()
 
     #---------- This part down is for building the PDF ----------
@@ -601,6 +613,133 @@ def save_rcl_progress():
 
     #---------- This part down is for building the PDF (Alex can you work on this) ----------
 
+    student_map = {
+        "initial_adjustment_explanation": (125.36, 251.52),
+        "iclp_class1": (84.20, 354.36),
+        "iclp_professor1": (227.12, 354.36),
+        #"iclp_professor_signature1": (375.43, 354.36), TO BE ADDED
+        "iclp_date1": (534.31, 354.36),
+        "iclp_class2": (84.20, 370.44),
+        "iclp_professor2": (227.12, 370.44),
+        #"iclp_professor_signature2": (375.43, 370.44), TO BE ADDED
+        "iclp_date2": (534.31, 370.44),
+        "final_semester_hours_needed": (232.28, 507.72),
+        "concurrent_hours_uh": (226.75, 572.77),
+        "concurrent_hours_other": (318.21, 572.77),
+        "concurrent_university_name": (375.44, 572.77),
+        "fall_sem": (318.08, 604.68),
+        "spring_sem": (453.68, 604.52),
+        "dclass1": (198.08, 618.24), #seperated by semicolons in table
+        "dclass2": (265.99, 618.24), #drop_courses = db.Column(db.String(255), nullable=True)
+        "dclass3": (338.83, 618.24),
+        "remaining_hours_uh": (79.16, 632.04),
+        "fall_sem2": (271.65, 632.04),
+        "spring_sem2": (406.40, 632.04),
+        "student_name": (86.97, 688.70),
+        "ps_id": (417.26, 688.70),
+        #"AA1_name": (70.16, 725.16),
+        #"AA1_sig": (286.27, 725.16), TO BE ADDED
+        #"AA1_Date": (482.96, 725.16),
+        #"AA2_name": (70.16, 760.80), 
+        #"AA2_sig": (286.27, 760.80), TO BE ADDED
+        #"AA2_date": (482.96, 760.80),
+
+        "initial_adjustment_issues": (41.56, 240.32),
+        "improper_course_level_placement": (41.56, 280.04),
+        "medical_reason": (41.56, 402.44),
+        #"medical_letter_attached": (54.76, 476.60), to be added
+        "final_semester": (41.56, 508.16),
+        "concurrent_enrollment": (41.56, 561.67),
+        "semester_fall": (227.56, 605.11),
+        "semester_spring": (351.64, 605.11),
+        "semester_fall": (189.88, 632.48),
+        "semester_spring": (302.68, 632.48)
+    }
+
+
+    #------ below os for oprinting pdf ----
+
+
+        # Ensure the student_name is not None and has at least one name
+    name_parts = (response.student_name or "").strip().split()
+
+    # Assign default empty values if any name part is missing
+    first = name_parts[0] if len(name_parts) > 0 else ""
+    middle = name_parts[1] if len(name_parts) > 1 else ""
+    last = name_parts[2] if len(name_parts) > 2 else ""
+
+    doc = fitz.open("static/emptyforms/TW/TW.pdf") # open pdf
+
+    # Choose the page to write on (0-indexed)
+    page = doc.load_page(0)  # For the first page
+
+    # Define text style (font, size, color, etc.)
+    font = "helv"  # Use font name as string (e.g., 'helv' for Helvetica)
+    size = 12  # Font size
+    color = (0, 0, 0)  # Black color in RGB (0, 0, 0)
+
+     # If the field exists (is not None), insert the value into the PDF
+    # Iterate through the student_map
+    # Iterate through the student_map
+    for field, position in student_map.items():
+        # Get the field value from the response object
+        field_value = getattr(response, field, None)
+
+    # Prevent errors by ensuring initials exist before accessing
+        #print("FIELD: ", field, " FIELD_VALIE: ", field_value)
+        if isinstance(field_value, bool):  # If the value is a boolean
+            if field_value:  # If True,
+                page.insert_text(position, "x", fontname=font, fontsize=size, color=color)
+            else:  # If False, output nothing
+                page.insert_text(position, " ", fontname=font, fontsize=size, color=color)
+        elif isinstance(field_value, (str, int)):  # If the value is a string or integer
+            if field_value:  # If the string or integer is not empty
+                #print("FIELD: ", field, " FIELD_VALUE: ", field_value)
+                page.insert_text(position, str(field_value), fontname=font, fontsize=size, color=color)
+            else:  # If the string is empty, output nothing
+                page.insert_text(position, " ", fontname=font, fontsize=size, color=color)
+
+    # Handle other cases if needed
+    else:
+        page.insert_text(position, " ", fontname=font, fontsize=size, color=color)
+
+    #"student_signature": (100, 738)
+    current_date = datetime.utcnow().strftime("%m/%d/%Y")
+    # Insert the formatted date into the PDF
+    page.insert_text((509.74, 688.70), current_date, fontname=font, fontsize=size, color=color)
+
+    filename = f"{user_id}.jpg"
+    filename = secure_filename(filename)
+
+    # Save the file
+    file_path = os.path.join("static/signatures", filename)
+
+    # List all files in the SIGNATURE_UPLOAD_FOLDER
+        # Position for student signature
+    student_signature_position = (279.58, 688.70)  # The coordinates (x, y) where the signature will be inserted
+    # Insert Student Signature (JPG image)
+    try:
+        img_rect = fitz.Rect(student_signature_position[0], student_signature_position[1], 
+                            student_signature_position[0] + 100, student_signature_position[1] + 50)  # Adjust size if needed
+        page.insert_image(img_rect, filename = file_path)
+        #print("SUCCESS")
+    except Exception as e:
+        print(f"Error inserting student signature: {e}")
+
+    user=session["user"]
+
+    # Avoid accessing first[0] or last[0] if empty
+    filename = f"{user_id}.pdf"
+    filename = secure_filename(filename)
+
+    # Define the path where the document should be saved
+    save_path = os.path.join('static', 'documents', 'RCL', filename)
+
+    # Save the document (assuming 'doc' is a document object with a 'save' method)
+    doc.save(save_path)
+
+
+
     return jsonify({"message": "Form progress saved successfully!"}), 200
 
 @form_bp.route("/preview_form", methods=["POST"])
@@ -617,8 +756,10 @@ def preview_form():
 
     # Call the appropriate save function
     if form_type == "TW":
+        print("TEST1")
         save_tw_progress()
     elif form_type == "RCL":
+        print("TEST1")
         save_rcl_progress()
 
     # Define the file name (Make sure your PDFs are saved in the right location)
