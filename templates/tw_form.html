@@ -96,9 +96,10 @@
             </div>
             
             <div class="file-form">
-                <label for="supporting_documents">Included instuctor approved drop forms (if applicable) <b>(PDF, DOC, JPG, PNG)</b>:</label>
-                <input type="file" name="supporting_documents" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" multiple>
-            
+                <label for="supporting_documents">
+                    Included instuctor approved drop forms (if applicable) <b>(PDF, DOC, JPG, PNG)</b>:
+                    <input type="file" name="supporting_documents" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" multiple>
+                </label>
                 {% if response and response.supporting_documents_attached %}
                     <p>Uploaded File: <a href="{{ url_for('form.download_supporting_document', filename=response.supporting_document_path) }}" target="_blank">View Document</a></p>
                 {% endif %}
@@ -190,5 +191,3 @@
         });
     </script>
 </body>
-
-    
