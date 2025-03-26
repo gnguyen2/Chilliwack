@@ -119,7 +119,6 @@ def approve_request(request_id):
     if request_entry:
         request_entry.is_finalized = True  # Mark as finalized
         reponse_table.status = "approved"
-        print("REQUEST: ", request_id, "REA: ", request_en)
         db.session.commit()
         
         flash(f"Request {request_id} has been approved.", "success")

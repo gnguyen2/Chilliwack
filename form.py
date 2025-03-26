@@ -225,33 +225,6 @@ def save_tw_progress():
     response.parking_ack = ("parking" in request.form) if "parking" in request.form else response.parking_ack
     response.last_updated = datetime.utcnow()
     
-    # Print all the fields
-    print("Student Name:", response.student_name)
-    print("Student ID:", response.ps_id)
-    print("Phone:", response.phone)
-    print("Email:", response.email)
-    print("Program:", response.program)
-    print("Academic Career:", response.academic_career)
-
-    print("Withdrawal Term Fall:", response.withdrawal_term_fall)
-    print("Withdrawal Term Spring:", response.withdrawal_term_spring)
-    print("Withdrawal Term Summer:", response.withdrawal_term_summer)
-    print("Withdrawal Year:", response.withdrawal_year)
-
-    print("Financial Aid Acknowledgment:", response.financial_aid_ack)
-    print("International Students Acknowledgment:", response.international_students_ack)
-    print("Student Athlete Acknowledgment:", response.student_athlete_ack)
-    print("Veterans Acknowledgment:", response.veterans_ack)
-    print("Graduate Students Acknowledgment:", response.graduate_students_ack)
-    print("Doctoral Students Acknowledgment:", response.doctoral_students_ack)
-    print("Housing Acknowledgment:", response.housing_ack)
-    print("Dining Acknowledgment:", response.dining_ack)
-    print("Parking Acknowledgment:", response.parking_ack)
-
-
-# Optionally print the whole response object
-    print("Complete Response Object:", response)
-    print("committed")
     db.session.commit()
 
     #---------- This part down is for building the PDF ----------
