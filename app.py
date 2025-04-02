@@ -4,6 +4,8 @@ from flask_migrate import Migrate
 from models import db, User, Role, Status, Request
 from decorators import role_not_allowed
 from sqlalchemy.orm import joinedload
+from dotenv import load_dotenv
+load_dotenv()
 
 from config import Config
 from auth import auth_bp

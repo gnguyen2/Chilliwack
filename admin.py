@@ -1,6 +1,6 @@
 from flask import Blueprint, request, flash, redirect, url_for, session, render_template, send_file
 from decorators import role_required
-from models import db, User, Role, Status, RCLResponses, TWResponses
+from models import db, User, Role, Status, RCLResponses, TWResponses, Request
 from sqlalchemy.orm import joinedload
 
 admin_bp = Blueprint("admin", __name__)
@@ -114,9 +114,11 @@ def approve_request(request_id):
         # If not found in RCL, check in TWResponses
         request_entry = TWResponses.query.get(request_id)
 
+    reponse_table = Request.query.get(request_entry.request_id)
+
     if request_entry:
         request_entry.is_finalized = True  # Mark as finalized
-        request_entry.status = "approved"
+        reponse_table.status = "approved"
         db.session.commit()
         
         flash(f"Request {request_id} has been approved.", "success")

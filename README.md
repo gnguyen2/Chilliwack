@@ -1,53 +1,47 @@
 # Chilliwack
 
-## **Setup and Installation**
+## **Overview**
+This repository contains a Flask application that requires the Microsoft ODBC Driver 18 for SQL Server and other dependencies to run. The easiest way to get started is by using Docker.
+
 ### **1. Clone the Repository**
 ```bash
 git clone https://github.com/gnguyen2/Chilliwack.git
 cd Chilliwack
 ```
 
-### **2. Create a Virtual Environment (Recommended)**
+### **2. Prepare Environment Variables**
+Create a file named .env.docker in the root of the project with the environment variables needed to connect to your database and configure the app.
+Important: You’ll need to contact any of the following on discord for the environment details:
+- @kjx172
+- @yuelex
+- @gia1103
+- @d00mb0i
+
+Once you have the details, place them in the .env.docker file.
+
+### **3. Build the Docker Image**
+From within the Chilliwack directory, run:
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Mac/Linux
-venv\Scripts\activate  # On Windows
-```
-### **3. Install Dependencies**
-```bash
-pip install -r requirements.txt
-```
-
-### **4. Install ODBC**
-https://learn.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server?view=sql-server-ver16
-
-### **5. Configure Environment Variables**
-create a local .env file and reach out to @kjx172, @yuelex, @gia1103, or @d00mb0i on discord for the information to put inside your environment file
-
-
-## **Running the Application**
-
-### **1. Initialize the Database**
-Run database migrations:
-```bash
-flask db init
-flask db migrate -m "Initial migration"
-flask db upgrade
+docker build -t chilliwack-app .
 ```
 
-### **2. Run Flask Application**
-Run database migrations:
-```bash
-flask run
+### **4. Run the Container**
+Use the image you just built to start a container:
 ```
-The app will be available at:
-🔗 http://127.0.0.1:5000/
+docker run --env-file .env.docker -p 5000:5000 --name chilliwack-container chilliwack-app
+```
 
-if you get an error stating ODBC timed out you just have to keep rerunning it
+Once the container is running, open your browser and go to:
+```
+http://127.0.0.1:5000
+```
+If you encounter an ODBC timeout error, re-run the container again. Sometimes it may take multiple attempts.
 
-### **3. Testing Functionality**
-You can use the temp admin script to change your role to test some of the role restricted functionality, there is also currently a link on the regular dashboard that will take you to the admin dash board as a basic user. It will be removed but for now allows you to view the admin page as a basic user.
+### **5. Running Migrations**
+You can run migrations inside the container. For example, once your container is up, open a new terminal and run:
 
-
-
-
+```
+docker exec -it chilliwack-container flask db init
+docker exec -it chilliwack-container flask db migrate -m "Initial migration"
+docker exec -it chilliwack-container flask db upgrade
+```

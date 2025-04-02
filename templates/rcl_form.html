@@ -155,13 +155,8 @@
 
         <!-- Submit Button -->
         <p>
-            <button type="submit" class="submit-button">Submit Form</button>
+            <button type="submit" id = "dashboardButton" class="submit-button">Submit Form</button>
         </p>
-    </form>
-
-    <form action="{{ url_for('form.preview_form') }}" method="POST" target="_blank">
-        <input type="hidden" name="form_type" value="RCL">
-        <button type="submit">Preview RCL Form</button>
     </form>
 
     <!-- Dashboard Button -->
