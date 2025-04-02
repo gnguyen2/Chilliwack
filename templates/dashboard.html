@@ -45,10 +45,10 @@
             
             <div class="role_check_box">
                 <a href="{{ url_for('form.fill_rcl_form') }}">
-                    <button type="button" class="color_change_button_noauth" id="privlaged_user_button">Modify/Create Reduced Course Load Form</button>
+                    <button type="button" class="color_change_button_noauth" id="formButton">Modify/Create Reduced Course Load Form</button>
                 </a>
                 <a href="{{ url_for('form.fill_tw_form') }}">
-                    <button type="button" class="color_change_button_noauth" id="administrator_button">Modify/Create Term Withdrawl Form</button>
+                    <button type="button" class="color_change_button_noauth" id="formButton">Modify/Create Term Withdrawl Form</button>
                 </a>
             </div>
 
@@ -70,6 +70,8 @@
             // Get user role and status from Jinja2 context
             const userRole = "{{ user.role.name|safe }}";
             const userStatus = "{{ user.status }}";
+            const userSig = "{{ user.signature_path }}"
+            
 
             // Your existing code for buttons and role management
             const buttons = document.querySelectorAll(".color_change_button");
@@ -79,6 +81,16 @@
                 "privlageduser": ["basic_user_button", "privlaged_user_button"],
                 "administrator": ["basic_user_button", "privlaged_user_button", "administrator_button"]
             };
+
+            document.getElementById("formButton").addEventListener("click", function () {
+                
+                if (!userSig) {
+                    alert("no signature on record");
+                    event.preventDefault();
+                    return;
+                } 
+            });
+
 
             buttons.forEach(button => {
                 button.addEventListener("click", function () {
