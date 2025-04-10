@@ -71,13 +71,22 @@ def delete_user(user_id):
         flash("User not found.", "warning")
         return redirect(url_for("admin.admindashboard"))
 
-    # Check if the logged-in admin is deleting their own account
-    if session.get("user") and session["user"].get("email") == user.email:
-        db.session.delete(user)
-        db.session.commit()
-        session.clear()  # Clear session to log out the user
-        flash("Your account has been deleted. You have been logged out.", "info")
-        return redirect(url_for("home"))  # Redirect to login page
+    current_user_email = session.get("user", {}).get("email")
+    if not current_user_email:
+        flash("Invalid session. Please log in again.", "danger")
+        return redirect(url_for("home"))
+
+    # Prevent self-deletion
+    if user.email == current_user_email:
+        flash("You cannot delete your own account.", "danger")
+        return redirect(url_for("admin.admindashboard"))
+
+    # Prevent deleting the last administrator
+    if user.role.name == "administrator":
+        admin_count = User.query.join(Role).filter(Role.name == "administrator").count()
+        if admin_count <= 1:
+            flash("Cannot delete the last remaining administrator.", "danger")
+            return redirect(url_for("admin.admindashboard"))
 
     # Otherwise, just delete the user normally
     db.session.delete(user)
