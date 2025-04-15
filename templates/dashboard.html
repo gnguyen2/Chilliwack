@@ -20,11 +20,6 @@
         {% endwith %}
 
         <div class="role_check_box">
-            <button type="button" class="color_change_button" id="basic_user_button">Basic User</button>
-            <button type="button" class="color_change_button" id="privlaged_user_button">Privlaged User</button>
-            <button type="button" class="color_change_button" id="administrator_button">Administrator</button>
-        </div>
-        <div class="role_check_box">
             <h2>Your Signature</h2>
             {% if user.signature_path %}
                 <img src="{{ url_for('static', filename=user.signature_path) }}{% if user.updated_at %}?t={{ user.updated_at.timestamp() }}{% endif %}"
@@ -49,6 +44,9 @@
                 </a>
                 <a href="{{ url_for('form.fill_tw_form') }}">
                     <button type="button" class="color_change_button_noauth" id="formButton">Modify/Create Term Withdrawl Form</button>
+                </a>
+                <a href="{{ url_for('form.fill_changeMajor_form') }}">
+                    <button type="button" class="color_change_button_noauth" id="formButton">Modify/Create Change Major Form</button>
                 </a>
             </div>
 
