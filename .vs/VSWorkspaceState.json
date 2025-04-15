@@ -1,12 +1,15 @@
 {
   "ExpandedNodes": [
     "",
-    "\\migrations",
     "\\static",
+    "\\static\\documents",
+    "\\static\\emptyforms",
+    "\\static\\emptyforms\\RCL",
+    "\\static\\emptyforms\\TW",
     "\\static\\signatures",
     "\\templates",
     "\\venv"
   ],
-  "SelectedNode": "\\templates\\upload_signature.html",
+  "SelectedNode": "\\admin.py",
   "PreviewInSolutionExplorer": false
 }
