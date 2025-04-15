@@ -215,3 +215,99 @@ class TWDocuments(db.Model):
 
     def __repr__(self):
         return f"<TWDocuments {self.id} - {self.file_name}>"
+
+class GeneralPetition(db.Model):  # FOR INTEGRATION
+    __tablename__ = 'general_petition'
+    
+    # Primary Key (Django automatically adds an id field if not specified)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
+    # Student Information Section
+    student_last_name = db.Column(db.String(100), nullable=False)
+    student_first_name = db.Column(db.String(100), nullable=False)
+    student_middle_name = db.Column(db.String(100), nullable=True)
+    student_uh_id = db.Column(db.String(20), nullable=False)
+    student_phone_number = db.Column(db.String(20), nullable=True)
+    student_program_plan = db.Column(db.String(100), nullable=False)
+    student_academic_career = db.Column(db.String(100), nullable=False)
+    student_mailing_address = db.Column(db.Text, nullable=False)
+    student_city = db.Column(db.String(100), nullable=False)
+    student_state = db.Column(db.String(50), nullable=False)
+    student_zip_code = db.Column(db.String(10), nullable=False)
+    student_email = db.Column(db.String(255), nullable=False)  # Email can be stored as String
+
+    # Petition Purpose Details
+    program_status_action = db.Column(db.String(100), nullable=True)
+    admission_status_from = db.Column(db.String(100), nullable=True)
+    admission_status_to = db.Column(db.String(100), nullable=True)
+    new_career = db.Column(db.String(100), nullable=True)
+    post_bac_study_objective = db.Column(db.String(100), nullable=True)
+    second_bachelor_plan = db.Column(db.Boolean, default=False)
+    graduate_study_objective = db.Column(db.Boolean, default=False)
+    teacher_certification = db.Column(db.Boolean, default=False)
+    personal_enrichment_objective = db.Column(db.Boolean, default=False)
+
+    program_change_from = db.Column(db.String(100), nullable=True)
+    program_change_to = db.Column(db.String(100), nullable=True)
+
+    plan_change_from = db.Column(db.String(100), nullable=True)
+    plan_change_to = db.Column(db.String(100), nullable=True)
+
+    degree_objective_change_from = db.Column(db.String(100), nullable=True)
+    degree_objective_change_to = db.Column(db.String(100), nullable=True)
+
+    requirement_term_catalog = db.Column(db.String(100), nullable=True)
+    requirement_term_career = db.Column(db.String(100), nullable=True)
+    requirement_term_program_plan = db.Column(db.String(100), nullable=True)
+
+    additional_plan_degree_type = db.Column(db.String(50), nullable=True)
+    additional_plan_degree_type_other = db.Column(db.String(100), nullable=True)
+    primary_plan = db.Column(db.Boolean, default=False)
+    secondary_plan = db.Column(db.Boolean, default=False)
+
+    second_degree_type = db.Column(db.String(100), nullable=True)
+
+    minor_change_from = db.Column(db.String(100), nullable=True)
+    minor_change_to = db.Column(db.String(100), nullable=True)
+    additional_minor = db.Column(db.String(100), nullable=True)
+
+    degree_requirement_exception_details = db.Column(db.Text, nullable=True)
+    special_problems_course_list = db.Column(db.Text, nullable=True)
+
+    course_overload_gpa = db.Column(db.String(10), nullable=True)
+    course_overload_credit_hours = db.Column(db.String(10), nullable=True)
+    course_overload_course_list = db.Column(db.Text, nullable=True)
+
+    graduate_leave_of_absence_request_details = db.Column(db.Text, nullable=True)
+    graduate_reinstatement_request_details = db.Column(db.Text, nullable=True)
+    other_request_details = db.Column(db.Text, nullable=True)
+
+    explanation_of_request = db.Column(db.Text, nullable=True)
+    explanation = db.Column(db.Text, nullable=True)
+
+    # In Django, ImageField is used for file uploads; in SQLAlchemy, store the path or use a BLOB.
+    # For simplicity, store the path as a db.String here:
+    student_signature = db.Column(db.String, nullable=True)
+
+    signature_date = db.Column(db.Date, nullable=True)
+
+    # Checkbox Fields for Q1–Q17
+    Q1 = db.Column(db.Boolean, default=False)
+    Q2 = db.Column(db.Boolean, default=False)
+    Q3 = db.Column(db.Boolean, default=False)
+    Q4 = db.Column(db.Boolean, default=False)
+    Q5 = db.Column(db.Boolean, default=False)
+    Q6 = db.Column(db.Boolean, default=False)
+    Q7 = db.Column(db.Boolean, default=False)
+    Q8 = db.Column(db.Boolean, default=False)
+    Q9 = db.Column(db.Boolean, default=False)
+    Q10 = db.Column(db.Boolean, default=False)
+    Q11 = db.Column(db.Boolean, default=False)
+    Q12 = db.Column(db.Boolean, default=False)
+    Q13 = db.Column(db.Boolean, default=False)
+    Q14 = db.Column(db.Boolean, default=False)
+    Q15 = db.Column(db.Boolean, default=False)
+    Q16 = db.Column(db.Boolean, default=False)
+    Q17 = db.Column(db.Boolean, default=False)
+
+    date_submitted = db.Column(db.Date, nullable=True)
