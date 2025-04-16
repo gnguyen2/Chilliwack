@@ -241,22 +241,25 @@ class GeneralPetition(db.Model):  # FOR INTEGRATION
     
     # Primary Key (Django automatically adds an id field if not specified)
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    user = db.relationship("User", backref="gen_pet_responses")
 
     department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=True)
 
     # Student Information Section
-    student_last_name = db.Column(db.String(100), nullable=False)
-    student_first_name = db.Column(db.String(100), nullable=False)
+    student_last_name = db.Column(db.String(100), nullable=True)
+    student_first_name = db.Column(db.String(100), nullable=True)
     student_middle_name = db.Column(db.String(100), nullable=True)
-    student_uh_id = db.Column(db.String(20), nullable=False)
+    student_uh_id = db.Column(db.String(20), nullable=True)
     student_phone_number = db.Column(db.String(20), nullable=True)
-    student_program_plan = db.Column(db.String(100), nullable=False)
-    student_academic_career = db.Column(db.String(100), nullable=False)
-    student_mailing_address = db.Column(db.Text, nullable=False)
-    student_city = db.Column(db.String(100), nullable=False)
-    student_state = db.Column(db.String(50), nullable=False)
-    student_zip_code = db.Column(db.String(10), nullable=False)
-    student_email = db.Column(db.String(255), nullable=False)  # Email can be stored as String
+    student_program_plan = db.Column(db.String(100), nullable=True)
+    student_academic_career = db.Column(db.String(100), nullable=True)
+    student_mailing_address = db.Column(db.Text, nullable=True)
+    student_city = db.Column(db.String(100), nullable=True)
+    student_state = db.Column(db.String(50), nullable=True)
+    student_zip_code = db.Column(db.String(10), nullable=True)
+    student_email = db.Column(db.String(255), nullable=True)  # Email can be stored as String
 
     # Petition Purpose Details
     program_status_action = db.Column(db.String(100), nullable=True)
@@ -335,7 +338,9 @@ class GeneralPetition(db.Model):  # FOR INTEGRATION
     Q16 = db.Column(db.Boolean, default=False)
     Q17 = db.Column(db.Boolean, default=False)
 
-    date_submitted = db.Column(db.Date, nullable=True)
+    # Status Tracking
+    is_finalized = db.Column(db.Boolean, default=False)
+    last_updated = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # Add a relationship to store multiple documents
     documents = db.relationship("GeneralPetitionDocuments", back_populates="response", cascade="all, delete-orphan")
