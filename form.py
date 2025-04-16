@@ -80,6 +80,10 @@ def upload_signature():
     flash("Signature uploaded successfully!", "success")
     return redirect(url_for("dashboard"))
 
+@form_bp.route("/changeMajor_form", methods=['GET', 'POST'])
+def fill_changeMajor_form():
+    return render_template("changeMajor_form.html")
+
 @form_bp.route("/tw_form", methods=['GET', 'POST'])
 def fill_tw_form():
     if "user" not in session:

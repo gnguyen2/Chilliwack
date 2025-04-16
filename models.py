@@ -270,7 +270,7 @@ class GeneralPetition(db.Model):  # FOR INTEGRATION
     degree_objective_change_from = db.Column(db.String(100), nullable=True)
     degree_objective_change_to = db.Column(db.String(100), nullable=True)
 
-    requirement_term_catalog = db.Column(db.String(100), nullable=True)
+    requirement_term_catalog = db.Column(db.String(100), nullable=True) #theres only one input box?
     requirement_term_career = db.Column(db.String(100), nullable=True)
     requirement_term_program_plan = db.Column(db.String(100), nullable=True)
 
@@ -285,6 +285,7 @@ class GeneralPetition(db.Model):  # FOR INTEGRATION
     minor_change_to = db.Column(db.String(100), nullable=True)
     additional_minor = db.Column(db.String(100), nullable=True)
 
+    #imo these are not needed - calvin
     degree_requirement_exception_details = db.Column(db.Text, nullable=True)
     special_problems_course_list = db.Column(db.Text, nullable=True)
 
@@ -297,6 +298,8 @@ class GeneralPetition(db.Model):  # FOR INTEGRATION
     other_request_details = db.Column(db.Text, nullable=True)
 
     explanation_of_request = db.Column(db.Text, nullable=True)
+    
+    #could all be put into this column
     explanation = db.Column(db.Text, nullable=True)
 
     # In Django, ImageField is used for file uploads; in SQLAlchemy, store the path or use a BLOB.
@@ -309,7 +312,7 @@ class GeneralPetition(db.Model):  # FOR INTEGRATION
     Q1 = db.Column(db.Boolean, default=False)
     Q2 = db.Column(db.Boolean, default=False)
     Q3 = db.Column(db.Boolean, default=False)
-    Q4 = db.Column(db.Boolean, default=False)
+    Q4 = db.Column(db.Boolean, default=False) 
     Q5 = db.Column(db.Boolean, default=False)
     Q6 = db.Column(db.Boolean, default=False)
     Q7 = db.Column(db.Boolean, default=False)

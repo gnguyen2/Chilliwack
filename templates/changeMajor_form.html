@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="static/form.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>General Petition Form</title>
+</head>
+<body>
+    <h1 class="form-title">General Petition Form</h1>
+    <br>
+    <form class="form-container" id="gpForm" action="#" method="POST" enctype="multipart/form-data">
+        <div class="notice-box">
+            <p><strong>State law requires that you be informed of the following:</strong></p>
+            <ol>
+                <li>With few exceptions, you are entitled on request to be independent of the information.</li>
+                <li>University holders about you by use of all forms.</li>
+                <li>Other bestsellers 2014 and 2020 of the Government Code, you are entitled to receive and receive the information.</li>
+                <li>Middle session $50 total of the Government Code, you are entitled to have the university content information about you that is incorrect.</li>
+            </ol>
+        </div>
+
+        <div class="form-flex">
+            <div class="form-group">
+                <label for="last_name">Last Name:</label>
+                <input type="text" name="last_name" id="last_name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="first_name">First Name:</label>
+                <input type="text" name="first_name" id="first_name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="middle_name">Middle Name:</label>
+                <input type="text" name="middle_name" id="middle_name">
+            </div>
+
+            <div class="form-group">
+                <label for="uh_id">My UH ID:</label>
+                <input type="text" name="uh_id" id="uh_id" required>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone Number:</label>
+                <input type="tel" name="phone" id="phone" required>
+            </div>
+        </div>
+
+        <div class="form-flex">
+            <div class="form-group">
+                <label for="mailing_address">Mailing Address:</label>
+                <input type="text" name="mailing_address" id="mailing_address" required>
+            </div>
+
+            <div class="form-group">
+                <label for="city">City:</label>
+                <input type="text" name="city" id="city" required>
+            </div>
+
+            <div class="form-group">
+                <label for="state">State:</label>
+                <input type="text" name="state" id="state" required>
+            </div>
+
+            <div class="form-group">
+                <label for="zip">ZIP Code:</label>
+                <input type="text" name="zip" id="zip" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" name="email" id="email" required>
+            </div>
+        </div>
+
+        <br>
+        <h3>Mark number for purpose of petition (for numbers with an "*" complete EXPLANATION OF REQUEST)</h3>
+        
+        <div class="checkbox-group">
+            <div class="checkbox-item">
+                <input type="checkbox" name="Q1" id="Q1">
+                <label for="update_status">1. Update Student's Program Status/action (readmit, term activate, etc.)</label>
+                <input type="text" name="update_status_action" placeholder="Details">
+            </div>
+
+            <div class="checkbox-item">
+                <input type="checkbox" name="Q2" id="Q2">
+                <label for="admission_change">2. Admission Status change from</label>
+                <input type="text" id = "admission_status_from" name="admission_status_from" placeholder="Current Status">
+                <label for="to" class="arount-input-label">to</label>
+                <input type="text" name="admission_status_to" id="admission_status_to" placeholder="New Status">
+            </div>
+
+            <div class="checkbox-item">
+                <input type="checkbox" name="Q3" id="Q3">
+                <label for="new_career">3. Add new career</label>
+                <input type="text" name="new_career" id="new_career" placeholder="New Status">
+                <div class="radio-group">
+                    <p>If post baccalaureate, indicate study objective:</p>
+                    <input type="radio" name="study_objective" id="second_bachelor_plan" value="second_degree">
+                    <label for="second_degree">Second bachelor's degree</label><br>
+                    
+                    <input type="radio" name="study_objective" id="graduate_study_objective" value="grad_study">
+                    <label for="grad_study">Requirements for graduate study</label><br>
+                    
+                    <input type="radio" name="study_objective" id="teacher_certification" value="teacher_cert">
+                    <label for="teacher_cert">Teacher certification</label><br>
+                    
+                    <input type="radio" name="study_objective" id="personal_enrichment_objective" value="enrichment">
+                    <label for="enrichment">Personal enrichment</label>
+                </div>
+            </div>
+
+            <div class="checkbox-item">
+                <input type="checkbox" name="Q4" id="Q4">
+                <label for="program_change">4. Student request Program Change from</label>
+                <input type="text" name="program_change_from" id="program_change_from" placeholder="Current Program">
+                <label for="to" class="arount-input-label">to</label>
+                <input type="text" name="program_change_to" id="program_change_to" placeholder="New Program">
+            </div>
+            
+            <div class="checkbox-item">
+                <input type="checkbox" name="Q5" id="Q5">
+                <label for="major_change">*5. Student requests plan(major) change from</label>
+                <input type="text" name="plan_change_from" id="plan_change_from" placeholder="Current Major">
+                <label for="to" class="arount-input-label">to</label>
+                <input type="text" name="plan_change_to" id="plan_change_to" placeholder="New Major">
+            </div>
+            
+            <div class="checkbox-item">
+                <input type="checkbox" name="Q6" id="Q6">
+                <label for="degree_change">*6. Degree objective/plan change (B.A, B.S, B.B.A., etc.) from</label>
+                <input type="text" name="degree_objective_change_from" id="degree_objective_change_from" placeholder="Current Degree">
+                <label for="to" class="arount-input-label">to</label>
+                <input type="text" name="degree_objective_change_to" id="degree_objective_change_to" placeholder="New Degree">
+            </div>
+            
+            <div class="checkbox-item">
+                <input type="checkbox" name="Q7" id="Q7">
+                <label for="requirement_term">*7. Requirement Term(year): UH Catalog/Career</label>
+                <input type="text" name="requirement_term_catalog" id="requirement_term_catalog" placeholder="Year">
+                <label for="to" class="arount-input-label">Program/Plan</label>
+                <input type="text" name="requirement_term_program_plan" id="requirement_term_program_plan" placeholder="Year">
+            </div>
+            
+            <div class="checkbox-item">
+                <input type="checkbox" name="Q8" id="Q8">
+                <label for="additional_plan">*8. Student Requests Additional Plan:</label>
+                <input type="text" name="additional_plan_degree_type" id="additional_plan_degree_type" placeholder="Plan Details">
+                <label for="to" class="arount-input-label">BA/BS/Other</label>
+                <input type="text" name="additional_plan_degree_type" id="additional_plan_degree_type_other" placeholder="Plan Details">
+                <div class="radio-group">
+                    <p>Is your new plan:</p>
+                    <input type="radio" name="primary_plan" id="primary_plan" value="primary_plan">
+                    <label for="primary_plan">Primary</label><br>
+                    
+                    <input type="radio" name="secondary_plan" id="secondary_plan" value="secondary_plan">
+                    <label for="secondary_plan">Secondary</label><br>
+                </div>
+            </div>
+
+            <div class="checkbox-item">
+                <input type="checkbox" name="Q9" id="Q9">
+                <label for="minor_change">*9. Add second Degree in</label>
+                <input type="text" name="second_degree_type" placeholder="Degree">
+            </div>
+            
+            <div class="checkbox-item">
+                <input type="checkbox" name="Q10" id="Q10">
+                <label for="minor_change">*10. Student request removal or change of minor from</label>
+                <input type="text" name="minor_change_from" id placeholder="Current Minor">
+                <label for="to" class="arount-input-label">to</label>
+                <input type="text" name="minor_change_to" id="minor_change_to" placeholder="New Minor">
+            </div>
+
+            <div class="checkbox-item">
+                <input type="checkbox" name="Q11" id="Q11">
+                <label for="minor_change">*11. Add additional minor in</label>
+                <input type="text" name="additional_minor" id="additional_minor" placeholder="Current Minor">
+            </div>
+
+            <div class="checkbox-item">
+                <input type="checkbox" name="Q12" id="Q12">
+                <label for="minor_change">*12. Degree requirement exception</label>
+            </div>
+
+            <div class="checkbox-item">
+                <input type="checkbox" name="Q13" id="Q13">
+                <label for="minor_change">*13. Special Problems course request (Indicate course(s), course description and instructor.)</label>
+            </div>
+
+            <div class="checkbox-item">
+                <input type="checkbox" name="Q14" id="Q14">
+                <label for="minor_change">*14. Course overload (indicate G.P.A., number of hours and courses)</label>
+            </div>
+
+            <div class="checkbox-item">
+                <input type="checkbox" name="Q15" id="Q15">
+                <label for="minor_change">*15. Graduate studies leave of absence</label>
+            </div>
+
+            <div class="checkbox-item">
+                <input type="checkbox" name="Q16" id="Q16">
+                <label for="minor_change">*16. Graduate studies reinstatement</label>
+            </div>
+
+            <div class="checkbox-item">
+                <input type="checkbox" name="Q17" id="Q17">
+                <label for="minor_change">*17. Other</label>
+            </div>
+            
+        </div>
+
+        <br>
+        <div class="form-group">
+            <label for="explanation"><strong>EXPLANATION OF REQUEST:</strong></label>
+            <textarea name="explanation" id="explanation" rows="5" style="width: 100%;"></textarea>
+        </div>
+
+        <br>
+        <div class="form-flex">
+            <div class="form-group">
+                <label for="student_signature">Signature of Student:</label>
+                <input type="text" name="student_signature" id="student_signature" required>
+            </div>
+
+            <div class="form-group">
+                <label for="date">Date:</label>
+                <input type="date" name="date" id="date" required>
+            </div>
+        </div>
+
+        <br>
+        <button type="submit" class="submit-button" id="submitGPButton" name="submitButton">Submit General Petition</button>
+    </form>
+    <br><br>
+    <!-- Dashboard Button -->
+    <button type="button" id="goToDashboardButton" class="btn btn-secondary">Go to Dashboard</button>
+
+    <script>
+        document.getElementById("goToDashboardButton").addEventListener("click", function(event) {
+            event.preventDefault();  // Prevent immediate redirection
+        
+            let formData = new FormData(document.getElementById("gpForm"));
+        
+            fetch("#", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);  // Show save success message
+                window.location.href = "#";  // Redirect to dashboard after save
+            })
+            .catch(error => console.error("Error saving form:", error));
+        });
+    </script>
+</body>
+</html>
