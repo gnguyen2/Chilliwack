@@ -14,6 +14,7 @@ class Role(db.Model):
 class Department(db.Model):
     __tablename__ = 'department'
     id = db.Column(db.Integer, primary_key=True)
+    # 0 = admin, 1 = TW, 2 = RCL, 3 = genpet, 4 = address
  
 # Status Table
 class Status(db.Model):

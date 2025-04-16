@@ -54,6 +54,11 @@ def update_user_role():
     user = User.query.get(user_id)
     if user and new_role_id:
         user.role_id = new_role_id
+
+        # If the user is an admin, set their department to 0 (all departments)
+        if new_role_id == "1":
+            user.department_id = "0"
+
         db.session.commit()
         flash("User role updated successfully!", "success")
     else:

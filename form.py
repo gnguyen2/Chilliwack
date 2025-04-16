@@ -380,6 +380,7 @@ def fill_tw_form():
         is_finalized = "confirm_acknowledgment" in request.form
         response.is_finalized = is_finalized
 
+        response.department_id = "1"
         db.session.add(response)
         db.session.commit()
 
@@ -439,6 +440,7 @@ def save_tw_progress():
     response.parking_ack = ("parking" in request.form) if "parking" in request.form else response.parking_ack
     response.last_updated = datetime.utcnow()
     
+    response.department_id = "1"
     db.session.commit()
 
     #---------- This part down is for building the PDF ----------
@@ -713,6 +715,7 @@ def fill_rcl_form():
         response.is_finalized = is_finalized
         response.last_updated = datetime.utcnow()
 
+        response.department_id = "2"
         db.session.add(response)
         db.session.commit()
 
@@ -815,7 +818,7 @@ def save_rcl_progress():
 
     # last updated
     response.last_updated = datetime.utcnow()
-
+    response.department_id = "2"
     db.session.commit()
 
 
@@ -945,7 +948,6 @@ def save_rcl_progress():
 
     # Save the document (assuming 'doc' is a document object with a 'save' method)
     doc.save(save_path)
-
 
 
     return jsonify({"message": "Form progress saved successfully!"}), 200
