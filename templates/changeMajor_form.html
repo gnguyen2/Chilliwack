@@ -22,54 +22,54 @@
         <div class="form-flex">
             <div class="form-group">
                 <label for="last_name">Last Name:</label>
-                <input type="text" name="last_name" id="last_name" required>
+                <input type="text" name="last_name" id="last_name" value="{{ response.student_last_name if response else '' }}" required>
             </div>
 
             <div class="form-group">
                 <label for="first_name">First Name:</label>
-                <input type="text" name="first_name" id="first_name" required>
+                <input type="text" name="first_name" id="first_name" value="{{ response.student_first_name if response else '' }}" required>
             </div>
 
             <div class="form-group">
                 <label for="middle_name">Middle Name:</label>
-                <input type="text" name="middle_name" id="middle_name">
+                <input type="text" name="middle_name" id="middle_name" value="{{ response.student_middle_name if response else '' }}">
             </div>
 
             <div class="form-group">
                 <label for="uh_id">My UH ID:</label>
-                <input type="text" name="uh_id" id="uh_id" required>
+                <input type="text" name="uh_id" id="uh_id" value="{{ response.student_uh_id if response else '' }}" required>
             </div>
 
             <div class="form-group">
                 <label for="phone">Phone Number:</label>
-                <input type="tel" name="phone" id="phone" required>
+                <input type="tel" name="phone" id="phone" value="{{ response.student_phone_number if response else '' }}" required>
             </div>
         </div>
 
         <div class="form-flex">
             <div class="form-group">
                 <label for="mailing_address">Mailing Address:</label>
-                <input type="text" name="mailing_address" id="mailing_address" required>
+                <input type="text" name="mailing_address" id="mailing_address" value="{{ response.student_mailing_address if response else '' }}" required>
             </div>
 
             <div class="form-group">
                 <label for="city">City:</label>
-                <input type="text" name="city" id="city" required>
+                <input type="text" name="city" id="city" value="{{ response.student_city if response else '' }}" required>
             </div>
 
             <div class="form-group">
                 <label for="state">State:</label>
-                <input type="text" name="state" id="state" required>
+                <input type="text" name="state" id="state" value="{{ response.student_state if response else '' }}" required>
             </div>
 
             <div class="form-group">
                 <label for="zip">ZIP Code:</label>
-                <input type="text" name="zip" id="zip" required>
+                <input type="text" name="zip" id="zip" value="{{ response.student_zip_code if response else '' }}"required>
             </div>
 
             <div class="form-group">
                 <label for="email">Email:</label>
-                <input type="email" name="email" id="email" required>
+                <input type="email" name="email" id="email" value="{{ response.student_email if response else '' }}"required>
             </div>
         </div>
 
@@ -78,134 +78,134 @@
         
         <div class="checkbox-group">
             <div class="checkbox-item">
-                <input type="checkbox" name="Q1" id="Q1">
+                <input type="checkbox" name="Q1" id="Q1" {% if response and response.Q1 %}checked{% endif %}>>
                 <label for="update_status">1. Update Student's Program Status/action (readmit, term activate, etc.)</label>
-                <input type="text" name="update_status_action" placeholder="Details">
+                <input type="text" name="update_status_action" placeholder="Details" value="{{ response.program_status_action if response else '' }}">
             </div>
 
             <div class="checkbox-item">
-                <input type="checkbox" name="Q2" id="Q2">
+                <input type="checkbox" name="Q2" id="Q2" {% if response and response.Q2 %}checked{% endif %}>>
                 <label for="admission_change">2. Admission Status change from</label>
-                <input type="text" id = "admission_status_from" name="admission_status_from" placeholder="Current Status">
+                <input type="text" id = "admission_status_from" name="admission_status_from" placeholder="Current Status" value="{{ response.admission_status_from if response else '' }}">
                 <label for="to" class="arount-input-label">to</label>
-                <input type="text" name="admission_status_to" id="admission_status_to" placeholder="New Status">
+                <input type="text" name="admission_status_to" id="admission_status_to" placeholder="New Status" value="{{ response.admission_status_to if response else '' }}">
             </div>
 
             <div class="checkbox-item">
-                <input type="checkbox" name="Q3" id="Q3">
+                <input type="checkbox" name="Q3" id="Q3" {% if response and response.Q3 %}checked{% endif %}>>
                 <label for="new_career">3. Add new career</label>
-                <input type="text" name="new_career" id="new_career" placeholder="New Status">
+                <input type="text" name="new_career" id="new_career" placeholder="New Status" value="{{ response.new_career if response else '' }}">
                 <div class="radio-group">
                     <p>If post baccalaureate, indicate study objective:</p>
-                    <input type="radio" name="study_objective" id="second_bachelor_plan" value="second_degree">
+                    <input type="radio" name="study_objective" id="second_bachelor_plan" value="second_degree" {% if response and response.second_bachelor_plan %}checked{% endif %}>>
                     <label for="second_degree">Second bachelor's degree</label><br>
                     
-                    <input type="radio" name="study_objective" id="graduate_study_objective" value="grad_study">
+                    <input type="radio" name="study_objective" id="graduate_study_objective" value="grad_study" {% if response and response.second_bachelor_plan %}checked{% endif %}>>
                     <label for="grad_study">Requirements for graduate study</label><br>
                     
-                    <input type="radio" name="study_objective" id="teacher_certification" value="teacher_cert">
+                    <input type="radio" name="study_objective" id="teacher_certification" value="teacher_cert" {% if response and response.second_bachelor_plan %}checked{% endif %}>>
                     <label for="teacher_cert">Teacher certification</label><br>
                     
-                    <input type="radio" name="study_objective" id="personal_enrichment_objective" value="enrichment">
+                    <input type="radio" name="study_objective" id="personal_enrichment_objective" value="enrichment" {% if response and response.second_bachelor_plan %}checked{% endif %}>>
                     <label for="enrichment">Personal enrichment</label>
                 </div>
             </div>
 
             <div class="checkbox-item">
-                <input type="checkbox" name="Q4" id="Q4">
+                <input type="checkbox" name="Q4" id="Q4" {% if response and response.Q4 %}checked{% endif %}>>
                 <label for="program_change">4. Student request Program Change from</label>
-                <input type="text" name="program_change_from" id="program_change_from" placeholder="Current Program">
+                <input type="text" name="program_change_from" id="program_change_from" placeholder="Current Program" value="{{ response.program_change_from if response else '' }}">
                 <label for="to" class="arount-input-label">to</label>
-                <input type="text" name="program_change_to" id="program_change_to" placeholder="New Program">
+                <input type="text" name="program_change_to" id="program_change_to" placeholder="New Program" value="{{ response.program_change_to if response else '' }}">
             </div>
             
             <div class="checkbox-item">
-                <input type="checkbox" name="Q5" id="Q5">
+                <input type="checkbox" name="Q5" id="Q5" {% if response and response.Q5 %}checked{% endif %}>>
                 <label for="major_change">*5. Student requests plan(major) change from</label>
-                <input type="text" name="plan_change_from" id="plan_change_from" placeholder="Current Major">
+                <input type="text" name="plan_change_from" id="plan_change_from" placeholder="Current Major" value="{{ response.plan_change_from if response else '' }}">
                 <label for="to" class="arount-input-label">to</label>
-                <input type="text" name="plan_change_to" id="plan_change_to" placeholder="New Major">
+                <input type="text" name="plan_change_to" id="plan_change_to" placeholder="New Major" value="{{ response.plan_change_to if response else '' }}">
             </div>
             
             <div class="checkbox-item">
-                <input type="checkbox" name="Q6" id="Q6">
+                <input type="checkbox" name="Q6" id="Q6" {% if response and response.Q6 %}checked{% endif %}>>
                 <label for="degree_change">*6. Degree objective/plan change (B.A, B.S, B.B.A., etc.) from</label>
-                <input type="text" name="degree_objective_change_from" id="degree_objective_change_from" placeholder="Current Degree">
+                <input type="text" name="degree_objective_change_from" id="degree_objective_change_from" placeholder="Current Degree" value="{{ response.degree_objective_change_from if response else '' }}">
                 <label for="to" class="arount-input-label">to</label>
-                <input type="text" name="degree_objective_change_to" id="degree_objective_change_to" placeholder="New Degree">
+                <input type="text" name="degree_objective_change_to" id="degree_objective_change_to" placeholder="New Degree" value="{{ response.degree_objective_change_to if response else '' }}">
             </div>
             
             <div class="checkbox-item">
-                <input type="checkbox" name="Q7" id="Q7">
+                <input type="checkbox" name="Q7" id="Q7" {% if response and response.Q7 %}checked{% endif %}>>
                 <label for="requirement_term">*7. Requirement Term(year): UH Catalog/Career</label>
-                <input type="text" name="requirement_term_catalog" id="requirement_term_catalog" placeholder="Year">
+                <input type="text" name="requirement_term_catalog" id="requirement_term_catalog" placeholder="Year" value="{{ response.requirement_term_catalog if response else '' }}">
                 <label for="to" class="arount-input-label">Program/Plan</label>
-                <input type="text" name="requirement_term_program_plan" id="requirement_term_program_plan" placeholder="Year">
+                <input type="text" name="requirement_term_program_plan" id="requirement_term_program_plan" placeholder="Year" value="{{ response.requirement_term_program_plan if response else '' }}">
             </div>
             
             <div class="checkbox-item">
-                <input type="checkbox" name="Q8" id="Q8">
+                <input type="checkbox" name="Q8" id="Q8" {% if response and response.Q8 %}checked{% endif %}>>
                 <label for="additional_plan">*8. Student Requests Additional Plan:</label>
-                <input type="text" name="additional_plan_degree_type" id="additional_plan_degree_type" placeholder="Plan Details">
+                <input type="text" name="additional_plan_degree_type" id="additional_plan_degree_type" placeholder="Plan Details" value="{{ response.additional_plan_degree_type if response else '' }}">
                 <label for="to" class="arount-input-label">BA/BS/Other</label>
-                <input type="text" name="additional_plan_degree_type" id="additional_plan_degree_type_other" placeholder="Plan Details">
+                <input type="text" name="additional_plan_degree_type" id="additional_plan_degree_type_other" placeholder="Plan Details" value="{{ response.additional_plan_degree_type_other if response else '' }}">
                 <div class="radio-group">
                     <p>Is your new plan:</p>
-                    <input type="radio" name="primary_plan" id="primary_plan" value="primary_plan">
+                    <input type="radio" name="primary_plan" id="primary_plan" value="primary_plan" {% if response and response.second_bachelor_plan %}checked{% endif %}>>
                     <label for="primary_plan">Primary</label><br>
                     
-                    <input type="radio" name="secondary_plan" id="secondary_plan" value="secondary_plan">
+                    <input type="radio" name="secondary_plan" id="secondary_plan" value="secondary_plan" {% if response and response.second_bachelor_plan %}checked{% endif %}>>
                     <label for="secondary_plan">Secondary</label><br>
                 </div>
             </div>
 
             <div class="checkbox-item">
-                <input type="checkbox" name="Q9" id="Q9">
+                <input type="checkbox" name="Q9" id="Q9" {% if response and response.Q9 %}checked{% endif %}>>
                 <label for="minor_change">*9. Add second Degree in</label>
-                <input type="text" name="second_degree_type" placeholder="Degree">
+                <input type="text" name="second_degree_type" placeholder="Degree" value="{{ response.second_degree_type if response else '' }}">
             </div>
             
             <div class="checkbox-item">
-                <input type="checkbox" name="Q10" id="Q10">
+                <input type="checkbox" name="Q10" id="Q10" {% if response and response.Q10 %}checked{% endif %}>>
                 <label for="minor_change">*10. Student request removal or change of minor from</label>
-                <input type="text" name="minor_change_from" id placeholder="Current Minor">
+                <input type="text" name="minor_change_from" id placeholder="Current Minor" value="{{ response.minor_change_from if response else '' }}">
                 <label for="to" class="arount-input-label">to</label>
-                <input type="text" name="minor_change_to" id="minor_change_to" placeholder="New Minor">
+                <input type="text" name="minor_change_to" id="minor_change_to" placeholder="New Minor" value="{{ response.minor_change_to if response else '' }}">
             </div>
 
             <div class="checkbox-item">
-                <input type="checkbox" name="Q11" id="Q11">
+                <input type="checkbox" name="Q11" id="Q11" {% if response and response.Q11 %}checked{% endif %}>>
                 <label for="minor_change">*11. Add additional minor in</label>
-                <input type="text" name="additional_minor" id="additional_minor" placeholder="Current Minor">
+                <input type="text" name="additional_minor" id="additional_minor" placeholder="Current Minor" value="{{ response.additional_minor if response else '' }}">
             </div>
 
             <div class="checkbox-item">
-                <input type="checkbox" name="Q12" id="Q12">
+                <input type="checkbox" name="Q12" id="Q12" {% if response and response.Q12 %}checked{% endif %}>>
                 <label for="minor_change">*12. Degree requirement exception</label>
             </div>
 
             <div class="checkbox-item">
-                <input type="checkbox" name="Q13" id="Q13">
+                <input type="checkbox" name="Q13" id="Q13" {% if response and response.Q13 %}checked{% endif %}>>
                 <label for="minor_change">*13. Special Problems course request (Indicate course(s), course description and instructor.)</label>
             </div>
 
             <div class="checkbox-item">
-                <input type="checkbox" name="Q14" id="Q14">
+                <input type="checkbox" name="Q14" id="Q14" {% if response and response.Q14 %}checked{% endif %}>>
                 <label for="minor_change">*14. Course overload (indicate G.P.A., number of hours and courses)</label>
             </div>
 
             <div class="checkbox-item">
-                <input type="checkbox" name="Q15" id="Q15">
+                <input type="checkbox" name="Q15" id="Q15" {% if response and response.Q15 %}checked{% endif %}>>
                 <label for="minor_change">*15. Graduate studies leave of absence</label>
             </div>
 
             <div class="checkbox-item">
-                <input type="checkbox" name="Q16" id="Q16">
+                <input type="checkbox" name="Q16" id="Q16" {% if response and response.Q16 %}checked{% endif %}>>
                 <label for="minor_change">*16. Graduate studies reinstatement</label>
             </div>
 
             <div class="checkbox-item">
-                <input type="checkbox" name="Q17" id="Q17">
+                <input type="checkbox" name="Q17" id="Q17" {% if response and response.Q17 %}checked{% endif %}>>
                 <label for="minor_change">*17. Other</label>
             </div>
             
