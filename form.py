@@ -238,7 +238,7 @@ def save_changeMajor_form():
     #------ below os for oprinting pdf ----
 
 
-    doc = fitz.open("static/emptyforms/CM/CM.pdf") # open pdf
+    doc = fitz.open("static/emptyforms/CM.pdf") # open pdf
 
     # Choose the page to write on (0-indexed)
     page = doc.load_page(0)  # For the first page
@@ -476,7 +476,7 @@ def save_tw_progress():
 
 
     try:
-        doc = fitz.open("static/emptyforms/TW/TW.pdf")  # open pdf
+        doc = fitz.open("static/emptyforms/TW.pdf")  # open pdf
         print("PDF successfully opened!")
     except Exception as e:
         print(f"Failed to open PDF: {e}")
@@ -899,7 +899,7 @@ def save_rcl_progress():
     middle = name_parts[1] if len(name_parts) > 1 else ""
     last = name_parts[2] if len(name_parts) > 2 else ""
 
-    doc = fitz.open("static/emptyforms/RCL/RCL.pdf") # open pdf
+    doc = fitz.open("static/emptyforms/RCL.pdf") # open pdf
 
     # Choose the page to write on (0-indexed)
     page = doc.load_page(0)  # For the first page
