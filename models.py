@@ -15,7 +15,8 @@ class Department(db.Model):
     __tablename__ = 'department'
     id = db.Column(db.Integer, primary_key=True)
     # 0 = admin, 1 = TW, 2 = RCL, 3 = genpet, 4 = address
- 
+    name = db.Column(db.String(100), unique=True, nullable=False)
+
 # Status Table
 class Status(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -47,7 +48,13 @@ class User(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     def __repr__(self):
         return f"<User {self.name} - Role: {self.role.name if self.role else 'None'}> - Status: {self.status.name if self.status else 'None'}>"
-    
+# delegation table
+class Delegation(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    from_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    to_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    expires_at = db.Column(db.DateTime, nullable=True) 
+
 class Request(db.Model):  
     id = db.Column(db.Integer, primary_key=True)
     student_email = db.Column(db.String(100), db.ForeignKey('user.email'), nullable=True)

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Departments & Roles</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='admindashboard.css') }}">
+</head>
+<script src="static/admindashboard.js" defer></script>
+
+<body class="admin-container">
+    <h1>Departments & Roles Management</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="flash-message {{ category }}">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+
+    <!-- Departments Overview -->
+    <section class="departments-overview">
+        <h2>Departments Overview</h2>
+        <div class="departments-container">
+            {% for dept in departments %}
+            <div class="department-card">
+                <h3>{{ dept.name }}</h3>
+                {% set dept_users = users | selectattr("department_id", "equalto", dept.id) | list %}
+                {% if dept_users %}
+                <ul class="user-list">
+                    {% for user in dept_users %}
+                    <li>
+                        <span class="user-name">{{ user.name }}</span>
+                        <span class="user-email">&mdash; <em>{{ user.email }}</em></span>
+                        <span class="user-role">Role: <strong>{{ user.role.name if user.role else 'None' }}</strong></span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="no-users">No users in this department</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+
+    <!-- Assign Department & Role -->
+    <section class="assign-card">
+        <h2>Assign User to Department</h2>
+        <form class="assign-form" action="{{ url_for('admin.update_user_assignment') }}" method="POST">
+            <div class="form-group">
+                <label for="user_id">User:</label>
+                <select name="user_id" id="user_id" required>
+                    {% for user in users %}
+                    <option value="{{ user.id }}">{{ user.name }} ({{ user.email }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="department_id">Department:</label>
+                <select name="department_id" id="department_id">
+                    <option value="">-- None --</option>
+                    {% for dept in departments %}
+                    <option value="{{ dept.id }}">{{ dept.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="role_id">Role:</label>
+                <select name="role_id" id="role_id">
+                    <option value="">-- None --</option>
+                    {% for role in roles %}
+                    <option value="{{ role.id }}">{{ role.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" class="submit-btn">Update Assignment</button>
+        </form>
+    </section>
+
+    <div class="back-link">
+        <a href="{{ url_for('admin.admindashboard') }}" class="button">← Back to Admin Dashboard</a>
+    </div>
+
+</body>
+</html>

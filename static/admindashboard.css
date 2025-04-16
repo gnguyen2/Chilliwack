@@ -131,3 +131,123 @@ td select, td button {
         transform: translateY(0);
     }
 }
+
+.departments-overview {
+    background-color: #f9f9f9;
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.departments-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.department-card {
+    background: white;
+    padding: 1rem 1.5rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.department-card h3 {
+        margin-top: 0;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 0.5rem;
+        font-size: 1.25rem;
+        color: #333;
+    }
+
+.user-list {
+    list-style-type: none;
+    padding-left: 0;
+    margin-top: 0.75rem;
+}
+
+.user-list li {
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+        line-height: 1.4;
+    }
+
+.user-name {
+    font-weight: 600;
+}
+
+.user-email {
+    color: #555;
+    margin-left: 0.3rem;
+}
+
+.user-role {
+    display: block;
+    font-size: 0.85rem;
+    color: #666;
+    margin-left: 1rem;
+}
+
+.no-users {
+    font-style: italic;
+    color: #999;
+    margin-top: 0.5rem;
+}
+
+.assign-card {
+    background-color: #fdfdfd;
+    padding: 2rem;
+    margin-top: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    max-width: 600px;
+}
+
+    .assign-card h2 {
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+        font-size: 1.5rem;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 0.5rem;
+    }
+
+.assign-form .form-group {
+    margin-bottom: 1.2rem;
+}
+
+.assign-form label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    color: #333;
+}
+
+.assign-form select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+    background-color: #fff;
+    color: #333;
+}
+
+.submit-btn {
+    margin-top: 1rem;
+    padding: 0.6rem 1.2rem;
+    background-color: #004d99;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+    .submit-btn:hover {
+        background-color: #003366;
+    }
+
+.back-link {
+    margin-top: 2rem;
+}

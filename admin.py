@@ -1,6 +1,6 @@
 from flask import Blueprint, request, flash, redirect, url_for, session, render_template, send_file
 from decorators import role_required
-from models import db, User, Role, Status, RCLResponses, TWResponses, Request
+from models import db, User, Role, Status, RCLResponses, TWResponses, Request, Department
 from sqlalchemy.orm import joinedload
 
 admin_bp = Blueprint("admin", __name__)
@@ -184,3 +184,44 @@ def download_pdf(request_id):
 
     flash("PDF not found for this request!", "warning")
     return redirect(url_for("admin.view_request", request_id=request_id))
+
+# Admin route for departments & roles page
+@admin_bp.route("/admin/departments_roles", methods=["GET", "POST"])
+@role_required("administrator")
+def departments_roles():
+    if not session.get("user"):
+        flash("Please log in first.", "warning")
+        return redirect(url_for("home"))
+
+    user = User.query.filter_by(email=session["user"]["email"]).first()
+
+    departments = Department.query.order_by(Department.name).all()
+    roles = Role.query.order_by(Role.name).all()
+    users = User.query.order_by(User.name).all()
+
+    return render_template(
+        "departments_roles.html",
+        departments=departments,
+        user=user,
+        roles=roles,
+        users=users
+    )
+
+# Update a user's department and/or role
+@admin_bp.route("/admin/update_user_assignment", methods=["POST"])
+@role_required("administrator")
+def update_user_assignment():
+    user_id = request.form.get("user_id")
+    dept_id = request.form.get("department_id") or None
+    role_id = request.form.get("role_id") or None
+
+    user = User.query.get(user_id)
+    if user:
+        user.department_id = dept_id if dept_id else None
+        user.role_id = role_id if role_id else None
+        db.session.commit()
+        flash(f"Updated department/role for {user.name}.", "success")
+    else:
+        flash("User not found.", "danger")
+
+    return redirect(url_for("admin.departments_roles"))
