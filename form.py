@@ -174,7 +174,7 @@ def fill_changeMajor_form():
 
         # -------------------- 6️⃣  MISC / BOOK‑KEEPING ---------------
         response.last_updated  = datetime.utcnow()
-        response.department_id = 1           # or whichever dept. you need
+        response.department_id =  3          # or whichever dept. you need
         db.session.add(response)
         db.session.commit()
 
@@ -256,6 +256,7 @@ def save_changeMajor_form():
             pass  # invalid date format
 
     response.date_submitted = datetime.utcnow()
+    response.department_id =  3 
     db.session.commit()
 
     return jsonify({"message": "Form saved successfully."}), 200
