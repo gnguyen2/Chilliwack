@@ -1,5 +1,5 @@
 from flask import Blueprint, session, redirect, url_for, flash, request, render_template, jsonify, send_file
-from models import db, User, TWResponses, TWDocuments, RCLDocuments, RCLResponses, Request
+from models import db, User, TWResponses, TWDocuments, RCLDocuments, RCLResponses, Request, GeneralPetition
 from werkzeug.utils import secure_filename
 import os
 from datetime import datetime
@@ -83,6 +83,216 @@ def upload_signature():
 @form_bp.route("/changeMajor_form", methods=['GET', 'POST'])
 def fill_changeMajor_form():
     return render_template("changeMajor_form.html")
+
+@form_bp.route("/save_changeMajor_form", methods=["POST"])
+def save_changeMajor_form():
+    if "user" not in session:
+        return jsonify({"error": "User not logged in"}), 401
+
+    user_id = session["user"]["id"]
+
+    response = GeneralPetition.query.filter_by(department_id=user_id, is_finalized=False).first()
+    if not response:
+        response = GeneralPetition(department_id=user_id)
+        db.session.add(response)
+
+    # === Student Info ===
+    response.student_last_name = request.form.get("last_name", response.student_last_name)
+    response.student_first_name = request.form.get("first_name", response.student_first_name)
+    response.student_middle_name = request.form.get("middle_name", response.student_middle_name)
+    response.student_uh_id = request.form.get("uh_id", response.student_uh_id)
+    response.student_phone_number = request.form.get("phone", response.student_phone_number)
+    response.student_mailing_address = request.form.get("mailing_address", response.student_mailing_address)
+    response.student_city = request.form.get("city", response.student_city)
+    response.student_state = request.form.get("state", response.student_state)
+    response.student_zip_code = request.form.get("zip", response.student_zip_code)
+    response.student_email = request.form.get("email", response.student_email)
+
+    # === Petition Purpose Flags ===
+    for i in range(1, 18):
+        setattr(response, f"Q{i}", f"Q{i}" in request.form)
+
+    # === Petition Purpose Details ===
+    response.program_status_action = request.form.get("update_status_action", response.program_status_action)
+    response.admission_status_from = request.form.get("admission_status_from", response.admission_status_from)
+    response.admission_status_to = request.form.get("admission_status_to", response.admission_status_to)
+    response.new_career = request.form.get("new_career", response.new_career)
+
+    # Post-bac study objective checkboxes
+    response.second_bachelor_plan = request.form.get("study_objective") == "second_degree"
+    response.graduate_study_objective = request.form.get("study_objective") == "grad_study"
+    response.teacher_certification = request.form.get("study_objective") == "teacher_cert"
+    response.personal_enrichment_objective = request.form.get("study_objective") == "enrichment"
+
+    response.program_change_from = request.form.get("program_change_from", response.program_change_from)
+    response.program_change_to = request.form.get("program_change_to", response.program_change_to)
+    response.plan_change_from = request.form.get("plan_change_from", response.plan_change_from)
+    response.plan_change_to = request.form.get("plan_change_to", response.plan_change_to)
+    response.degree_objective_change_from = request.form.get("degree_objective_change_from", response.degree_objective_change_from)
+    response.degree_objective_change_to = request.form.get("degree_objective_change_to", response.degree_objective_change_to)
+
+    response.requirement_term_catalog = request.form.get("requirement_term_catalog", response.requirement_term_catalog)
+    response.requirement_term_program_plan = request.form.get("requirement_term_program_plan", response.requirement_term_program_plan)
+
+    response.additional_plan_degree_type = request.form.get("additional_plan_degree_type", response.additional_plan_degree_type)
+    response.additional_plan_degree_type_other = request.form.get("additional_plan_degree_type_other", response.additional_plan_degree_type_other)
+    response.primary_plan = "primary_plan" in request.form
+    response.secondary_plan = "secondary_plan" in request.form
+
+    response.second_degree_type = request.form.get("second_degree_type", response.second_degree_type)
+    response.minor_change_from = request.form.get("minor_change_from", response.minor_change_from)
+    response.minor_change_to = request.form.get("minor_change_to", response.minor_change_to)
+    response.additional_minor = request.form.get("additional_minor", response.additional_minor)
+
+    # === Explanation and Signature ===
+    response.explanation = request.form.get("explanation", response.explanation)
+    response.student_signature = request.form.get("student_signature", response.student_signature)
+
+    date_str = request.form.get("date")
+    if date_str:
+        try:
+            response.signature_date = datetime.strptime(date_str, "%Y-%m-%d")
+        except ValueError:
+            pass  # invalid date format
+
+    response.date_submitted = datetime.utcnow()
+    db.session.commit()
+
+    return jsonify({"message": "Form saved successfully."}), 200
+
+
+
+    #---------- This part down is for building the PDF (Alex can you work on this) ----------
+
+    student_map = {
+        "initial_adjustment_explanation": (125.36, 251.52),
+        "iclp_class1": (84.20, 354.36),
+        "iclp_professor1": (227.12, 354.36),
+        #"iclp_professor_signature1": (375.43, 354.36), TO BE ADDED
+        "iclp_date1": (534.31, 354.36),
+        "iclp_class2": (84.20, 370.44),
+        "iclp_professor2": (227.12, 370.44),
+        #"iclp_professor_signature2": (375.43, 370.44), TO BE ADDED
+        "iclp_date2": (534.31, 370.44),
+        "final_semester_hours_needed": (232.28, 507.72),
+        "concurrent_hours_uh": (226.75, 572.77),
+        "concurrent_hours_other": (318.21, 572.77),
+        "concurrent_university_name": (375.44, 572.77),
+        "fall_sem": (318.08, 604.68),
+        "spring_sem": (453.68, 604.52),
+        "dclass1": (198.08, 618.24), #seperated by semicolons in table
+        "dclass2": (265.99, 618.24), #drop_courses = db.Column(db.String(255), nullable=True)
+        "dclass3": (338.83, 618.24),
+        "remaining_hours_uh": (79.16, 632.04),
+        "fall_sem2": (271.65, 632.04),
+        "spring_sem2": (406.40, 632.04),
+        "student_name": (86.97, 688.70),
+        "ps_id": (417.26, 688.70),
+        #"AA1_name": (70.16, 725.16),
+        #"AA1_sig": (286.27, 725.16), TO BE ADDED
+        #"AA1_Date": (482.96, 725.16),
+        #"AA2_name": (70.16, 760.80), 
+        #"AA2_sig": (286.27, 760.80), TO BE ADDED
+        #"AA2_date": (482.96, 760.80),
+
+        "initial_adjustment_issues": (41.56, 240.32),
+        "improper_course_level_placement": (41.56, 280.04),
+        "medical_reason": (41.56, 402.44),
+        #"medical_letter_attached": (54.76, 476.60), to be added
+        "final_semester": (41.56, 508.16),
+        "concurrent_enrollment": (41.56, 561.67),
+        "semester_fall": (227.56, 605.11),
+        "semester_spring": (351.64, 605.11),
+        "semester_fall": (189.88, 632.48),
+        "semester_spring": (302.68, 632.48)
+    }
+
+
+    #------ below os for oprinting pdf ----
+
+
+        # Ensure the student_name is not None and has at least one name
+    name_parts = (response.student_name or "").strip().split()
+
+    # Assign default empty values if any name part is missing
+    first = name_parts[0] if len(name_parts) > 0 else ""
+    middle = name_parts[1] if len(name_parts) > 1 else ""
+    last = name_parts[2] if len(name_parts) > 2 else ""
+
+    doc = fitz.open("static/emptyforms/RCL/RCL.pdf") # open pdf
+
+    # Choose the page to write on (0-indexed)
+    page = doc.load_page(0)  # For the first page
+
+    # Define text style (font, size, color, etc.)
+    font = "helv"  # Use font name as string (e.g., 'helv' for Helvetica)
+    size = 12  # Font size
+    color = (0, 0, 0)  # Black color in RGB (0, 0, 0)
+
+     # If the field exists (is not None), insert the value into the PDF
+    # Iterate through the student_map
+    # Iterate through the student_map
+    for field, position in student_map.items():
+        # Get the field value from the response object
+        field_value = getattr(response, field, None)
+
+    # Prevent errors by ensuring initials exist before accessing
+        #print("FIELD: ", field, " FIELD_VALIE: ", field_value)
+        if isinstance(field_value, bool):  # If the value is a boolean
+            if field_value:  # If True,
+                page.insert_text(position, "x", fontname=font, fontsize=size, color=color)
+            else:  # If False, output nothing
+                page.insert_text(position, " ", fontname=font, fontsize=size, color=color)
+        elif isinstance(field_value, (str, int)):  # If the value is a string or integer
+            if field_value:  # If the string or integer is not empty
+                #print("FIELD: ", field, " FIELD_VALUE: ", field_value)
+                page.insert_text(position, str(field_value), fontname=font, fontsize=size, color=color)
+            else:  # If the string is empty, output nothing
+                page.insert_text(position, " ", fontname=font, fontsize=size, color=color)
+
+    # Handle other cases if needed
+    else:
+        page.insert_text(position, " ", fontname=font, fontsize=size, color=color)
+
+    #"student_signature": (100, 738)
+    current_date = datetime.utcnow().strftime("%m/%d/%Y")
+    # Insert the formatted date into the PDF
+    page.insert_text((509.74, 688.70), current_date, fontname=font, fontsize=size, color=color)
+
+    filename = f"{user_id}.jpg"
+    filename = secure_filename(filename)
+
+    # Save the file
+    file_path = os.path.join("static/signatures", filename)
+
+    # List all files in the SIGNATURE_UPLOAD_FOLDER
+        # Position for student signature
+    student_signature_position = (279.58, 640.70)  # The coordinates (x, y) where the signature will be inserted
+    # Insert Student Signature (JPG image)
+    try:
+        img_rect = fitz.Rect(student_signature_position[0], student_signature_position[1], 
+                            student_signature_position[0] + 100, student_signature_position[1] + 50)  # Adjust size if needed
+        page.insert_image(img_rect, filename = file_path)
+        #print("SUCCESS")
+    except Exception as e:
+        print(f"Error inserting student signature: {e}")
+
+    user=session["user"]
+
+    # Avoid accessing first[0] or last[0] if empty
+    filename = f"{user_id}.pdf"
+    filename = secure_filename(filename)
+
+    # Define the path where the document should be saved
+    save_path = os.path.join('static', 'documents', 'RCL', filename)
+
+    # Save the document (assuming 'doc' is a document object with a 'save' method)
+    doc.save(save_path)
+
+
+
+    return jsonify({"message": "Form progress saved successfully!"}), 200
+
 
 @form_bp.route("/tw_form", methods=['GET', 'POST'])
 def fill_tw_form():

@@ -242,15 +242,15 @@
             event.preventDefault();  // Prevent immediate redirection
         
             let formData = new FormData(document.getElementById("gpForm"));
-        
-            fetch("#", {
+    
+            fetch("{{ url_for('form.save_changeMajor_form') }}", {
                 method: "POST",
                 body: formData
             })
             .then(response => response.json())
             .then(data => {
                 alert(data.message);  // Show save success message
-                window.location.href = "#";  // Redirect to dashboard after save
+                window.location.href = "{{ url_for('dashboard') }}";
             })
             .catch(error => console.error("Error saving form:", error));
         });
