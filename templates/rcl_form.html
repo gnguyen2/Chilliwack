@@ -157,14 +157,13 @@
         <p>
             <button type="submit" id = "dashboardButton" class="submit-button">Submit Form</button>
         </p>
-    </form>
+        <form action="{{ url_for('form.preview_form') }}" method="POST" target="_blank">
+            <input type="hidden" name="form_type" value="RCL">
+            <button type="submit" class="submit-button" >Preview RCL Form</button>
+        </form>
 
     <!-- Dashboard Button -->
-    <button type="button" id="goToDashboardButton" class="btn btn-secondary">Go to Dashboard</button>
-    <form action="{{ url_for('form.preview_form') }}" method="POST" target="_blank">
-        <input type="hidden" name="form_type" value="RCL">
-        <button type="submit">Preview RCL Form</button>
-    </form>
+    <button type="button" id="goToDashboardButton" class="submit-button" >Go to Dashboard</button>
 
     <script>
         // Toggle IAI sub-options

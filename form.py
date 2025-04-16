@@ -259,68 +259,87 @@ def save_changeMajor_form():
     response.department_id =  3 
     db.session.commit()
 
-    return jsonify({"message": "Form saved successfully."}), 200
-
-
-
     #---------- This part down is for building the PDF (Alex can you work on this) ----------
 
-    student_map = {
-        "initial_adjustment_explanation": (125.36, 251.52),
-        "iclp_class1": (84.20, 354.36),
-        "iclp_professor1": (227.12, 354.36),
-        #"iclp_professor_signature1": (375.43, 354.36), TO BE ADDED
-        "iclp_date1": (534.31, 354.36),
-        "iclp_class2": (84.20, 370.44),
-        "iclp_professor2": (227.12, 370.44),
-        #"iclp_professor_signature2": (375.43, 370.44), TO BE ADDED
-        "iclp_date2": (534.31, 370.44),
-        "final_semester_hours_needed": (232.28, 507.72),
-        "concurrent_hours_uh": (226.75, 572.77),
-        "concurrent_hours_other": (318.21, 572.77),
-        "concurrent_university_name": (375.44, 572.77),
-        "fall_sem": (318.08, 604.68),
-        "spring_sem": (453.68, 604.52),
-        "dclass1": (198.08, 618.24), #seperated by semicolons in table
-        "dclass2": (265.99, 618.24), #drop_courses = db.Column(db.String(255), nullable=True)
-        "dclass3": (338.83, 618.24),
-        "remaining_hours_uh": (79.16, 632.04),
-        "fall_sem2": (271.65, 632.04),
-        "spring_sem2": (406.40, 632.04),
-        "student_name": (86.97, 688.70),
-        "ps_id": (417.26, 688.70),
-        #"AA1_name": (70.16, 725.16),
-        #"AA1_sig": (286.27, 725.16), TO BE ADDED
-        #"AA1_Date": (482.96, 725.16),
-        #"AA2_name": (70.16, 760.80), 
-        #"AA2_sig": (286.27, 760.80), TO BE ADDED
-        #"AA2_date": (482.96, 760.80),
+    coord_map = {#(x goes down, y goes to left)
+    # --- Student Info ---
+    "student_first_name": (73.75, 600.00),
+    "student_last_name": (73.00, 750.00),
+    "student_middle_name": (73.00, 475.00),
+    "student_uh_id": (92.30, 705.00),
+    "student_phone_number": (92.30, 550.00),
+    "student_mailing_address": (113.00, 710.00),
+    "student_city": (133.00, 760.00),
+    "student_state": (133.00, 635.00),
+    "student_zip_code": (133.00, 550.00),
+    "student_email": (133.00, 460.00),
 
-        "initial_adjustment_issues": (41.56, 240.32),
-        "improper_course_level_placement": (41.56, 280.04),
-        "medical_reason": (41.56, 402.44),
-        #"medical_letter_attached": (54.76, 476.60), to be added
-        "final_semester": (41.56, 508.16),
-        "concurrent_enrollment": (41.56, 561.67),
-        "semester_fall": (227.56, 605.11),
-        "semester_spring": (351.64, 605.11),
-        "semester_fall": (189.88, 632.48),
-        "semester_spring": (302.68, 632.48)
-    }
+    #advisor commented out until implementation
+    #"current_program": (78.50, 280.00), 
+    #"current_plan": (78.50, 150.00),
+    #"petition_effective_before_class_day": (112.90, 240.00),
+    #"petition_effective_after_class_day": (134, 240),
+
+    # --- Petition purpose (sample) ---
+    "program_status_action": (196.00, 710.00),
+
+    # --- New blanks from image, labeled a1 to a50 ---
+    "plan_change_from": (195.80, 540.08),
+    "plan_change_to": (195.80, 470.09),
+    "second_degree_type": (195.80, 275.61),
+    "second_degree_type_other": (195.80, 140.61),
+    #"admission_status_from": (216.50, 646.86),
+    "admission_status_to": (216.50, 600.86),
+    "degree_objective_change_from": (216.50, 487.31),
+    "degree_objective_change_to": (216.50, 403.75),
+    "minor_change_from": (216.50, 280.13),
+    "minor_change_to": (216.50, 145.21),
+    "new_career": (236.06, 675.25),
+    "additional_minor": (236.06, 160.76),
+    "requirement_term_catalog": (277.46, 468.99),
+    "requirement_term_program_plan": (277.46, 365.40),
+    "additional_plan_degree_type": (298.16, 535.68),
+    "additional_plan_degree_type_other": (298.16, 405.42),
+    "program_change_from": (318.86, 770.27),
+    "program_change_to": (318.86, 698.25),
+    "explanation_of_request": (361.57, 750.25),
 
 
+
+    #---to be implemented---
+    #"advisor_comments": (470.59, 260.37),
+    #"advisor_signature": (447.63, 570.95),
+    #"advisor_printed_name": (447.63, 471.01),
+    #"advisor_signature_date": (447.63, 361.11),
+    #"chair_signature": (478.70, 578.95),
+    #"chair_printed_name": (478.70, 471.01),
+    #"chair_signature_date": (478.70, 361.11),
+
+
+    #check boxes remember to implement if X make font bigger
+    "x1":(187, 779),
+    "x2":(217, 779),
+    "x3":(238, 779),
+    "x4":(310, 779),
+    "x5":(187, 546),
+    "x6":(207, 546), 
+    "x7":(269, 546), 
+    "x8":(289, 546),
+    "x9":(187, 290),
+    "x10":(207, 290),
+    "x11":(237, 290),
+    "x12":(247, 290),
+    "x13":(257, 290),
+    "x14":(280, 290),
+    "x15":(304, 290),
+    "x16":(319, 290),
+    "x17":(333, 290),
+
+}
     #------ below os for oprinting pdf ----
 
 
-        # Ensure the student_name is not None and has at least one name
-    name_parts = (response.student_name or "").strip().split()
-
-    # Assign default empty values if any name part is missing
-    first = name_parts[0] if len(name_parts) > 0 else ""
-    middle = name_parts[1] if len(name_parts) > 1 else ""
-    last = name_parts[2] if len(name_parts) > 2 else ""
-
-    doc = fitz.open("static/emptyforms/RCL/RCL.pdf") # open pdf
+    doc = fitz.open("static/emptyforms/CM.pdf") # open pdf
 
     # Choose the page to write on (0-indexed)
     page = doc.load_page(0)  # For the first page
@@ -333,7 +352,7 @@ def save_changeMajor_form():
      # If the field exists (is not None), insert the value into the PDF
     # Iterate through the student_map
     # Iterate through the student_map
-    for field, position in student_map.items():
+    for field, position in coord_map.items():
         # Get the field value from the response object
         field_value = getattr(response, field, None)
 
@@ -358,8 +377,9 @@ def save_changeMajor_form():
     #"student_signature": (100, 738)
     current_date = datetime.utcnow().strftime("%m/%d/%Y")
     # Insert the formatted date into the PDF
-    page.insert_text((509.74, 688.70), current_date, fontname=font, fontsize=size, color=color)
+    page.insert_text((399.48, 400.08), current_date, fontname=font, fontsize=size, color=color)
 
+    #this sets up signature filename
     filename = f"{user_id}.jpg"
     filename = secure_filename(filename)
 
@@ -368,7 +388,7 @@ def save_changeMajor_form():
 
     # List all files in the SIGNATURE_UPLOAD_FOLDER
         # Position for student signature
-    student_signature_position = (279.58, 640.70)  # The coordinates (x, y) where the signature will be inserted
+    student_signature_position = (399.48, 579.31)  # The coordinates (x, y) where the signature will be inserted
     # Insert Student Signature (JPG image)
     try:
         img_rect = fitz.Rect(student_signature_position[0], student_signature_position[1], 
@@ -385,7 +405,7 @@ def save_changeMajor_form():
     filename = secure_filename(filename)
 
     # Define the path where the document should be saved
-    save_path = os.path.join('static', 'documents', 'RCL', filename)
+    save_path = os.path.join('static', 'documents', 'CM', filename)
 
     # Save the document (assuming 'doc' is a document object with a 'save' method)
     doc.save(save_path)
@@ -556,7 +576,7 @@ def save_tw_progress():
 
 
     try:
-        doc = fitz.open("static/emptyforms/TW/TW.pdf")  # open pdf
+        doc = fitz.open("static/emptyforms/TW.pdf")  # open pdf
         print("PDF successfully opened!")
     except Exception as e:
         print(f"Failed to open PDF: {e}")
@@ -979,7 +999,7 @@ def save_rcl_progress():
     middle = name_parts[1] if len(name_parts) > 1 else ""
     last = name_parts[2] if len(name_parts) > 2 else ""
 
-    doc = fitz.open("static/emptyforms/RCL/RCL.pdf") # open pdf
+    doc = fitz.open("static/emptyforms/RCL.pdf") # open pdf
 
     # Choose the page to write on (0-indexed)
     page = doc.load_page(0)  # For the first page
