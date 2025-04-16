@@ -9,7 +9,12 @@ class Role(db.Model):
     
     def __repr__(self):
         return f"<{self.name}>"
-    
+
+# For departments
+class Department(db.Model):
+    __tablename__ = 'department'
+    id = db.Column(db.Integer, primary_key=True)
+ 
 # Status Table
 class Status(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -17,14 +22,14 @@ class Status(db.Model):
     
     def __repr__(self):
         return f"<{self.name}>"
-
-        
+       
 # User Table
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     microsoft_id = db.Column(db.String(50), unique=True, nullable=False)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
+    department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=True)
 
     # Foreign Key to Role Table
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'))
@@ -51,6 +56,7 @@ class Request(db.Model):
     details = db.Column(db.Text, nullable=True)  # Stores extra info like dropped courses
     status = db.Column(db.String(50), default="pending")  # pending, approved, rejected
     pdf_path = db.Column(db.String(255))  # Stores the generated PDF path
+    approval_date = db.Column(db.DateTime)
 
     approvals = db.relationship("ApprovalProcess", back_populates="request", cascade="all, delete-orphan")
 
@@ -76,6 +82,7 @@ class RCLResponses(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship("User", backref="responses")
+    department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=True)
 
     request_id = db.Column(db.Integer, db.ForeignKey('request.id'), nullable=True)  # Nullable for drafts
     request = db.relationship("Request", backref="form_responses")
@@ -143,9 +150,11 @@ class RCLDocuments(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     response_id = db.Column(db.Integer, db.ForeignKey("rcl_responses.id"), nullable=False)
+    department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=True)
     file_name = db.Column(db.String(255), nullable=True)
     file_path = db.Column(db.String(255), nullable=True)
     uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
 
     # Relationship back to RCLResponses
     response = db.relationship("RCLResponses", back_populates="documents")
@@ -162,6 +171,8 @@ class TWResponses(db.Model):
 
     request_id = db.Column(db.Integer, db.ForeignKey('request.id'), nullable=True)  # Nullable for drafts
     request = db.relationship("Request", backref="withdrawal_responses")
+
+    department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=True)
 
     # Student Information
     student_name = db.Column(db.String(100), nullable=True)
@@ -206,6 +217,7 @@ class TWDocuments(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     response_id = db.Column(db.Integer, db.ForeignKey("tw_responses.id"), nullable=False)
+    department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=True)
     file_name = db.Column(db.String(255), nullable=True)
     file_path = db.Column(db.String(255), nullable=True)
     uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -221,6 +233,8 @@ class GeneralPetition(db.Model):  # FOR INTEGRATION
     
     # Primary Key (Django automatically adds an id field if not specified)
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
+    department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=True)
 
     # Student Information Section
     student_last_name = db.Column(db.String(100), nullable=False)
@@ -311,3 +325,22 @@ class GeneralPetition(db.Model):  # FOR INTEGRATION
     Q17 = db.Column(db.Boolean, default=False)
 
     date_submitted = db.Column(db.Date, nullable=True)
+
+    # Add a relationship to store multiple documents
+    documents = db.relationship("GeneralPetitionDocuments", back_populates="response", cascade="all, delete-orphan")
+
+class GeneralPetitionDocuments(db.Model):
+    __tablename__ = "gen_pet_documents"
+
+    id = db.Column(db.Integer, primary_key=True)
+    response_id = db.Column(db.Integer, db.ForeignKey("general_petition.id"), nullable=False)
+    department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=True)
+    file_name = db.Column(db.String(255), nullable=True)
+    file_path = db.Column(db.String(255), nullable=True)
+    uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relationship back to TWResponses
+    response = db.relationship("GeneralPetition", back_populates="documents")
+
+    def __repr__(self):
+        return f"<TWDocuments {self.id} - {self.file_name}>"
