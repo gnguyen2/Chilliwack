@@ -1081,7 +1081,7 @@ def preview_form():
     form_type = request.form.get("form_type")  # Get the form type (TW or RCL)
 
     # Validate form type
-    if form_type not in ["TW", "RCL"]:
+    if form_type not in ["TW", "RCL", "CM"]:
         return jsonify({"error": "Invalid form type"}), 400
 
     # Call the appropriate save function
@@ -1089,8 +1089,11 @@ def preview_form():
         print("TEST1")
         save_tw_progress()
     elif form_type == "RCL":
-        print("TEST1")
+        print("TEST2")
         save_rcl_progress()
+    elif form_type == "CM":
+        print("TEST3")
+        save_changeMajor_form()
 
     # Define the file name (Make sure your PDFs are saved in the right location)
     filename = f"{user_id}.pdf"
