@@ -1,5 +1,5 @@
 from flask import Blueprint, session, redirect, url_for, flash, request, render_template, jsonify, send_file
-from models import db, User, TWResponses, TWDocuments, RCLDocuments, RCLResponses, Request, GeneralPetition
+from models import db, User, TWResponses, TWDocuments, RCLDocuments, RCLResponses, Request, GeneralPetition, GeneralPetitionDocuments
 from werkzeug.utils import secure_filename
 import os
 from datetime import datetime
@@ -82,7 +82,107 @@ def upload_signature():
 
 @form_bp.route("/changeMajor_form", methods=['GET', 'POST'])
 def fill_changeMajor_form():
-    return render_template("changeMajor_form.html")
+    if "user" not in session:
+        flash("Please log in first.", "warning")
+        return redirect(url_for("home"))
+
+    user_id = session["user"]["id"]
+    existing_response = GeneralPetition.query.filter_by(user_id=user_id, is_finalized=False).first()
+
+    if request.method == 'POST':
+        response = existing_response if existing_response else GeneralPetition(user_id=user_id)
+
+        response.student_last_name   = request.form.get("last_name",   "").strip()
+        response.student_first_name  = request.form.get("first_name",  "").strip()
+        response.student_middle_name = request.form.get("middle_name", "").strip()
+        response.student_uh_id       = request.form.get("uh_id",       "").strip()
+        response.student_phone_number= request.form.get("phone",       "").strip()
+        response.student_mailing_address = request.form.get("mailing_address","").strip()
+        response.student_city        = request.form.get("city",        "").strip()
+        response.student_state       = request.form.get("state",       "").strip()
+        response.student_zip_code    = request.form.get("zip",         "").strip()
+        response.student_email       = request.form.get("email",       "").strip()
+
+        response.Q1 = "Q1" in request.form
+        response.program_status_action = request.form.get("update_status_action","").strip()
+
+        response.Q2 = "Q2" in request.form
+        response.admission_status_from = request.form.get("admission_status_from","").strip()
+        response.admission_status_to   = request.form.get("admission_status_to","").strip()
+
+        response.Q3 = "Q3" in request.form
+        response.new_career            = request.form.get("new_career","").strip()
+        # post‑bac study‑objective radio buttons
+        response.second_bachelor_plan        = request.form.get("study_objective") == "second_degree"
+        response.graduate_study_objective    = request.form.get("study_objective") == "grad_study"
+        response.teacher_certification       = request.form.get("study_objective") == "teacher_cert"
+        response.personal_enrichment_objective= request.form.get("study_objective") == "enrichment"
+
+        response.Q4 = "Q4" in request.form
+        response.program_change_from = request.form.get("program_change_from","").strip()
+        response.program_change_to   = request.form.get("program_change_to","").strip()
+
+        response.Q5 = "Q5" in request.form
+        response.plan_change_from = request.form.get("plan_change_from","").strip()
+        response.plan_change_to   = request.form.get("plan_change_to","").strip()
+
+        response.Q6 = "Q6" in request.form
+        response.degree_objective_change_from = request.form.get("degree_objective_change_from","").strip()
+        response.degree_objective_change_to   = request.form.get("degree_objective_change_to","").strip()
+
+        response.Q7 = "Q7" in request.form
+        response.requirement_term_catalog      = request.form.get("requirement_term_catalog","").strip()
+        response.requirement_term_program_plan = request.form.get("requirement_term_program_plan","").strip()
+
+        response.Q8 = "Q8" in request.form
+        response.additional_plan_degree_type        = request.form.get("additional_plan_degree_type","").strip()
+        response.additional_plan_degree_type_other  = request.form.get("additional_plan_degree_type_other","").strip()
+        response.primary_plan   = request.form.get("primary_plan")   == "primary_plan"
+        response.secondary_plan = request.form.get("secondary_plan") == "secondary_plan"
+
+        response.Q9  = "Q9" in request.form
+        response.second_degree_type = request.form.get("second_degree_type","").strip()
+
+        response.Q10 = "Q10" in request.form
+        response.minor_change_from = request.form.get("minor_change_from","").strip()
+        response.minor_change_to   = request.form.get("minor_change_to","").strip()
+
+        response.Q11 = "Q11" in request.form
+        response.additional_minor = request.form.get("additional_minor","").strip()
+
+        # Q12 – Q17 are just flags; any details could go in explanation
+        for i in range(12, 18):
+            setattr(response, f"Q{i}", f"Q{i}" in request.form)
+
+        response.explanation = request.form.get("explanation","").strip()
+        response.student_signature = request.form.get("student_signature","").strip()
+        response.signature_date    = request.form.get("date") or None
+
+        files = request.files.getlist("supporting_documents")
+        for f in files:
+            if f and document_allowed_file(f.filename):
+                safe = secure_filename(f"user_{user_id}_{f.filename}")
+                path = os.path.join(DOCUMENTS_UPLOAD_FOLDER, safe)
+                f.save(path)
+
+                response.documents.append(
+                    GeneralPetitionDocuments(
+                        file_name = f.filename,
+                        file_path = safe
+                    )
+                )
+
+        # -------------------- 6️⃣  MISC / BOOK‑KEEPING ---------------
+        response.last_updated  = datetime.utcnow()
+        response.department_id = 1           # or whichever dept. you need
+        db.session.add(response)
+        db.session.commit()
+
+        flash("Petition saved successfully!", "success")
+        return redirect(url_for("form.fill_changeMajor_form"))
+
+    # GET – render template with any draft pre‑filled
+    return render_template("changeMajor_form.html", response=existing_response)
 
 @form_bp.route("/save_changeMajor_form", methods=["POST"])
 def save_changeMajor_form():
@@ -91,9 +191,9 @@ def save_changeMajor_form():
 
     user_id = session["user"]["id"]
 
-    response = GeneralPetition.query.filter_by(department_id=user_id, is_finalized=False).first()
+    response = GeneralPetition.query.filter_by(user_id=user_id, is_finalized=False).first()
     if not response:
-        response = GeneralPetition(department_id=user_id)
+        response = GeneralPetition(user_id=user_id)
         db.session.add(response)
 
     # === Student Info ===
@@ -292,7 +392,6 @@ def save_changeMajor_form():
 
 
     return jsonify({"message": "Form progress saved successfully!"}), 200
-
 
 @form_bp.route("/tw_form", methods=['GET', 'POST'])
 def fill_tw_form():
