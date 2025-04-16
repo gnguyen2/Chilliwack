@@ -165,12 +165,11 @@
     </form>
     <br><br>
     <!-- Dashboard Button -->
-    <button type="button" id="goToDashboardButton" class="btn btn-secondary">Go to Dashboard</button>
-
-<form action="{{ url_for('form.preview_form') }}" method="POST" target="_blank">
-    <input type="hidden" name="form_type" value="TW">
-    <button type="submit">Preview TW Form</button>
-</form>
+    <button type="button" id="goToDashboardButton" class="submit-button" >Go to Dashboard</button>
+    <form action="{{ url_for('form.preview_form') }}" method="POST" target="_blank">
+        <input type="hidden" name="form_type" value="TW">
+        <button type="submit" class="submit-button" >Preview TW Form</button>
+    </form>
 
     <script>
         document.getElementById("goToDashboardButton").addEventListener("click", function(event) {
