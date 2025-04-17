@@ -20,7 +20,7 @@
             </div>
 
             <div id="iai_suboptions" style="display: none; margin-left: 20px;">
-                <label><input type="checkbox" name="iai_suboption" value="English Language"> English Language</label><br>
+                <label><input type="checkbox" name="iai_suboption" value="English Language" > English Language</label><br>
                 <label><input type="checkbox" name="iai_suboption" value="Reading Requirements"> Reading Requirements</label><br>
                 <label><input type="checkbox" name="iai_suboption" value="Unfamiliarity with American Teaching Methods"> Unfamiliarity with American teaching methods</label>
             </div>
@@ -61,7 +61,7 @@
                     hours at UH and 
                     <input type="number" id="concurrent_hours_other" name="other_school_hours" min="1" max="9" disabled value="{{ response.concurrent_hours_other if response else '' }}"> 
                     hours at
-                    <input type="text" id="other_school_name" name="other_school_name" placeholder="Enter school name" disabled value="{{ response.other_school_name if response else '' }}">.
+                    <input type="text" id="other_school_name" name="other_school_name"  ="Enter school name" disabled value="{{ response.other_school_name if response else '' }}">.
                 </label>
             </div>
         </div>
@@ -79,12 +79,18 @@
             </label>
         </p>
         <p>
+            {% set courses = (response.drop_courses or '').split(';') %}
             <label>
                 I want to drop the following class(es):
-                <input type="text" name="course1" placeholder="Course Number">
-                <input type="text" name="course2" placeholder="Course Number">
-                <input type="text" name="course3" placeholder="Course Number">
-            </label>
+                <input type="text" name="course1" placeholder="Course Number"
+                       value="{{  courses[0]|trim if courses|length > 0 else ''  }}">
+              
+                <input type="text" name="course2" placeholder="Course Number"
+                       value="{{  courses[1]|trim if courses|length > 1 else ''  }}">
+              
+                <input type="text" name="course3" placeholder="Course Number"
+                       value="{{  courses[2]|trim if courses|length > 2 else ''  }}">
+              </label>              
         </p>
         <p>
             <label>
