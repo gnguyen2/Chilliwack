@@ -11,6 +11,8 @@
     <a href="{{ url_for('auth.logout') }}" class="button">Logout</a>
     <a href="{{ url_for('dashboard') }}" class="button">Dashboard</a>
     <a href="{{ url_for('admin.departments_roles') }}" class="button">Departments & Roles</a>
+    <a href="{{ url_for('admin.approvals') }}" class="button">Pending & History</a>
+
 
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}

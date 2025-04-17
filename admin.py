@@ -1,6 +1,6 @@
 from flask import Blueprint, request, flash, redirect, url_for, session, render_template, send_file
 from decorators import role_required
-from models import db, User, Role, Status, RCLResponses, TWResponses, Request, Department
+from models import db, User, Role, Status, RCLResponses, TWResponses, Request, Department, ApprovalProcess
 from sqlalchemy.orm import joinedload
 
 admin_bp = Blueprint("admin", __name__)
@@ -225,3 +225,46 @@ def update_user_assignment():
         flash("User not found.", "danger")
 
     return redirect(url_for("admin.departments_roles"))
+# View pending approvals & history
+@admin_bp.route("/admin/approvals", methods=["GET"])
+@role_required("administrator")
+def approvals():
+
+    # Basic queries
+    approvals_query = ApprovalProcess.query.join(Request).join(User, ApprovalProcess.approver)
+    
+    # Get filters from request.args
+    form_type = request.args.get("form_type")
+    user_id = request.args.get("user_id")
+    dept_id = request.args.get("department_id")
+    start_date = request.args.get("start_date")
+    end_date = request.args.get("end_date")
+
+    if form_type:
+        approvals_query = approvals_query.filter(Request.request_type == form_type)
+    if user_id:
+        approvals_query = approvals_query.filter(ApprovalProcess.approver_id == user_id)
+    if dept_id:
+        approvals_query = approvals_query.join(User, User.id == ApprovalProcess.approver_id)\
+                                         .filter(User.department_id == dept_id)
+    if start_date:
+        approvals_query = approvals_query.filter(ApprovalProcess.decision_date >= start_date)
+    if end_date:
+        approvals_query = approvals_query.filter(ApprovalProcess.decision_date <= end_date)
+
+    all_approvals = approvals_query.order_by(ApprovalProcess.decision_date.desc()).all()
+    pending_approvals = [a for a in all_approvals if a.status == "pending"]
+    history = [a for a in all_approvals if a.status != "pending"]
+
+    departments = Department.query.all()
+    users = User.query.order_by(User.name).all()
+    user = User.query.filter_by(email=session["user"]["email"]).first()
+
+    return render_template(
+        "pending_approvals.html",
+        pending_approvals=pending_approvals,
+        history=history,
+        departments=departments,
+        users=users,
+        user=user
+    )
