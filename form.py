@@ -261,6 +261,8 @@ def save_changeMajor_form():
 
     #---------- This part down is for building the PDF (Alex can you work on this) ----------
 
+
+
     coord_map = {#(x goes down, y goes to left)
     # --- Student Info ---
     "student_first_name": (73.75, 600.00),
@@ -360,24 +362,24 @@ def save_changeMajor_form():
         #print("FIELD: ", field, " FIELD_VALIE: ", field_value)
         if isinstance(field_value, bool):  # If the value is a boolean
             if field_value:  # If True,
-                page.insert_text(position, "x", fontname=font, fontsize=size, color=color)
+                page.insert_text(position, "x", fontname=font, fontsize=size, color=color, rotate=90)
             else:  # If False, output nothing
-                page.insert_text(position, " ", fontname=font, fontsize=size, color=color)
+                page.insert_text(position, " ", fontname=font, fontsize=size, color=color, rotate=90)
         elif isinstance(field_value, (str, int)):  # If the value is a string or integer
             if field_value:  # If the string or integer is not empty
                 #print("FIELD: ", field, " FIELD_VALUE: ", field_value)
-                page.insert_text(position, str(field_value), fontname=font, fontsize=size, color=color)
+                page.insert_text(position, str(field_value), fontname=font, fontsize=size, color=color, rotate=90)
             else:  # If the string is empty, output nothing
-                page.insert_text(position, " ", fontname=font, fontsize=size, color=color)
+                page.insert_text(position, " ", fontname=font, fontsize=size, color=color, rotate=90)
 
     # Handle other cases if needed
     else:
-        page.insert_text(position, " ", fontname=font, fontsize=size, color=color)
+        page.insert_text(position, " ", fontname=font, fontsize=size, color=color, rotate=90)
 
     #"student_signature": (100, 738)
     current_date = datetime.utcnow().strftime("%m/%d/%Y")
     # Insert the formatted date into the PDF
-    page.insert_text((399.48, 400.08), current_date, fontname=font, fontsize=size, color=color)
+    page.insert_text((405.48, 400.08), current_date, fontname=font, fontsize=size, color=color, rotate=90)
 
     #this sets up signature filename
     filename = f"{user_id}.jpg"
@@ -388,12 +390,12 @@ def save_changeMajor_form():
 
     # List all files in the SIGNATURE_UPLOAD_FOLDER
         # Position for student signature
-    student_signature_position = (399.48, 579.31)  # The coordinates (x, y) where the signature will be inserted
+    student_signature_position = (343.48, 579.31)  # The coordinates (x, y) where the signature will be inserted
     # Insert Student Signature (JPG image)
     try:
         img_rect = fitz.Rect(student_signature_position[0], student_signature_position[1], 
                             student_signature_position[0] + 100, student_signature_position[1] + 50)  # Adjust size if needed
-        page.insert_image(img_rect, filename = file_path)
+        page.insert_image(img_rect, filename = file_path, rotate=90)
         #print("SUCCESS")
     except Exception as e:
         print(f"Error inserting student signature: {e}")
