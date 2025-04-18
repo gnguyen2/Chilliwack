@@ -1,5 +1,5 @@
 from flask import Blueprint, session, redirect, url_for, flash, request, render_template, jsonify, send_file
-from models import db, User, TWResponses, TWDocuments, RCLDocuments, RCLResponses, Request, GeneralPetition, GeneralPetitionDocuments
+from models import db, User, TWResponses, TWDocuments, RCLDocuments, RCLResponses, Request, GeneralPetition, GeneralPetitionDocuments, ApprovalProcess
 from werkzeug.utils import secure_filename
 import os
 from datetime import datetime
@@ -511,6 +511,17 @@ def fill_tw_form():
             TWResponses.query.filter_by(user_id=user_id, is_finalized=False).delete()
             db.session.commit()
             flash("Form submitted successfully!", "success")
+            
+            approval = ApprovalProcess(
+                request_id=response.request_id,
+                approver_id=user_exists.id,
+                status="pending",
+                decision_date=datetime.utcnow(),
+                comments=None,
+            )
+            db.session.add(approval)
+            db.session.commit()
+
             return redirect(url_for("dashboard"))
 
         flash("Form saved successfully!", "success")
@@ -846,6 +857,16 @@ def fill_rcl_form():
             RCLResponses.query.filter_by(user_id=user_id, is_finalized=False).delete()
             db.session.commit()
             flash("RCL Form submitted successfully!", "success")
+            # Create ApprovalProcess entry
+            approval = ApprovalProcess(
+                request_id=response.request_id,
+                approver_id=user_exists.id,  # whoever is submitting it
+                status="pending",
+                decision_date=datetime.utcnow(),
+                comments=None,
+            )
+            db.session.add(approval)
+            db.session.commit()
             return redirect(url_for("dashboard"))
 
         flash("RCL Form saved successfully!", "success")
