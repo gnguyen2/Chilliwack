@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="static/form.css">
+    <link rel="stylesheet" href="static/form_gp.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>General Petition Form</title>
 </head>
@@ -44,9 +44,7 @@
                 <label for="phone">Phone Number:</label>
                 <input type="tel" name="phone" id="phone" value="{{ response.student_phone_number if response else '' }}" required>
             </div>
-        </div>
 
-        <div class="form-flex">
             <div class="form-group">
                 <label for="mailing_address">Mailing Address:</label>
                 <input type="text" name="mailing_address" id="mailing_address" value="{{ response.student_mailing_address if response else '' }}" required>
@@ -98,7 +96,7 @@
                 <div class="radio-group">
                     <p>If post baccalaureate, indicate study objective:</p>
                     <input type="radio" name="study_objective" id="second_bachelor_plan" value="second_degree" {% if response and response.second_bachelor_plan %}checked{% endif %}>
-                    <label for="second_degree">Second bachelor's degree</label><br>
+                    <label for="second_degree">Second bachelor's degree</label><br><br>
                     
                     <input type="radio" name="study_objective" id="graduate_study_objective" value="grad_study" {% if response and response.second_bachelor_plan %}checked{% endif %}>
                     <label for="grad_study">Requirements for graduate study</label><br>
