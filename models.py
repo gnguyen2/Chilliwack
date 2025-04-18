@@ -247,6 +247,9 @@ class GeneralPetition(db.Model):  # FOR INTEGRATION
 
     department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=True)
 
+    request_id = db.Column(db.Integer, db.ForeignKey('request.id'), nullable=True)  # Nullable for drafts
+    request = db.relationship("Request", backref="change_major_responses")
+
     # Student Information Section
     student_last_name = db.Column(db.String(100), nullable=True)
     student_first_name = db.Column(db.String(100), nullable=True)
