@@ -1,0 +1,32 @@
+{% if forms %}
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Student&nbsp;Name / Email</th>
+      <th>Date&nbsp;Submitted</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for f in forms %}
+    <tr>
+      <!-- Model name → TWResponses, RCLResponses, GeneralPetition, … -->
+      <td>{{ f.__class__.__name__ }}</td>
+
+      <!-- Try the most common identifiers; adjust to your models -->
+      <td>{{ f.student_name or f.student_email }}</td>
+
+      <!-- Pick whichever timestamp each model has -->
+      <td>
+        {{ (f.date_submitted
+            or f.submission_date
+            or f.last_updated) }}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+  <p>No finalized forms for your department yet.</p>
+{% endif %}

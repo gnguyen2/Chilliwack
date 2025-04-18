@@ -1,9 +1,68 @@
 from flask import Blueprint, request, flash, redirect, url_for, session, render_template, send_file
 from decorators import role_required
-from models import db, User, Role, Status, RCLResponses, TWResponses, Request, Department, ApprovalProcess
+from models import db, User, Role, Status, RCLResponses, TWResponses, Request, Department, ApprovalProcess, GeneralPetition
 from sqlalchemy.orm import joinedload
 
 admin_bp = Blueprint("admin", __name__)
+
+# 0 = admin | 1 = TW | 2 = RCL | 3 = Gen‑Pet | 4 = Address Change
+DEPT_MODEL_MAP = {
+    1: TWResponses,
+    2: RCLResponses,
+    3: GeneralPetition,
+    #4: AddressChangeResponses
+}
+
+# Privlaged user dashboard
+@admin_bp.route("/department_dash")
+@role_required("administrator", "privilegeduser")
+def departmentdashboard():
+    if not session.get("user"):
+        flash("Please log in first.", "warning")
+        return redirect(url_for("home"))
+
+    # Get current user with role
+    user = User.query.options(joinedload(User.role)).filter_by(email=session["user"]["email"]).first()
+
+    forms = []
+
+    # Admin
+    if user.department_id == 0:
+        forms = (
+            TWResponses.query.filter(
+                TWResponses.is_finalized == True,
+                TWResponses.request_id.isnot(None)
+            ).all()
+            +
+            RCLResponses.query.filter(
+                RCLResponses.is_finalized == True,
+                RCLResponses.request_id.isnot(None)
+            ).all()
+            +
+            GeneralPetition.query.filter(GeneralPetition.is_finalized == True).all()
+        )
+    
+    # Everyone Else
+    else:
+        model = DEPT_MODEL_MAP.get(user.department_id)
+        if model is None:
+            flash("No form type configured for your department.", "warning")
+        else:
+            if model is not None:
+                q = model.query.filter(model.is_finalized.is_(True))
+
+                # Only apply `.request_id.isnot(None)` if the model supports it
+                if model in [TWResponses, RCLResponses]:
+                    q = q.filter(model.request_id.isnot(None))
+
+                forms = q.all()
+
+
+    # Check if bypass is requested
+    if request.args.get("bypass") == "true":
+        return render_template('departmentdashboard.html', user=user, forms=forms)
+    
+    return render_template('departmentdashboard.html', user=user, forms=forms)
 
 # Admin Dashboard
 @admin_bp.route("/admin")
@@ -25,7 +84,7 @@ def admindashboard():
     # Get distinct status values
     statuses = Status.query.all()
 
-        # Fetch only submitted (finalized) requests where request_id is not null
+    # Fetch only submitted (finalized) requests where request_id is not null
     submitted_rcl_requests = RCLResponses.query.filter(
         RCLResponses.is_finalized == True,
         RCLResponses.request_id.isnot(None)
@@ -34,9 +93,13 @@ def admindashboard():
         TWResponses.is_finalized == True,
         TWResponses.request_id.isnot(None)
     ).all()
+    submitted_genpet_form = GeneralPetition.query.filter(
+        GeneralPetition.is_finalized == True,
+        GeneralPetition.request_id.isnot(None)
+    ).all()
 
     # Combine RCL and TW requests into a single list
-    pending_requests = submitted_rcl_requests + submitted_tw_requests
+    pending_requests = submitted_rcl_requests + submitted_tw_requests + submitted_genpet_form
 
     # Check if bypass is requested
     if request.args.get("bypass") == "true":
@@ -213,18 +276,23 @@ def departments_roles():
 def update_user_assignment():
     user_id = request.form.get("user_id")
     dept_id = request.form.get("department_id") or None
-    role_id = request.form.get("role_id") or None
+    role_id = request.form.get("role_id")
 
     user = User.query.get(user_id)
     if user:
-        user.department_id = dept_id if dept_id else None
-        user.role_id = role_id if role_id else None
+        if not role_id:
+            flash("Role is required when assigning a user.", "danger")
+            return redirect(url_for("admin.departments_roles"))
+
+        user.department_id = dept_id
+        user.role_id = role_id  # now guaranteed not None
         db.session.commit()
         flash(f"Updated department/role for {user.name}.", "success")
     else:
         flash("User not found.", "danger")
 
     return redirect(url_for("admin.departments_roles"))
+
 # View pending approvals & history
 @admin_bp.route("/admin/approvals", methods=["GET"])
 @role_required("administrator")
