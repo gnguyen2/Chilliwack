@@ -276,18 +276,23 @@ def departments_roles():
 def update_user_assignment():
     user_id = request.form.get("user_id")
     dept_id = request.form.get("department_id") or None
-    role_id = request.form.get("role_id") or None
+    role_id = request.form.get("role_id")
 
     user = User.query.get(user_id)
     if user:
-        user.department_id = dept_id if dept_id else None
-        user.role_id = role_id if role_id else None
+        if not role_id:
+            flash("Role is required when assigning a user.", "danger")
+            return redirect(url_for("admin.departments_roles"))
+
+        user.department_id = dept_id
+        user.role_id = role_id  # now guaranteed not None
         db.session.commit()
         flash(f"Updated department/role for {user.name}.", "success")
     else:
         flash("User not found.", "danger")
 
     return redirect(url_for("admin.departments_roles"))
+
 # View pending approvals & history
 @admin_bp.route("/admin/approvals", methods=["GET"])
 @role_required("administrator")
