@@ -135,7 +135,9 @@ class RCLResponses(db.Model):
     semester_fall = db.Column(db.Boolean, default=False)
     semester_spring = db.Column(db.Boolean, default=False)
     year_last_digit = db.Column(db.Integer, default=False)
-    drop_courses = db.Column(db.String(255), nullable=True)  # Store comma-separated course numbers
+    dclass1 = db.Column(db.String(255), nullable=True)  # Store comma-separated course numbers
+    dclass2 = db.Column(db.String(255), nullable=True)
+    dclass3 = db.Column(db.String(255), nullable=True)
     remaining_hours_uh = db.Column(db.Integer, nullable=True)
 
     # Approval Signatures

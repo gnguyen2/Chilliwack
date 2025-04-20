@@ -883,20 +883,36 @@ def save_rcl_progress():
     user_id = session["user"]["id"]
     response = RCLResponses.query.filter_by(user_id=user_id, is_finalized=False).first()
 
+
+    print(request.form) #testing
+
     if not response:
         response = RCLResponses(user_id=user_id)
         db.session.add(response)
 
     # Parse main_option
     main_option = request.form.get("main_option", "")
-    response.initial_adjustment_issues = (main_option == "IAI")
-    response.improper_course_level_placement = (main_option == "ICLP")
-    response.medical_reason = (main_option == "Medical Reason")
-    response.final_semester = (main_option == "Final Semester")
-    response.concurrent_enrollment = (main_option == "Concurrent Enrollment")
+    print("This is the main option: " + main_option)  
+
+    option_map = { #working as should
+        "IAI": "initial_adjustment_issues",
+        "ICLP": "improper_course_level_placement",
+        "Medical Reason": "medical_reason",
+        "Final Semester": "final_semester",
+        "Concurrent Enrollment": "concurrent_enrollment",
+    }
+
+    # Reset all to False first
+    for attr in option_map.values():
+        setattr(response, attr, False)
+
+    # Set the selected one to True
+    if main_option in option_map:
+        setattr(response, option_map[main_option], True)
+
 
     # IAI suboptions
-    if response.initial_adjustment_issues:
+    if response.initial_adjustment_issues: #working as it should
         suboptions = request.form.getlist("iai_suboption")  # e.g. ["English Language","Reading Requirements"]
         if suboptions:
             response.initial_adjustment_explanation = ", ".join(suboptions)
@@ -946,10 +962,9 @@ def save_rcl_progress():
     # response.my_semester_year = int(year_str) if year_str.isdigit() else None
 
     # Dropped courses
-    course1 = request.form.get("course1", "").strip()
-    course2 = request.form.get("course2", "").strip()
-    course3 = request.form.get("course3", "").strip()
-    response.drop_courses = "; ".join([c for c in [course1, course2, course3] if c])
+    response.dclass1 = request.form.get("course1", "").strip()
+    response.dclass2 = request.form.get("course2", "").strip()
+    response.dclass3 = request.form.get("course3", "").strip()
 
     # total_hours => stored in remaining_hours_uh
     total_hrs = request.form.get("total_hours", "0")
@@ -964,8 +979,19 @@ def save_rcl_progress():
     response.department_id = "2"
     db.session.commit()
 
+    gen_rcl_pdf()
 
-    #---------- This part down is for building the PDF (Alex can you work on this) ----------
+    return jsonify({"message": "Form progress saved successfully!"}), 200
+
+@form_bp.route("/gen_rcl_pdf", methods=["POST"])
+def gen_rcl_pdf():
+    print("RCL GEN")
+    if "user" not in session:
+        return jsonify({"error": "User not logged in"}), 401
+
+    user_id = session["user"]["id"]
+    response = RCLResponses.query.filter_by(user_id=user_id, is_finalized=False).first()
+    print("THIS IS THE RESPONSE: ", response)
 
     student_map = {
         "initial_adjustment_explanation": (125.36, 251.52),
@@ -1048,7 +1074,7 @@ def save_rcl_progress():
                 page.insert_text(position, " ", fontname=font, fontsize=size, color=color)
         elif isinstance(field_value, (str, int)):  # If the value is a string or integer
             if field_value:  # If the string or integer is not empty
-                #print("FIELD: ", field, " FIELD_VALUE: ", field_value)
+                print("FIELD: ", field, " FIELD_VALUE: ", field_value)
                 page.insert_text(position, str(field_value), fontname=font, fontsize=size, color=color)
             else:  # If the string is empty, output nothing
                 page.insert_text(position, " ", fontname=font, fontsize=size, color=color)
@@ -1093,7 +1119,6 @@ def save_rcl_progress():
     doc.save(save_path)
 
 
-    return jsonify({"message": "Form progress saved successfully!"}), 200
 
 @form_bp.route("/preview_form", methods=["POST"])
 def preview_form():
