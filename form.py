@@ -576,8 +576,25 @@ def save_tw_progress():
     response.department_id = "1"
     db.session.commit()
 
-    #---------- This part down is for building the PDF ----------
+    gen_tw_pdf()
 
+    return jsonify({"message": "Form progress saved successfully!"}), 200
+
+@form_bp.route("/gen_tw_pdf", methods = ["POST"])
+def gen_tw_pdf():
+ #---------- This part down is for building the PDF ----------
+    """Saves the current form progress asynchronously."""
+    if "user" not in session:
+        return jsonify({"error": "User not logged in"}), 401
+
+    user_id = session["user"]["id"]
+
+    # Check for existing draft
+    response = TWResponses.query.filter_by(user_id=user_id, is_finalized=False).first()
+    
+    if not response:
+        response = TWResponses(user_id=user_id)
+        db.session.add(response)
     # Ensure the student_name is not None and has at least one name
     name_parts = (response.student_name or "").strip().split()
 
@@ -697,10 +714,7 @@ def save_tw_progress():
 
     # Save the document (assuming 'doc' is a document object with a 'save' method)
     doc.save(save_path)
-
-
-    return jsonify({"message": "Form progress saved successfully!"}), 200
-
+    
 @form_bp.route("/rcl_form", methods=['GET', 'POST'])
 def fill_rcl_form():
     if "user" not in session:
@@ -1118,8 +1132,6 @@ def gen_rcl_pdf():
     # Save the document (assuming 'doc' is a document object with a 'save' method)
     doc.save(save_path)
 
-
-
 @form_bp.route("/preview_form", methods=["POST"])
 def preview_form():
     if "user" not in session:
@@ -1136,9 +1148,11 @@ def preview_form():
     if form_type == "TW":
         print("TEST1")
         save_tw_progress()
+        gen_tw_pdf()
     elif form_type == "RCL":
         print("TEST2")
         save_rcl_progress()
+        gen_tw_pdf()
     elif form_type == "CM":
         print("TEST3")
         save_changeMajor_form()
