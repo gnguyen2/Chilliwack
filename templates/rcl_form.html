@@ -156,18 +156,67 @@
         <!-- Submit Button -->
         <p>
             <button type="submit" id = "dashboardButton" class="submit-button">Submit Form</button>
+            <button type="button" class="submit-button" id="previewRCL" class="btn btn-secondary">Preview CM form</button>
         </p>
         
-        <form action="{{ url_for('form.preview_form') }}" method="POST" target="_blank">
+        <!--<form action="{{ url_for('form.preview_form') }}" method="POST" target="_blank">
             <input type="hidden" name="form_type" value="TW">
             <button type="submit" class="submit-button" >Preview RCL Form</button>
-        </form>
+        </form>-->
     
 
     <!-- Dashboard Button -->
     <button type="button" id="goToDashboardButton" class="submit-button" >Go to Dashboard</button>
 
     <script>
+        document.getElementById("previewRCL").addEventListener("click", function(event) {
+            event.preventDefault();
+
+            // Save the form first
+            let saveData = new FormData(document.getElementById("rcl_form"));
+
+            fetch("{{ url_for('form.save_rcl_progress') }}", {
+                method: "POST",
+                body: saveData
+            })
+            .then(response => {
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.includes("application/json")) {
+                    return response.json();
+                } else {
+                    return Promise.reject("Unexpected content type: " + contentType);
+                }
+            })
+            .then(data => {
+                // Now that it's saved, send to preview_form
+                let previewData = new FormData();
+                previewData.append("form_type", "RCL");
+
+                return fetch("{{ url_for('form.preview_form') }}", {
+                    method: "POST",
+                    body: previewData
+                });
+            })
+            .then(previewResponse => {
+                if (previewResponse.ok) {
+                    // Open PDF preview in new tab
+                    return previewResponse.blob().then(blob => {
+                        const pdfUrl = URL.createObjectURL(blob);
+                        window.open(pdfUrl, '_blank');
+                    });
+                } else {
+                    return previewResponse.json().then(err => {
+                        alert("Preview failed: " + err.error);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Error in preview chain:", error);
+                alert("Something went wrong during preview.");
+            });
+        });
+
+
         // Toggle IAI sub-options
         document.getElementById("iai_option").addEventListener("change", function() {
             let suboptions = document.getElementById("iai_suboptions");

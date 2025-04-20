@@ -80,8 +80,8 @@ def upload_signature():
     flash("Signature uploaded successfully!", "success")
     return redirect(url_for("dashboard"))
 
-@form_bp.route("/changeMajor_form", methods=['GET', 'POST'])
-def fill_changeMajor_form():
+@form_bp.route("/cm_form", methods=['GET', 'POST'])
+def fill_cm_form():
     if "user" not in session:
         flash("Please log in first.", "warning")
         return redirect(url_for("home"))
@@ -179,13 +179,13 @@ def fill_changeMajor_form():
         db.session.commit()
 
         flash("Petition saved successfully!", "success")
-        return redirect(url_for("form.fill_changeMajor_form"))
+        return redirect(url_for("form.fill_cm_form"))
 
     # GET – render template with any draft pre‑filled
-    return render_template("changeMajor_form.html", response=existing_response)
+    return render_template("cm_form.html", response=existing_response)
 
-@form_bp.route("/save_changeMajor_form", methods=["POST"])
-def save_changeMajor_form():
+@form_bp.route("/save_cm_progress", methods=["POST"])
+def save_cm_progress():
     if "user" not in session:
         return jsonify({"error": "User not logged in"}), 401
 
@@ -209,7 +209,9 @@ def save_changeMajor_form():
     response.student_email = request.form.get("email", response.student_email)
 
     # === Petition Purpose Flags ===
+    #testing
     for i in range(1, 18):
+        print(f"TESTING Q{i}: {request.form.get(f'Q{i}', 'Not in form')} , response: {getattr(response, f'Q{i}', 'No attr')}")
         setattr(response, f"Q{i}", f"Q{i}" in request.form)
 
     # === Petition Purpose Details ===
@@ -259,9 +261,21 @@ def save_changeMajor_form():
     response.department_id =  3 
     db.session.commit()
 
-    #---------- This part down is for building the PDF (Alex can you work on this) ----------
 
+    return jsonify({"message": "Form progress saved successfully!"}), 200
 
+@form_bp.route("/gen_cm_pdf", methods = ["POST"])
+def gen_cm_pdf():
+    if "user" not in session:
+        return jsonify({"error": "User not logged in"}), 401
+
+    user_id = session["user"]["id"]
+
+    response = GeneralPetition.query.filter_by(user_id=user_id, is_finalized=False).first()
+    if not response:
+        response = GeneralPetition(user_id=user_id)
+        db.session.add(response)
+        #---------- This part down is for building the PDF (Alex can you work on this) ----------
 
     coord_map = {#(x goes down, y goes to left)
     # --- Student Info ---
@@ -290,7 +304,7 @@ def save_changeMajor_form():
     "plan_change_to": (195.80, 470.09),
     "second_degree_type": (195.80, 275.61),
     "second_degree_type_other": (195.80, 140.61),
-    #"admission_status_from": (216.50, 646.86),
+    "admission_status_from": (216.50, 646.86),
     "admission_status_to": (216.50, 600.86),
     "degree_objective_change_from": (216.50, 487.31),
     "degree_objective_change_to": (216.50, 403.75),
@@ -319,23 +333,23 @@ def save_changeMajor_form():
 
 
     #check boxes remember to implement if X make font bigger
-    "x1":(187, 779),
-    "x2":(217, 779),
-    "x3":(238, 779),
-    "x4":(310, 779),
-    "x5":(187, 546),
-    "x6":(207, 546), 
-    "x7":(269, 546), 
-    "x8":(289, 546),
-    "x9":(187, 290),
-    "x10":(207, 290),
-    "x11":(237, 290),
-    "x12":(247, 290),
-    "x13":(257, 290),
-    "x14":(280, 290),
-    "x15":(304, 290),
-    "x16":(319, 290),
-    "x17":(333, 290),
+    "Q1":(187, 779),
+    "Q2":(217, 779),
+    "Q3":(238, 779),
+    "Q4":(310, 779),
+    "Q5":(187, 546),
+    "Q6":(207, 546), 
+    "Q7":(269, 546), 
+    "Q8":(289, 546),
+    "Q9":(187, 290),
+    "Q10":(207, 290),
+    "Q11":(237, 290),
+    "Q12":(247, 290),
+    "Q13":(257, 290),
+    "Q14":(280, 290),
+    "Q15":(304, 290),
+    "Q16":(319, 290),
+    "Q17":(333, 290),
 
 }
     #------ below os for oprinting pdf ----
@@ -361,6 +375,7 @@ def save_changeMajor_form():
     # Prevent errors by ensuring initials exist before accessing
         #print("FIELD: ", field, " FIELD_VALIE: ", field_value)
         if isinstance(field_value, bool):  # If the value is a boolean
+            print("FIELD: ", field, " FIeld Value: ", field_value)
             if field_value:  # If True,
                 page.insert_text(position, "x", fontname=font, fontsize=size, color=color, rotate=90)
             else:  # If False, output nothing
@@ -411,10 +426,6 @@ def save_changeMajor_form():
 
     # Save the document (assuming 'doc' is a document object with a 'save' method)
     doc.save(save_path)
-
-
-
-    return jsonify({"message": "Form progress saved successfully!"}), 200
 
 @form_bp.route("/tw_form", methods=['GET', 'POST'])
 def fill_tw_form():
@@ -1152,10 +1163,14 @@ def preview_form():
     elif form_type == "RCL":
         print("TEST2")
         save_rcl_progress()
-        gen_tw_pdf()
+        gen_rcl_pdf()
     elif form_type == "CM":
         print("TEST3")
-        save_changeMajor_form()
+        
+        save_rcl_progress()
+
+        gen_cm_pdf()
+
 
     # Define the file name (Make sure your PDFs are saved in the right location)
     filename = f"{user_id}.pdf"
