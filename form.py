@@ -1,5 +1,5 @@
 from flask import Blueprint, session, redirect, url_for, flash, request, render_template, jsonify, send_file
-from models import db, User, TWResponses, TWDocuments, RCLDocuments, RCLResponses, GeneralPetition, GeneralPetitionDocuments, ApprovalProcess
+from models import db, User, TWResponses, TWDocuments, RCLDocuments, RCLResponses, GeneralPetition, GeneralPetitionDocuments, ApprovalProcess, CAResponses
 from werkzeug.utils import secure_filename
 import os
 from datetime import datetime
@@ -1186,6 +1186,144 @@ def preview_form():
     # Return the existing PDF for display in the browser (opens in a new tab)
     return send_file(pdf_path, as_attachment=False, download_name=filename, mimetype="application/pdf")
     
+@form_bp.route("/save_ca_progress", methods=["POST"])
+def save_ca_progress():
+    if "user" not in session:
+        return jsonify({"error": "User not logged in"}), 401
+
+    user_id = session["user"]["id"]
+
+    response = CAResponses.query.filter_by(user_id=user_id, is_finalized=False).first()
+    if not response:
+        response = CAResponses(user_id=user_id)
+        db.session.add(response)
+
+    # === Student Info ===
+    response.id = user_id
+    response.user_name = request.form.get("user_name")
+    response.user_phone = request.form.get("user_phone")
+    response.user_email = request.form.get("user_email")
+    response.comments = request.form.get("comments")
+    response.complete_dept_name = request.form.get("complete_dept_name")
+    response.college_or_division = request.form.get("college_or_division")
+    response.dept_acronym = request.form.get("dept_acronym")
+    response.opening_date = datetime.utcnow()
+    response.building_location = request.form.get("building_location")
+
+
+    # === Petition Purpose Flags ===
+    date_str = request.form.get("date")
+    if date_str:
+        try:
+            response.signature_date = datetime.strptime(date_str, "%Y-%m-%d")
+        except ValueError:
+            pass  # invalid date format
+
+    response.date_submitted = datetime.utcnow()
+    response.department_id =  4 
+    db.session.commit()
+
+
+    return jsonify({"message": "Form progress saved successfully!"}), 200
+
+@form_bp.route("/ca_form", methods=['GET', 'POST'])
+def fill_ca_form():
+    if "user" not in session:
+        flash("Please log in first.", "warning")
+        return redirect(url_for("home"))
+
+    user_id = session["user"]["id"]
+    existing_response = CAResponses.query.filter_by(user_id=user_id, is_finalized=False).first()
+
+    if request.method == 'POST':
+        response = existing_response if existing_response else CAResponses(user_id=user_id)
+
+        response.id                    = user_id
+        response.user_name            = request.form.get("user_name", "").strip()
+        response.user_phone           = request.form.get("user_phone", "").strip()
+        response.user_email           = request.form.get("user_email", "").strip()
+        response.comments             = request.form.get("comments", "").strip()
+        response.complete_dept_name   = request.form.get("complete_dept_name", "").strip()
+        response.college_or_division  = request.form.get("college_or_division", "").strip()
+        response.dept_acronym         = request.form.get("dept_acronym", "").strip()
+        response.opening_date         = datetime.utcnow()
+        response.building_location    = request.form.get("building_location", "").strip()
+
+
+        # -------------------- 6️⃣  MISC / BOOK‑KEEPING ---------------
+        response.last_updated  = datetime.utcnow()
+        response.department_id =  4          # or whichever dept. you need
+        db.session.add(response)
+        db.session.commit()
+
+        flash("Petition saved successfully!", "success")
+        return redirect(url_for("form.fill_ca_form"))
+
+    # GET – render template with any draft pre‑filled
+    return render_template("ca_form.html", response=existing_response)
+
+@form_bp.route("/gen_ca_pdf", methods = ["POST"])
+def gen_ca_pdf():
+    if "user" not in session:
+        return jsonify({"error": "User not logged in"}), 401
+
+    user_id = session["user"]["id"]
+
+    response = CAResponses.query.filter_by(user_id=user_id, is_finalized=False).first()
+    if not response:
+        response = CAResponses(user_id=user_id)
+        db.session.add(response)
+        #---------- This part down is for building the PDF (Alex can you work on this) ----------
+    first_name, last_name = response.user_name.strip().split(" ", 1)
+    
+    coord_map = {#(x goes down, y goes to left)
+    # --- Student Info ---
+    "complete_dept_name": (201.79917907714844, 127.67596435546875),
+    "college_or_division": (265.581298828125, 160.074462890625),
+    "dept_acronym": (203.28892517089844, 192.47296142578125),
+    "opening_date": (244.5893096923828, 224.8714599609375),
+    "building_location": (292.6187744140625, 257.26995849609375),
+    "user_phone": (111.02850341796875, 414.86395263671875),
+    "user_email": (105.75000762939453, 447.262451171875),
+    "comments": (174.7755126953125, 479.66094970703125)
+}
+    doc = fitz.open("static/emptyforms/CA.pdf") # open pdf
+
+    # Choose the page to write on (0-indexed)
+    page = doc.load_page(0)  # For the first page
+
+    # Define text style (font, size, color, etc.)
+    font = "helv"  # Use font name as string (e.g., 'helv' for Helvetica)
+    size = 12  # Font size
+    color = (0, 0, 0)  # Black color in RGB (0, 0, 0)
+
+     # If the field exists (is not None), insert the value into the PDF
+    # Iterate through the student_map
+    # Iterate through the student_map
+    for field, position in coord_map.items():
+        # Get the field value from the response object
+        field_value = getattr(response, field, None)
+        page.insert_text(position, str(field_value), fontname=font, fontsize=size, color=color)
+
+    #"student_signature": (100, 738)
+    current_date = datetime.utcnow().strftime("%m/%d/%Y")
+    # Insert the formatted date into the PDF
+    page.insert_text((137.9971923828125, 350.06695556640625), str(first_name, fontname=font, fontsize=size, color=color))
+    page.insert_text((137.2720947265625, 382.4654541015625), str(last_name, fontname=font, fontsize=size, color=color))
+                     
+
+    #this sets up signature filename
+
+    # Avoid accessing first[0] or last[0] if empty
+    filename = f"{user_id}.pdf"
+    filename = secure_filename(filename)
+
+    # Define the path where the document should be saved
+    save_path = os.path.join('static', 'documents', 'CA', filename)
+
+    # Save the document (assuming 'doc' is a document object with a 'save' method)
+    doc.save(save_path)
+
 @form_bp.route("/view_pdf/<int:request_id>")
 def view_pdf(request_id):
     """Find and display the latest generated PDF for a request."""
