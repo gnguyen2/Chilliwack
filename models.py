@@ -51,9 +51,11 @@ class User(db.Model):
 # delegation table
 class Delegation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    from_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    to_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    expires_at = db.Column(db.DateTime, nullable=True) 
+    from_parent_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    to_child_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    dept_from = db.column(db.Integer, db.ForeignKey('Department.id'))
+    dept_to = db.Column(db.Integer, db.ForeignKey('Department.id')) 
+    date = db.Column (db.Datetime)
 
 class Request(db.Model):  
     id = db.Column(db.Integer, primary_key=True)
