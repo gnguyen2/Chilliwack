@@ -30,9 +30,9 @@
 
             <div class="form-group">
                 <label for="user_email">Email:</label>
-                <input type="text" name="user_email" id="user_email" value="{{ response.user_email  if response else '' }}">
+                <input type="text" name="user_email" id="user_email" value="{{ response.user_email  if response else '' }}" required>
             </div>
-            
+
             <div class="form-group">
                 <label for="complete_dept_name">Complete Dept Name:</label>
                 <input type="text" name="complete_dept_name" id="complete_dept_name" value="{{ response.complete_dept_name if response else '' }}" required>
@@ -45,7 +45,7 @@
 
             <div class="form-group">
                 <label for="dept_acronym ">Dept. Acronym or N/A:</label>
-                <input type="text" name="dept_acronym " id="dept_acronym " value="{{ response.dept_acronym  if response else '' }}">
+                <input type="text" name="dept_acronym " id="dept_acronym " value="{{ response.dept_acronym  if response else '' }}"required>
             </div>
 
             <div class="form-group">

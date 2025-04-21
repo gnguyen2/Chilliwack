@@ -1,6 +1,6 @@
 from flask import Blueprint, request, flash, redirect, url_for, session, render_template, send_file
 from decorators import role_required
-from models import db, User, Role, Status, RCLResponses, TWResponses, Request, Department, ApprovalProcess, GeneralPetition, Delegation
+from models import db, User, Role, Status, RCLResponses, TWResponses, Department, ApprovalProcess, GeneralPetition, Delegation
 from sqlalchemy.orm import joinedload
 from datetime import datetime
 
@@ -89,15 +89,12 @@ def admindashboard():
     # Fetch only submitted (finalized) requests where request_id is not null
     submitted_rcl_requests = RCLResponses.query.filter(
         RCLResponses.is_finalized == True,
-        RCLResponses.request_id.isnot(None)
     ).all()
     submitted_tw_requests = TWResponses.query.filter(
         TWResponses.is_finalized == True,
-        TWResponses.request_id.isnot(None)
     ).all()
     submitted_genpet_form = GeneralPetition.query.filter(
         GeneralPetition.is_finalized == True,
-        GeneralPetition.request_id.isnot(None)
     ).all()
 
     # Combine RCL and TW requests into a single list
@@ -321,7 +318,9 @@ def update_user_assignment():
 def approvals():
 
     # Basic queries
-    approvals_query = ApprovalProcess.query.join(Request).join(User, ApprovalProcess.approver)
+    approvals_query = ApprovalProcess.query \
+    .join(Request, ApprovalProcess.request_id == Request.id) \
+    .join(User, ApprovalProcess.approver_id == User.id, isouter=True)  # Add LEFT JOIN for missing approver
     
     # Get filters from request.args
     form_type = request.args.get("form_type")
@@ -358,3 +357,4 @@ def approvals():
         users=users,
         user=user
     )
+

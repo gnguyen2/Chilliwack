@@ -1,7 +1,7 @@
 from flask import Flask, render_template, url_for, redirect, flash, request, session
 from flask_session import Session
 from flask_migrate import Migrate
-from models import db, User, Role, Status, Request
+from models import db, User, Role, Status
 from decorators import role_not_allowed
 from sqlalchemy.orm import joinedload
 from dotenv import load_dotenv
