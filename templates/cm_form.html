@@ -82,7 +82,7 @@
             </div>
 
             <div class="checkbox-item">
-                <input type="checkbox" name="Q2" id="Q2" {% if response and response.Q2 %}checked{% endif %}>
+                <input type="checkbox" name="Q2" id="Q2" value = "on" {% if response and response.Q2 %}checked{% endif %}>
                 <label for="admission_change">2. Admission Status change from</label>
                 <input type="text" id = "admission_status_from" name="admission_status_from" placeholder="Current Status" value="{{ response.admission_status_from if response else '' }}">
                 <label for="to" class="arount-input-label">to</label>
@@ -233,29 +233,86 @@
     </form>
     <br><br>
     <!-- Dashboard Button -->
-    <button type="submit" class="submit-button" id="goToDashboardButton" class="btn btn-secondary">Go to Dashboard</button>
-    <form action="{{ url_for('form.preview_form') }}" method="POST" target="_blank">
+    <button type="button" class="submit-button" id="goToDashboardButton" class="btn btn-secondary">Go to Dashboard</button>
+    <button type="button" class="submit-button" id="previewCM" class="btn btn-secondary">Preview CM form</button>
+    <!--<form action="{{ url_for('form.preview_form') }}" method="POST" target="_blank">
         <input type="hidden" name="form_type" value="CM">
-        <button type="submit" class="submit-button" >Preview TW Form</button>
-    </form>
+        <button type="submit" class="submit-button" >Preview CM Form</button>
+    </form>-->
 
     <script>
+        document.getElementById("previewCM").addEventListener("click", function(event) {
+            event.preventDefault();
+
+            // Save the form first
+            let saveData = new FormData(document.getElementById("gpForm"));
+
+            fetch("{{ url_for('form.save_cm_progress') }}", {
+                method: "POST",
+                body: saveData
+            })
+            .then(response => {
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.includes("application/json")) {
+                    return response.json();
+                } else {
+                    return Promise.reject("Unexpected content type: " + contentType);
+                }
+            })
+            .then(data => {
+                // Now that it's saved, send to preview_form
+                let previewData = new FormData();
+                previewData.append("form_type", "CM");
+
+                return fetch("{{ url_for('form.preview_form') }}", {
+                    method: "POST",
+                    body: previewData
+                });
+            })
+            .then(previewResponse => {
+                if (previewResponse.ok) {
+                    // Open PDF preview in new tab
+                    return previewResponse.blob().then(blob => {
+                        const pdfUrl = URL.createObjectURL(blob);
+                        window.open(pdfUrl, '_blank');
+                    });
+                } else {
+                    return previewResponse.json().then(err => {
+                        alert("Preview failed: " + err.error);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Error in preview chain:", error);
+                alert("Something went wrong during preview.");
+            });
+        });
         document.getElementById("goToDashboardButton").addEventListener("click", function(event) {
             event.preventDefault();  // Prevent immediate redirection
         
             let formData = new FormData(document.getElementById("gpForm"));
     
-            fetch("{{ url_for('form.save_changeMajor_form') }}", {
+            fetch("{{ url_for('form.save_cm_progress') }}", {
                 method: "POST",
                 body: formData
             })
-            .then(response => response.json())
+            .then(response => {
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.includes("application/json")) {
+                    return response.json();
+                } else {
+                    return Promise.reject("Unexpected content type: " + contentType);
+                }
+            })
             .then(data => {
-                alert(data.message);  // Show save success message
+                alert(data.message);
                 window.location.href = "{{ url_for('dashboard') }}";
             })
-            .catch(error => console.error("Error saving form:", error));
-        });
+            .catch(error => {
+                console.error("Error saving form:", error);
+                alert("Something went wrong. Try again.");
+            });
+        })
     </script>
 </body>
 </html>
