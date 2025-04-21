@@ -89,15 +89,12 @@ def admindashboard():
     # Fetch only submitted (finalized) requests where request_id is not null
     submitted_rcl_requests = RCLResponses.query.filter(
         RCLResponses.is_finalized == True,
-        RCLResponses.request_id.isnot(None)
     ).all()
     submitted_tw_requests = TWResponses.query.filter(
         TWResponses.is_finalized == True,
-        TWResponses.request_id.isnot(None)
     ).all()
     submitted_genpet_form = GeneralPetition.query.filter(
         GeneralPetition.is_finalized == True,
-        GeneralPetition.request_id.isnot(None)
     ).all()
 
     # Combine RCL and TW requests into a single list
