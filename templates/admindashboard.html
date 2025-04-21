@@ -8,6 +8,7 @@
     <p>Email: {{ user.email }}</p>
     <p>Debug: Role is "{{ user.role }}"</p>
     <p>Debug: Status is "{{ user.status }}"</p>
+    <p>Debug: Department ID is "{{ user.department_id }}"</p>
     <a href="{{ url_for('auth.logout') }}" class="button">Logout</a>
     <a href="{{ url_for('dashboard') }}" class="button">Dashboard</a>
     <a href="{{ url_for('admin.departments_roles') }}" class="button">Departments & Roles</a>
@@ -71,28 +72,33 @@
     <h2>Requests</h2>
     <table>
         <tr>
-            <th>Request ID</th>
-            <th>Student Name</th>
-            <th>Request Type</th>
+            <th>Request&nbsp;ID</th>
+            <th>Student&nbsp;Name</th>
+            <th>Request&nbsp;Type</th>
+            <th>Department&nbsp;ID</th>   <!-- NEW -->
             <th>Status</th>
-            <th>Submission Date</th>
+            <th>Submission&nbsp;Date</th>
             <th>Actions</th>
         </tr>
-        {% for request in pending_requests %}
+
+        {# Show each request only if: (a) admin’s dept_id is 0 OR (b) it matches admin’s dept_id #}
+        {% for request in pending_requests if user.department_id == 0
+                                            or request.department_id == user.department_id %}
         <tr>
             <td>{{ request.id }}</td>
             <td>{{ request.student_name }}</td>
             <td>{{ "RCL" if request.is_rcl else "Withdrawal" }}</td>
+            <td>{{ request.department_id }}</td>  <!-- NEW -->
             <td>
                 {% if request.status == 'approved' %}
-                Approved
+                    Approved
                 {% elif request.status == 'rejected' %}
-                Rejected
+                    Rejected
                 {% else %}
-                Pending
+                    Pending
                 {% endif %}
             </td>
-            <td>{{ request.submission_date.strftime('%Y-%m-%d') }}</td>
+            <td>{{ request.submission_date.strftime('%Y‑%m‑%d') }}</td>
             <td>
                 <a href="{{ url_for('admin.view_request', request_id=request.id) }}" class="view-button">View Form</a>
                 <form action="{{ url_for('admin.approve_request', request_id=request.id) }}" method="POST">
