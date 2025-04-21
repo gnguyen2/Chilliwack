@@ -93,20 +93,21 @@
                 <input type="checkbox" name="Q3" id="Q3" {% if response and response.Q3 %}checked{% endif %}>
                 <label for="new_career">3. Add new career</label>
                 <input type="text" name="new_career" id="new_career" placeholder="New Status" value="{{ response.new_career if response else '' }}">
-                <div class="radio-group">
-                    <p>If post baccalaureate, indicate study objective:</p>
-                    <input type="radio" name="study_objective" id="second_bachelor_plan" value="second_degree" {% if response and response.second_bachelor_plan %}checked{% endif %}>
-                    <label for="second_degree">Second bachelor's degree</label><br>
-                    
-                    <input type="radio" name="study_objective" id="graduate_study_objective" value="grad_study" {% if response and response.second_bachelor_plan %}checked{% endif %}>
-                    <label for="grad_study">Requirements for graduate study</label><br>
-                    
-                    <input type="radio" name="study_objective" id="teacher_certification" value="teacher_cert" {% if response and response.second_bachelor_plan %}checked{% endif %}>
-                    <label for="teacher_cert">Teacher certification</label><br>
-                    
-                    <input type="radio" name="study_objective" id="personal_enrichment_objective" value="enrichment" {% if response and response.second_bachelor_plan %}checked{% endif %}>
-                    <label for="enrichment">Personal enrichment</label>
-                </div>
+                
+            </div>
+            <div class="radio-group">
+                <p>If post baccalaureate, indicate study objective:</p>
+                <input type="radio" name="study_objective" id="second_bachelor_plan" value="second_degree" {% if response and response.second_bachelor_plan %}checked{% endif %}>
+                <label for="second_degree">Second bachelor's degree</label><br>
+                
+                <input type="radio" name="study_objective" id="graduate_study_objective" value="grad_study" {% if response and response.second_bachelor_plan %}checked{% endif %}>
+                <label for="grad_study">Requirements for graduate study</label><br>
+                
+                <input type="radio" name="study_objective" id="teacher_certification" value="teacher_cert" {% if response and response.second_bachelor_plan %}checked{% endif %}>
+                <label for="teacher_cert">Teacher certification</label><br>
+                
+                <input type="radio" name="study_objective" id="personal_enrichment_objective" value="enrichment" {% if response and response.second_bachelor_plan %}checked{% endif %}>
+                <label for="enrichment">Personal enrichment</label>
             </div>
 
             <div class="checkbox-item">
@@ -147,14 +148,15 @@
                 <input type="text" name="additional_plan_degree_type" id="additional_plan_degree_type" placeholder="Plan Details" value="{{ response.additional_plan_degree_type if response else '' }}">
                 <label for="to" class="arount-input-label">BA/BS/Other</label>
                 <input type="text" name="additional_plan_degree_type" id="additional_plan_degree_type_other" placeholder="Plan Details" value="{{ response.additional_plan_degree_type_other if response else '' }}">
-                <div class="radio-group">
-                    <p>Is your new plan:</p>
-                    <input type="radio" name="primary_plan" id="primary_plan" value="primary_plan" {% if response and response.second_bachelor_plan %}checked{% endif %}>
-                    <label for="primary_plan">Primary</label><br>
-                    
-                    <input type="radio" name="secondary_plan" id="secondary_plan" value="secondary_plan" {% if response and response.second_bachelor_plan %}checked{% endif %}>
-                    <label for="secondary_plan">Secondary</label><br>
-                </div>
+            </div>
+
+            <div class="radio-group">
+                <p>Is your new plan:</p>
+                <input type="radio" name="primary_plan" id="primary_plan" value="primary_plan" {% if response and response.second_bachelor_plan %}checked{% endif %}>
+                <label for="primary_plan">Primary</label><br>
+                
+                <input type="radio" name="secondary_plan" id="secondary_plan" value="secondary_plan" {% if response and response.second_bachelor_plan %}checked{% endif %}>
+                <label for="secondary_plan">Secondary</label><br>
             </div>
 
             <div class="checkbox-item">
