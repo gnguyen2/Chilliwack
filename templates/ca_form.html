@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="static/form_gp.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Change Address Form</title>
+</head>
+<body>
+    <h1 class="form-title">Change Address Form</h1>
+    <br>
+    <form class="form-container" id="caForm" action="#" method="POST" enctype="multipart/form-data">
+        <div class="notice-box">
+            <p><strong>This form should only be used to change mail delivery for an ENTIRE Department that is moving. If a department is split between different locations on campus, there will be only one centralized address and one mail drop location.</strong></p>
+            <ol>
+                <li>Individual addresses can not be changed using this form. The form can also be used for a departmental name change.</li>
+                <li>Submit this form to have your department mail changed as a result of a Department move, or department name change..</li>
+            </ol>
+        </div>
+
+        <div class="form-flex">
+            <div class="form-group">
+                <label for="user_name">Name:</label>
+                <input type="text" name="user_name" id="user_name" value="{{ response.user_name if response else '' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="user_phone">Phone Number:</label>
+                <input type="text" name="user_phone" id="user_phone" value="{{ response.user_phone  if response else '' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="user_email">Email:</label>
+                <input type="text" name="user_email" id="user_email" value="{{ response.user_email  if response else '' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="complete_dept_name">Complete Dept Name:</label>
+                <input type="text" name="complete_dept_name" id="complete_dept_name" value="{{ response.complete_dept_name if response else '' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="college_or_division ">Name of College and/or Division:</label>
+                <input type="text" name="college_or_division " id="college_or_division " value="{{ response.college_or_division  if response else '' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="dept_acronym ">Dept. Acronym or N/A:</label>
+                <input type="text" name="dept_acronym " id="dept_acronym " value="{{ response.dept_acronym  if response else '' }}"required>
+            </div>
+
+            <div class="form-group">
+                <label for="opening_date ">Date of Department Opening:</label>
+                <input type="date" name="opening_date " id="opening_date " value="{{ response.opening_date  if response else '' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="building_location ">Building Location and Room Number:</label>
+                <input type="tel" name="building_location" id="building_location " value="{{ response.building_location  if response else '' }}" required>
+            </div>
+
+            <label for="comments">Comments:</label>
+            <textarea name="comments" id="comments" rows="5" style="width: 100%;"></textarea>
+        </div>
+
+        
+        <br>
+        <button type="submit" class="submit-button" id="submitCAButton" name="submitButton">Submit Address Change</button>
+    </form>
+    <br><br>
+    <!-- Dashboard Button -->
+    <button type="button" class="submit-button" id="goToDashboardButton" class="btn btn-secondary">Go to Dashboard</button>
+    <button type="button" class="submit-button" id="previewCA" class="btn btn-secondary">Preview CA form</button>
+    <!--<form action="{{ url_for('form.preview_form') }}" method="POST" target="_blank">
+        <input type="hidden" name="form_type" value="CM">
+        <button type="submit" class="submit-button" >Preview CM Form</button>
+    </form>-->
+
+    <script>
+        document.getElementById("previewCA").addEventListener("click", function(event) {
+            event.preventDefault();
+
+            // Save the form first
+            let saveData = new FormData(document.getElementById("caForm"));
+
+            fetch("{{ url_for('form.save_ca_progress') }}", {
+                method: "POST",
+                body: saveData
+            })
+            .then(response => {
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.includes("application/json")) {
+                    return response.json();
+                } else {
+                    return Promise.reject("Unexpected content type: " + contentType);
+                }
+            })
+            .then(data => {
+                // Now that it's saved, send to preview_form
+                let previewData = new FormData();
+                previewData.append("form_type", "CA");
+
+                return fetch("{{ url_for('form.preview_form') }}", {
+                    method: "POST",
+                    body: previewData
+                });
+            })
+            .then(previewResponse => {
+                if (previewResponse.ok) {
+                    // Open PDF preview in new tab
+                    return previewResponse.blob().then(blob => {
+                        const pdfUrl = URL.createObjectURL(blob);
+                        window.open(pdfUrl, '_blank');
+                    });
+                } else {
+                    return previewResponse.json().then(err => {
+                        alert("Preview failed: " + err.error);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Error in preview chain:", error);
+                alert("Something went wrong during preview.");
+            });
+        });
+        document.getElementById("goToDashboardButton").addEventListener("click", function(event) {
+            event.preventDefault();  // Prevent immediate redirection
+        
+            let formData = new FormData(document.getElementById("caForm"));
+    
+            fetch("{{ url_for('form.save_cm_progress') }}", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => {
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.includes("application/json")) {
+                    return response.json();
+                } else {
+                    return Promise.reject("Unexpected content type: " + contentType);
+                }
+            })
+            .then(data => {
+                alert(data.message);
+                window.location.href = "{{ url_for('dashboard') }}";
+            })
+            .catch(error => {
+                console.error("Error saving form:", error);
+                alert("Something went wrong. Try again.");
+            });
+        })
+    </script>
+</body>
+</html>

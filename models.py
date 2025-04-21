@@ -48,25 +48,16 @@ class User(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     def __repr__(self):
         return f"<User {self.name} - Role: {self.role.name if self.role else 'None'}> - Status: {self.status.name if self.status else 'None'}>"
+
+
 # delegation table
 class Delegation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    from_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    to_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    expires_at = db.Column(db.DateTime, nullable=True) 
-
-class Request(db.Model):  
-    id = db.Column(db.Integer, primary_key=True)
-    student_email = db.Column(db.String(100), db.ForeignKey('user.email'), nullable=True)
-    request_type = db.Column(db.String(50), nullable=False)  # "RCL" or "TW"
-    semester = db.Column(db.String(20), nullable=True)  # Optional fields depending on type
-    year = db.Column(db.Integer, nullable=True)
-    details = db.Column(db.Text, nullable=True)  # Stores extra info like dropped courses
-    status = db.Column(db.String(50), default="pending")  # pending, approved, rejected
-    pdf_path = db.Column(db.String(255))  # Stores the generated PDF path
-    approval_date = db.Column(db.DateTime)
-
-    approvals = db.relationship("ApprovalProcess", back_populates="request", cascade="all, delete-orphan")
+    from_parent_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    to_child_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    dept_from = db.Column(db.Integer, db.ForeignKey('department.id'))
+    dept_to = db.Column(db.Integer, db.ForeignKey('department.id')) 
+    date = db.Column (db.DateTime)
 
 class ApprovalProcess(db.Model):
     req_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -91,9 +82,6 @@ class RCLResponses(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship("User", backref="responses")
     department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=True)
-
-    request_id = db.Column(db.Integer, db.ForeignKey('request.id'), nullable=True)  # Nullable for drafts
-    request = db.relationship("Request", backref="form_responses")
 
     # Student Information
     student_name = db.Column(db.String(100), nullable=True)
@@ -179,9 +167,6 @@ class TWResponses(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship("User", backref="withdrawal_responses")
 
-    request_id = db.Column(db.Integer, db.ForeignKey('request.id'), nullable=True)  # Nullable for drafts
-    request = db.relationship("Request", backref="withdrawal_responses")
-
     department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=True)
 
     # Student Information
@@ -248,8 +233,6 @@ class GeneralPetition(db.Model):  # FOR INTEGRATION
     user = db.relationship("User", backref="gen_pet_responses")
 
     department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=True)
-
-    request_id = db.Column(db.Integer, db.ForeignKey('request.id'), nullable=True)  # Nullable for drafts
 
     # Student Information Section
     student_last_name = db.Column(db.String(100), nullable=True)

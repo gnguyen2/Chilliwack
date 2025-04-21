@@ -1,0 +1,184 @@
+/* static/admindashboard.css */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600&display=swap');
+
+:root {
+    --primary-bg: #ffffff;
+    --secondary-bg: #f7f7f7;
+    --text-color: #000000;
+    --accent-color: #ff3b3b;
+    --border-color: #000000;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+body {
+    background: var(--primary-bg);
+    color: var(--text-color);
+    text-align: center;
+    padding: 20px;
+}
+
+h1 {
+    font-size: 40px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border-bottom: 2px solid var(--border-color);
+    display: inline-block;
+    padding-bottom: 5px;
+}
+
+.form-container {
+    text-align: left;
+    width: 100%;
+    background-color: #e0e0e0; /* Grey background */
+    padding: 20px;
+    border-radius: 12px; /* Rounded edges */
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2); /* Slightly stronger shadow */
+}
+
+.file-form{
+    display: flex;
+    gap: 20px;
+    align-items: left;
+    margin-left: 20px;
+}
+
+.file-form label{
+    display: inline-block;
+}
+
+
+.form-title {
+
+    text-align: center;
+    font-size: 30px;
+    margin-bottom: 20px;
+}
+
+.form-flex {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px; /* Reduced gap */
+    justify-content: flex-start; /* Align items to the left */
+}
+
+.form-group {
+    flex: 0 1 auto; /* Don't force equal width, allow natural width */
+    display: flex;
+    align-items: center;
+    min-width: 200px; /* Minimum width for form groups */
+    gap: 8px; /* Reduced gap between label and input */
+}
+
+.form-group label {
+    flex: 0 0 auto; /* Don't force fixed width for labels */
+    width: auto; /* Let labels take natural width */
+    margin-right: 5px; /* Small space between label and input */
+    white-space: nowrap; /* Prevent label text from wrapping */
+}
+
+.form-group select{
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.number-input{
+    display:flex;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+
+.form-group input {
+    flex: 1;
+    min-width: 150px; /* Minimum width for inputs */
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center; /* Center vertically */
+    margin-bottom: 8px;
+    gap: 5px; /* Reduced gap */
+}
+
+.checkbox-item label {
+    margin-left: 0; /* Remove left margin */
+    white-space: nowrap; /* Prevent wrapping */
+}
+
+.radio-group {
+    margin-bottom: 5px;
+    margin-left: 20px;
+    gap: 10px;
+    align-items: center;
+}
+
+.radio-group label {
+    margin-right: 15px;
+    white-space: nowrap;
+    align-items: center;
+    display: inline-flex;
+}
+
+.arount-input-label{
+    margin: 0px;
+}
+
+.checkbox-item input[type="radio"],
+.checkbox-item input[type="checkbox"] {
+    cursor: pointer;
+}
+
+.radio-group input[type="radio"] {
+    margin: 0; /* Remove any default margins */
+    vertical-align: middle; /* Align the radio button with the middle of the text */
+    position: relative;
+    top: 0px; /* Fine-tune alignment if needed (adjust this value as necessary) */
+}
+
+.checkbox-group {
+    text-align: left;
+}
+
+.checkbox-group label {
+    font-weight: normal;
+    display: inline-block;
+    margin-left: 10px;
+
+}
+
+.checkbox-group input[type="checkbox"] {
+    vertical-align: top; /* Align the checkbox with the top of the label */
+    margin-top: 3px; /* Ensure no extra space above the checkbox */
+    cursor: pointer;
+}
+
+.submit-button {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    align-self: center;
+}
+
+.submit-button:hover {
+    background-color: #0056b3;
+}
