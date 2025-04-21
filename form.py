@@ -1,5 +1,5 @@
 from flask import Blueprint, session, redirect, url_for, flash, request, render_template, jsonify, send_file
-from models import db, User, TWResponses, TWDocuments, RCLDocuments, RCLResponses, Request, GeneralPetition, GeneralPetitionDocuments, ApprovalProcess
+from models import db, User, TWResponses, TWDocuments, RCLDocuments, RCLResponses, GeneralPetition, GeneralPetitionDocuments, ApprovalProcess
 from werkzeug.utils import secure_filename
 import os
 from datetime import datetime

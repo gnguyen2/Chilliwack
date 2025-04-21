@@ -1,6 +1,6 @@
 from flask import Blueprint, request, flash, redirect, url_for, session, render_template, send_file
 from decorators import role_required
-from models import db, User, Role, Status, RCLResponses, TWResponses, Request, Department, ApprovalProcess, GeneralPetition, Delegation
+from models import db, User, Role, Status, RCLResponses, TWResponses, Department, ApprovalProcess, GeneralPetition, Delegation
 from sqlalchemy.orm import joinedload
 from datetime import datetime
 
