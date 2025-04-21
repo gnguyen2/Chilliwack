@@ -1,7 +1,9 @@
 from flask import Blueprint, request, flash, redirect, url_for, session, render_template, send_file
 from decorators import role_required
-from models import db, User, Role, Status, RCLResponses, TWResponses, Request, Department, ApprovalProcess, GeneralPetition
+from models import db, User, Role, Status, RCLResponses, TWResponses, Request, Department, ApprovalProcess, GeneralPetition, Delegation
 from sqlalchemy.orm import joinedload
+from datetime import datetime
+
 
 admin_bp = Blueprint("admin", __name__)
 
@@ -279,15 +281,35 @@ def update_user_assignment():
     role_id = request.form.get("role_id")
 
     user = User.query.get(user_id)
+
     if user:
         if not role_id:
             flash("Role is required when assigning a user.", "danger")
             return redirect(url_for("admin.departments_roles"))
 
+        # Save previous department before updating
+        previous_dept = user.department_id
+
+        # Update the user
         user.department_id = dept_id
-        user.role_id = role_id  # now guaranteed not None
+        user.role_id = role_id
         db.session.commit()
-        flash(f"Updated department/role for {user.name}.", "success")
+        parent_id = session["user"]["id"]
+
+
+        # Log the delegation
+        new_delegation = Delegation(
+            from_parent_id = parent_id,  # assuming Flask-Login is used
+            to_child_id=user_id,
+            dept_from=previous_dept,
+            dept_to=dept_id,
+            date=datetime.utcnow()
+        )
+
+        db.session.add(new_delegation)
+        db.session.commit()
+
+        flash(f"Updated department/role for {user.name} and logged delegation.", "success")
     else:
         flash("User not found.", "danger")
 

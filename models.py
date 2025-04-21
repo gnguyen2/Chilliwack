@@ -48,14 +48,16 @@ class User(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     def __repr__(self):
         return f"<User {self.name} - Role: {self.role.name if self.role else 'None'}> - Status: {self.status.name if self.status else 'None'}>"
+
+
 # delegation table
 class Delegation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     from_parent_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     to_child_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    dept_from = db.column(db.Integer, db.ForeignKey('Department.id'))
-    dept_to = db.Column(db.Integer, db.ForeignKey('Department.id')) 
-    date = db.Column (db.Datetime)
+    dept_from = db.Column(db.Integer, db.ForeignKey('department.id'))
+    dept_to = db.Column(db.Integer, db.ForeignKey('department.id')) 
+    date = db.Column (db.DateTime)
 
 class Request(db.Model):  
     id = db.Column(db.Integer, primary_key=True)
