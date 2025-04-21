@@ -73,7 +73,7 @@ class ApprovalProcess(db.Model):
     approver = db.relationship("User", foreign_keys=[approver_id], back_populates="approvals")
 
     def __repr__(self):
-        return f"<Approval {self.id} - Request: {self.request_id} - Status: {self.status}>"
+        return f"<Approval {self.id} - Request: {self.req_id} - Status: {self.status}>"
     
 class RCLResponses(db.Model):
     __tablename__ = "rcl_responses"
@@ -82,6 +82,9 @@ class RCLResponses(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship("User", backref="responses")
     department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=True)
+
+    # 1 = in prog, 2 = finalizad awaiting approval, 3=approved
+    approval_status = db.Column(db.Integer, nullable=False)
 
     # Student Information
     student_name = db.Column(db.String(100), nullable=True)
@@ -169,6 +172,9 @@ class TWResponses(db.Model):
 
     department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=True)
 
+    # 1 = in prog, 2 = finalizad awaiting approval, 3=approved
+    approval_status = db.Column(db.Integer, nullable=False)
+
     # Student Information
     student_name = db.Column(db.String(100), nullable=True)
     ps_id = db.Column(db.String(20), nullable=True)
@@ -233,6 +239,9 @@ class GeneralPetition(db.Model):  # FOR INTEGRATION
     user = db.relationship("User", backref="gen_pet_responses")
 
     department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=True)
+
+    # 1 = in prog, 2 = finalizad awaiting approval, 3=approved
+    approval_status = db.Column(db.Integer, nullable=False)
 
     # Student Information Section
     student_last_name = db.Column(db.String(100), nullable=True)
