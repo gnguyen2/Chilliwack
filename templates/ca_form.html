@@ -19,6 +19,21 @@
 
         <div class="form-flex">
             <div class="form-group">
+                <label for="user_name">Name:</label>
+                <input type="text" name="user_name" id="user_name" value="{{ response.user_name if response else '' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="user_phone">Phone Number:</label>
+                <input type="text" name="user_phone" id="user_phone" value="{{ response.user_phone  if response else '' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="user_email">Email:</label>
+                <input type="text" name="user_email" id="user_email" value="{{ response.user_email  if response else '' }}">
+            </div>
+            
+            <div class="form-group">
                 <label for="complete_dept_name">Complete Dept Name:</label>
                 <input type="text" name="complete_dept_name" id="complete_dept_name" value="{{ response.complete_dept_name if response else '' }}" required>
             </div>
