@@ -369,3 +369,18 @@ class GeneralPetitionDocuments(db.Model):
 
     def __repr__(self):
         return f"<TWDocuments {self.id} - {self.file_name}>"
+    
+class CAResponses(db.Model):
+    __tablename__ = 'ca_responses'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_name = db.Column(db.String(255), nullable = False)
+    user_phone = db.Column(db.String(255), nullable = False)
+    user_email = db.Column(db.String(255), nullable = False)
+    comments = db.Column (db.Text, nullable = True)
+
+    complete_dept_name = db.Column(db.String(255), nullable=False)
+    college_or_division = db.Column(db.String(255), nullable=False)
+    dept_acronym = db.Column(db.String(50), nullable=True)
+    opening_date = db.Column(db.String(50), nullable=True)
+    building_location = db.Column(db.String(255), nullable=True)
