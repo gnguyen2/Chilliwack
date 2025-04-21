@@ -42,7 +42,7 @@ class User(db.Model):
     status = db.relationship('Status', backref=db.backref('users', lazy=True))
 
     #establish a relationship with ApprovalProcess
-    approvals = db.relationship("ApprovalProcess", back_populates="approver", lazy=True)
+    approvals = db.relationship("ApprovalProcess", back_populates="approver", foreign_keys="ApprovalProcess.approver_id", lazy=True)
     #store the signature file path
     signature_path = db.Column(db.String(255), nullable=True)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -69,8 +69,9 @@ class Request(db.Model):
     approvals = db.relationship("ApprovalProcess", back_populates="request", cascade="all, delete-orphan")
 
 class ApprovalProcess(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    request_id = db.Column(db.Integer, db.ForeignKey('request.id'), nullable=False)
+    req_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable = False) #This will be the ID of the requesting student
+    form_type = db.Column(db.Integer, db.ForeignKey('department.id'), nullable = False)
     approver_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     status = db.Column(db.String(50), default="pending")  # pending, approved, rejected
     decision_date = db.Column(db.DateTime)  # Timestamp of approval/rejection
@@ -78,7 +79,6 @@ class ApprovalProcess(db.Model):
     signature_path = db.Column(db.String(255))  # Path to the approver's signature
 
     # Relationships
-    request = db.relationship("Request", back_populates="approvals")
     approver = db.relationship("User", foreign_keys=[approver_id], back_populates="approvals")
 
     def __repr__(self):
@@ -250,7 +250,6 @@ class GeneralPetition(db.Model):  # FOR INTEGRATION
     department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=True)
 
     request_id = db.Column(db.Integer, db.ForeignKey('request.id'), nullable=True)  # Nullable for drafts
-    request = db.relationship("Request", backref="change_major_responses")
 
     # Student Information Section
     student_last_name = db.Column(db.String(100), nullable=True)

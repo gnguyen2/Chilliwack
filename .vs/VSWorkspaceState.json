@@ -1,15 +1,16 @@
 {
   "ExpandedNodes": [
     "",
+    "\\migrations",
+    "\\migrations\\versions",
     "\\static",
     "\\static\\documents",
+    "\\static\\documents\\TW",
     "\\static\\emptyforms",
-    "\\static\\emptyforms\\RCL",
-    "\\static\\emptyforms\\TW",
     "\\static\\signatures",
     "\\templates",
     "\\venv"
   ],
-  "SelectedNode": "\\admin.py",
+  "SelectedNode": "\\form.py",
   "PreviewInSolutionExplorer": false
 }

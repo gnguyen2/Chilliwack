@@ -63,12 +63,12 @@
                 <td>{{ approval.approver.name }}</td>
                 <td>
                     {{ approval.decision_date.strftime('%Y-%m-%d') if approval.decision_date else '—' }}
-                </td>           
-                <td>{{ approval.status.capitalize() }}</td>
+                </td>
                 <td>
-                    <a href="{{ url_for('admin.view_request', request_id=approval.request.id) }}">View Form</a>
-                    {% if user.role.name == "administrator" %}
-                    {% endif %}
+                    {{ approval.status.capitalize() }}
+                </td>
+                <td>
+                    <a href="{{ url_for('admin.view_request', request_id=approval.request.id) }}" class="view-button">View Form</a>
                 </td>
             </tr>
             {% endfor %}
@@ -99,7 +99,7 @@
                 <td>{{ entry.status.capitalize() }}</td>
                 <td>{{ entry.decision_date.strftime('%Y-%m-%d %H:%M') if entry.decision_date else '�' }}</td>
                 <td>{{ entry.comments or '�' }}</td>
-                <td><a href="{{ url_for('admin.view_request', request_id=entry.request.id) }}">View</a></td>
+                <a href="{{ url_for('admin.view_request', request_id=request.id) }}" class="view-button">View Form</a>
             </tr>
             {% endfor %}
         </tbody>

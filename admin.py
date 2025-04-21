@@ -299,7 +299,9 @@ def update_user_assignment():
 def approvals():
 
     # Basic queries
-    approvals_query = ApprovalProcess.query.join(Request).join(User, ApprovalProcess.approver)
+    approvals_query = ApprovalProcess.query \
+    .join(Request, ApprovalProcess.request_id == Request.id) \
+    .join(User, ApprovalProcess.approver_id == User.id, isouter=True)  # Add LEFT JOIN for missing approver
     
     # Get filters from request.args
     form_type = request.args.get("form_type")
@@ -336,3 +338,4 @@ def approvals():
         users=users,
         user=user
     )
+
