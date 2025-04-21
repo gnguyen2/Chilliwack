@@ -847,26 +847,6 @@ def fill_rcl_form():
         if not user_exists:
             flash("Error: The email associated with this request does not exist in the system.", "danger")
             return redirect(url_for("form.fill_rcl_form"))
-        
-        request_entry = Request.query.filter_by(
-            student_email=user_email,
-            request_type="RCL"
-        ).first()
-
-        if not request_entry:
-            # If none, create a new Request
-            new_request = Request(
-                student_email=user_email,
-                request_type="RCL",     # or "RCL_Grad" as needed
-                semester=("fall" if response.semester_fall else "spring"),  # or None if you want
-                year=year_str,          # or int(year_str) if you store it as int
-                status="draft"          # default status
-            )
-            db.session.add(new_request)
-            db.session.commit()
-            response.request_id = new_request.id
-        else:
-            response.request_id = request_entry.id
 
         # 6) Check if form is finalized
         is_finalized = "confirm_acknowledgment" in request.form
@@ -874,18 +854,21 @@ def fill_rcl_form():
         response.last_updated = datetime.utcnow()
 
         response.department_id = "2"
+        response.approval_status = 1
         db.session.add(response)
         db.session.commit()
 
         # If user finalized the form, remove other drafts
         if is_finalized:
             RCLResponses.query.filter_by(user_id=user_id, is_finalized=False).delete()
+            response.approval_status = 2
             db.session.commit()
             flash("RCL Form submitted successfully!", "success")
             # Create ApprovalProcess entry
             approval = ApprovalProcess(
-                request_id=response.request_id,
+                user_id=response.user_id,
                 approver_id=user_exists.id,  # whoever is submitting it
+                form_type = 2,
                 status="pending",
                 decision_date=datetime.utcnow(),
                 comments=None,
@@ -1002,6 +985,7 @@ def save_rcl_progress():
     # last updated
     response.last_updated = datetime.utcnow()
     response.department_id = "2"
+    response.approval_status = 1
     db.session.commit()
 
     gen_rcl_pdf()
