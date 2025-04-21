@@ -60,7 +60,7 @@ class Delegation(db.Model):
     date = db.Column (db.DateTime)
 
 class ApprovalProcess(db.Model):
-    req_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    req_id = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable = False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable = False) #This will be the ID of the requesting student
     form_type = db.Column(db.Integer, db.ForeignKey('department.id'), nullable = False)
     approver_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -74,7 +74,23 @@ class ApprovalProcess(db.Model):
 
     def __repr__(self):
         return f"<Approval {self.id} - Request: {self.req_id} - Status: {self.status}>"
-    
+
+class CAResponses(db.Model):
+    __tablename__ = 'ca_responses'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, nullable = False)
+    user_name = db.Column(db.String(255), nullable = False)
+    user_phone = db.Column(db.String(255), nullable = False)
+    user_email = db.Column(db.String(255), nullable = False)
+    comments = db.Column (db.Text, nullable = True)
+
+    complete_dept_name = db.Column(db.String(255), nullable=False)
+    college_or_division = db.Column(db.String(255), nullable=False)
+    dept_acronym = db.Column(db.String(50), nullable=True)
+    opening_date = db.Column(db.String(50), nullable=True)
+    building_location = db.Column(db.String(255), nullable=True)
+
 class RCLResponses(db.Model):
     __tablename__ = "rcl_responses"
 
@@ -84,7 +100,7 @@ class RCLResponses(db.Model):
     department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=True)
 
     # 1 = in prog, 2 = finalizad awaiting approval, 3=approved
-    approval_status = db.Column(db.Integer, nullable=False)
+    approval_status = db.Column(db.Integer)
 
     # Student Information
     student_name = db.Column(db.String(100), nullable=True)
@@ -173,7 +189,7 @@ class TWResponses(db.Model):
     department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=True)
 
     # 1 = in prog, 2 = finalizad awaiting approval, 3=approved
-    approval_status = db.Column(db.Integer, nullable=False)
+    approval_status = db.Column(db.Integer)
 
     # Student Information
     student_name = db.Column(db.String(100), nullable=True)
@@ -241,7 +257,7 @@ class GeneralPetition(db.Model):  # FOR INTEGRATION
     department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=True)
 
     # 1 = in prog, 2 = finalizad awaiting approval, 3=approved
-    approval_status = db.Column(db.Integer, nullable=False)
+    approval_status = db.Column(db.Integer)
 
     # Student Information Section
     student_last_name = db.Column(db.String(100), nullable=True)
@@ -356,18 +372,3 @@ class GeneralPetitionDocuments(db.Model):
 
     def __repr__(self):
         return f"<TWDocuments {self.id} - {self.file_name}>"
-    
-class CAResponses(db.Model):
-    __tablename__ = 'ca_responses'
-
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_name = db.Column(db.String(255), nullable = False)
-    user_phone = db.Column(db.String(255), nullable = False)
-    user_email = db.Column(db.String(255), nullable = False)
-    comments = db.Column (db.Text, nullable = True)
-
-    complete_dept_name = db.Column(db.String(255), nullable=False)
-    college_or_division = db.Column(db.String(255), nullable=False)
-    dept_acronym = db.Column(db.String(50), nullable=True)
-    opening_date = db.Column(db.String(50), nullable=True)
-    building_location = db.Column(db.String(255), nullable=True)
