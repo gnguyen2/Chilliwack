@@ -91,6 +91,8 @@ class CAResponses(db.Model):
     opening_date = db.Column(db.String(50), nullable=True)
     building_location = db.Column(db.String(255), nullable=True)
 
+    is_finalized = db.Column(db.Boolean, default=False)
+
 class RCLResponses(db.Model):
     __tablename__ = "rcl_responses"
 
