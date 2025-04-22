@@ -86,7 +86,17 @@
                                             and request.approval_status not in [3, 4] %}
         <tr>
             <td>{{ request.id }}</td>
-            <td>{{ request.student_name }}</td>
+            <td>
+                {% if request.__tablename__ in ['rcl_responses', 'tw_responses'] %}
+                {{ request.student_name }}
+                {% elif request.__tablename__ in ['general_petition'] %}
+                {{ request.student_first_name }} {{ request.student_last_name }}
+                {% elif request.__tablename__ in ['ca_responses'] %}
+                {{ request.user_name }}
+                {% else %}
+                Unknown
+                {% endif %}
+            </td>
             <td>
                 {% if request.__tablename__ == 'rcl_responses' %}
                 RCL

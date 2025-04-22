@@ -359,6 +359,7 @@ class GeneralPetition(db.Model):  # FOR INTEGRATION
     # Status Tracking
     is_finalized = db.Column(db.Boolean, default=False)
     last_updated = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
 
     # Add a relationship to store multiple documents
     documents = db.relationship("GeneralPetitionDocuments", back_populates="response", cascade="all, delete-orphan")
