@@ -1,6 +1,6 @@
-from flask import Blueprint, request, flash, redirect, url_for, session, render_template, send_file
+from flask import Blueprint, flash, redirect, url_for, session, render_template, send_file
 from decorators import role_required
-from models import db, User, Role, Status, RCLResponses, TWResponses, Department, ApprovalProcess, GeneralPetition, Delegation
+from models import db, User, Role, Status, RCLResponses, TWResponses, Department, ApprovalProcess, GeneralPetition, Delegation, GeneralPetitionDocuments, CAResponses
 from sqlalchemy.orm import joinedload
 from datetime import datetime
 
@@ -12,7 +12,7 @@ DEPT_MODEL_MAP = {
     1: TWResponses,
     2: RCLResponses,
     3: GeneralPetition,
-    #4: AddressChangeResponses
+    4: CAResponses
 }
 
 # Privlaged user dashboard
@@ -33,17 +33,22 @@ def departmentdashboard():
         forms = (
             TWResponses.query.filter(
                 TWResponses.is_finalized == True,
-                TWResponses.request_id.isnot(None)
+                TWResponses.req_id.isnot(None)
             ).all()
             +
             RCLResponses.query.filter(
                 RCLResponses.is_finalized == True,
-                RCLResponses.request_id.isnot(None)
+                RCLResponses.req_id.isnot(None)
             ).all()
             +
-            GeneralPetition.query.filter(GeneralPetition.is_finalized == True).all()
+            GeneralPetition.query.filter(GeneralPetition.is_finalized == True,
+                                         GeneralPetition.is_finalizes == True,
+            ).all()
+            +
+            CAResponses.query.filter(CAResponses.is_finalized == True,
+                                         CAResponses.is_finalizes == True,
         )
-    
+        )
     # Everyone Else
     else:
         model = DEPT_MODEL_MAP.get(user.department_id)
@@ -54,15 +59,14 @@ def departmentdashboard():
                 q = model.query.filter(model.is_finalized.is_(True))
 
                 # Only apply `.request_id.isnot(None)` if the model supports it
-                if model in [TWResponses, RCLResponses]:
+                if model in [TWResponses, RCLResponses, CAResponses, GeneralPetition]:
                     q = q.filter(model.request_id.isnot(None))
 
                 forms = q.all()
 
 
     # Check if bypass is requested
-    if request.args.get("bypass") == "true":
-        return render_template('departmentdashboard.html', user=user, forms=forms)
+   
     
     return render_template('departmentdashboard.html', user=user, forms=forms)
 
@@ -96,14 +100,12 @@ def admindashboard():
     submitted_genpet_form = GeneralPetition.query.filter(
         GeneralPetition.is_finalized == True,
     ).all()
-
+    submitted_ca_requests = CAResponses.query.filter(
+        CAResponses.is_finalized == True,
+    ).all()
     # Combine RCL and TW requests into a single list
-    pending_requests = submitted_rcl_requests + submitted_tw_requests + submitted_genpet_form
+    pending_requests = submitted_rcl_requests + submitted_tw_requests + submitted_genpet_form + submitted_ca_requests
 
-    # Check if bypass is requested
-    if request.args.get("bypass") == "true":
-        return render_template('admindashboard.html', user=user, users=users, roles=roles, statuses=statuses, pending_requests=pending_requests)
-    
     return render_template('admindashboard.html', user=user, users=users, roles=roles, statuses=statuses, pending_requests=pending_requests)
 
 #update users
@@ -179,73 +181,129 @@ def change_status():
 
     return redirect(url_for("admin.admindashboard"))
 
-#handle requests
-@admin_bp.route("/admin/approve_request/<int:request_id>", methods=["POST"])
+@admin_bp.route("/admin/approve_request/<int:dept_id>/<int:user_id>", methods=["POST"])
 @role_required("administrator")
-def approve_request(request_id):
-    # Try finding the request in RCLResponses
-    request_entry = RCLResponses.query.get(request_id)
-    
-    if not request_entry:
-        # If not found in RCL, check in TWResponses
-        request_entry = TWResponses.query.get(request_id)
+def approve_request(dept_id, user_id):
+    # Determine model based on department ID
+    model = {
+        1: TWResponses,
+        2: RCLResponses,
+        3: GeneralPetition,
+        4: CAResponses
+    }.get(dept_id)
 
-    reponse_table = Request.query.get(request_entry.request_id)
-
-    if request_entry:
-        request_entry.is_finalized = True  # Mark as finalized
-        reponse_table.status = "approved"
-        db.session.commit()
-        
-        flash(f"Request {request_id} has been approved.", "success")
-    else:
-        flash(f"Request {request_id} not found.", "warning")
-
-    return redirect(url_for("admin.admindashboard"))
-
-@admin_bp.route("/admin/reject_request/<int:request_id>", methods=["POST"])
-@role_required("administrator")
-def reject_request(request_id):
-    # Try finding the request in RCLResponses
-    request_entry = RCLResponses.query.get(request_id)
-    
-    if not request_entry:
-        # If not found in RCL, check in TWResponses
-        request_entry = TWResponses.query.get(request_id)
-
-    if request_entry:
-        request_entry.is_finalized = True  # Mark as finalized
-        request_entry.status = "rejected"
-        db.session.commit()
-        
-        flash(f"Request {request_id} has been rejected.", "danger")
-    else:
-        flash(f"Request {request_id} not found.", "warning")
-
-    return redirect(url_for("admin.admindashboard"))
-
-@admin_bp.route("/admin/view_request/<int:request_id>")
-@role_required("administrator")
-def view_request(request_id):
-    # Fetch the request, checking both RCL and Withdrawal tables
-    request_entry = RCLResponses.query.get(request_id) or TWResponses.query.get(request_id)
-
-    if not request_entry:
-        flash(f"Request {request_id} not found.", "warning")
+    if not model:
+        flash("Invalid department selected.", "danger")
         return redirect(url_for("admin.admindashboard"))
 
-    return render_template("view_request.html", request=request_entry)
+    # Look up the user's request in that model
+    request_entry = model.query.filter_by(user_id=user_id).order_by(model.id.desc()).first()
 
-@admin_bp.route("/admin/download_pdf/<int:request_id>")
+    if not request_entry:
+        flash(f"No request found for user ID {user_id} in department {dept_id}.", "warning")
+        return redirect(url_for("admin.admindashboard"))
+
+    # Finalize and approve the form
+    request_entry.is_finalized = True
+
+    # Set department-specific status if needed
+    if hasattr(request_entry, "approval_status"):
+        request_entry.approval_status = 3  # assuming 3 = approved
+
+    # ---------------- approval‑process table ----
+    approval = (ApprovalProcess.query
+                            .filter_by(user_id=user_id,
+                                       form_type=dept_id,
+                                       status="pending")
+                            .order_by(ApprovalProcess.req_id.desc())
+                            .first())
+
+    if approval:
+        approval.status = "approved"
+        approval.decision_date = datetime.utcnow()
+    else:
+        flash("Warning: no pending ApprovalProcess entry found.", "warning")
+
+    db.session.commit()
+    flash(f"{model.__tablename__} form for user {user_id} has been approved.", "success")
+    return redirect(url_for("admin.admindashboard"))
+
+
+@admin_bp.route("/admin/reject_request/<int:dept_id>/<int:user_id>", methods=["POST"])
+@role_required("administrator")
+def reject_request(dept_id, user_id):
+    # Determine model based on department ID
+    model = {
+        1: TWResponses,
+        2: RCLResponses,
+        3: GeneralPetition,
+        4: CAResponses
+    }.get(dept_id)
+
+    if not model:
+        flash("Invalid department selected.", "danger")
+        return redirect(url_for("admin.admindashboard"))
+
+    # Look up the user's request in that model
+    request_entry = model.query.filter_by(user_id=user_id).order_by(model.id.desc()).first()
+
+    if not request_entry:
+        flash(f"No request found for user ID {user_id} in department {dept_id}.", "warning")
+        return redirect(url_for("admin.admindashboard"))
+
+    # Finalize and approve the form
+    request_entry.is_finalized = True
+
+    # Set department-specific status if needed
+    if hasattr(request_entry, "approval_status"):
+        request_entry.approval_status = 4  # assuming 3 = approved
+
+    approval = (ApprovalProcess.query
+                            .filter_by(user_id=user_id,
+                                       form_type=dept_id,
+                                       status="pending")
+                            .order_by(ApprovalProcess.req_id.desc())
+                            .first())
+
+    if approval:
+        approval.status = "rejected"
+        approval.decision_date = datetime.utcnow()
+    else:
+        flash("Warning: no pending ApprovalProcess entry found.", "warning")    
+
+    db.session.commit()
+    flash(f"{model.__tablename__} form for user {user_id} has been rejected.", "success")
+    return redirect(url_for("admin.admindashboard"))
+
+
+@admin_bp.route("/admin/view_request/<int:dept_id>/<int:user_id>")
+@role_required("administrator")
+def view_request(dept_id, user_id):
+    model = {
+        1: TWResponses,
+        2: RCLResponses,
+        3: GeneralPetition,
+        4: CAResponses
+    }.get(dept_id)
+
+    if not model:
+        flash("Invalid department selected.", "danger")
+        return redirect(url_for("admin.admindashboard"))
+    # Fetch the request, checking both RCL and Withdrawal tables
+    request_entry = model.query.filter_by(user_id=user_id).order_by(model.id.desc()).first()
+
+    return render_template("view_request.html", request = request_entry, dept_id=dept_id, user_id=user_id)
+
+@admin_bp.route("/admin/download_pdf/<int:dept_id>/<int:user_id>")
 @role_required("administrator")
 def download_pdf(request_id):
-    request_entry = RCLResponses.query.get(request_id) or TWResponses.query.get(request_id)
+    request_entry = RCLResponses.query.get(request_id) or TWResponses.query.get(request_id) or GeneralPetition.query.get(request_id) or CAResponses.query.get(request_id)
 
     if request_entry and request_entry.pdf_path:
         return send_file(request_entry.pdf_path, as_attachment=True)
 
     flash("PDF not found for this request!", "warning")
-    return redirect(url_for("admin.view_request", request_id=request_id))
+    return redirect(url_for("admin.view_request", dept_id=dept_id, user_id=user_id))
 
 # Admin route for departments & roles page
 @admin_bp.route("/admin/departments_roles", methods=["GET", "POST"])
@@ -316,45 +374,54 @@ def update_user_assignment():
 @admin_bp.route("/admin/approvals", methods=["GET"])
 @role_required("administrator")
 def approvals():
-
-    # Basic queries
-    approvals_query = ApprovalProcess.query \
-    .join(Request, ApprovalProcess.request_id == Request.id) \
-    .join(User, ApprovalProcess.approver_id == User.id, isouter=True)  # Add LEFT JOIN for missing approver
-    
-    # Get filters from request.args
     form_type = request.args.get("form_type")
     user_id = request.args.get("user_id")
     dept_id = request.args.get("department_id")
     start_date = request.args.get("start_date")
     end_date = request.args.get("end_date")
 
+    # Start query
+    approvals_query = ApprovalProcess.query
+
     if form_type:
-        approvals_query = approvals_query.filter(Request.request_type == form_type)
+        try:
+            approvals_query = approvals_query.filter(ApprovalProcess.form_type == int(form_type))
+        except ValueError:
+            flash("Invalid form type filter.", "warning")
+
     if user_id:
-        approvals_query = approvals_query.filter(ApprovalProcess.approver_id == user_id)
+        try:
+            approvals_query = approvals_query.filter(ApprovalProcess.user_id == int(user_id))
+        except ValueError:
+            flash("Invalid user ID filter.", "warning")
+
     if dept_id:
-        approvals_query = approvals_query.join(User, User.id == ApprovalProcess.approver_id)\
-                                         .filter(User.department_id == dept_id)
+        try:
+            approvals_query = approvals_query.filter(ApprovalProcess.form_type == int(dept_id))
+        except ValueError:
+            flash("Invalid department ID filter.", "warning")
+
     if start_date:
         approvals_query = approvals_query.filter(ApprovalProcess.decision_date >= start_date)
     if end_date:
         approvals_query = approvals_query.filter(ApprovalProcess.decision_date <= end_date)
 
-    all_approvals = approvals_query.order_by(ApprovalProcess.decision_date.desc()).all()
-    pending_approvals = [a for a in all_approvals if a.status == "pending"]
-    history = [a for a in all_approvals if a.status != "pending"]
+    approvals = approvals_query.order_by(ApprovalProcess.decision_date.desc()).all()
 
+    # Separate pending and historical
+    pending_approvals = [a for a in approvals if a.status == "pending"]
+    history = [a for a in approvals if a.status != "pending"]
+
+    # Supporting context data
+    users = User.query.all()
     departments = Department.query.all()
-    users = User.query.order_by(User.name).all()
-    user = User.query.filter_by(email=session["user"]["email"]).first()
+    current_user = User.query.filter_by(email=session["user"]["email"]).first()
 
     return render_template(
         "pending_approvals.html",
         pending_approvals=pending_approvals,
         history=history,
-        departments=departments,
         users=users,
-        user=user
+        departments=departments,
+        user=current_user
     )
-

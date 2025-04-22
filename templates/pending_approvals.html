@@ -58,20 +58,25 @@
         <tbody>
             {% for approval in pending_approvals %}
             <tr>
-                <td>{{ approval.request.id }}</td>
-                <td>{{ approval.request.student_email }}</td>
-                <td>{{ approval.approver.name }}</td>
+                <td>{{ approval.req_id }}</td>
+                <td>
+                    {% set student = users | selectattr("id", "equalto", approval.user_id) | first %}
+                    {{ student.name if student else 'Unknown' }}
+                </td>
+                <td>
+                    {{ approval.approver.name if approval.approver else '—' }}
+                </td>
                 <td>
                     {{ approval.decision_date.strftime('%Y-%m-%d') if approval.decision_date else '—' }}
                 </td>
+                <td>{{ approval.status.capitalize() }}</td>
                 <td>
-                    {{ approval.status.capitalize() }}
-                </td>
-                <td>
-                    <a href="{{ url_for('admin.view_request', request_id=approval.request.id) }}" class="view-button">View Form</a>
+                    <!-- Use form_type (as department ID) to determine source -->
+                    <a href="{{ url_for('admin.view_request', request_id=approval.req_id) }}" class="view-button">View Form</a>
                 </td>
             </tr>
             {% endfor %}
+
         </tbody>
     </table>
 
