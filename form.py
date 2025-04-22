@@ -1214,7 +1214,6 @@ def preview_form():
     # Return the existing PDF for display in the browser (opens in a new tab)
     return send_file(pdf_path, as_attachment=False, download_name=filename, mimetype="application/pdf")
     
-# ------------------------- 1)  AJAX “save progress” --------------------------
 @form_bp.route("/save_ca_progress", methods=["POST"])
 def save_ca_progress():
     if "user" not in session:
