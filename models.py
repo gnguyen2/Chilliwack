@@ -87,7 +87,7 @@ class CAResponses(db.Model):
     comments = db.Column (db.Text, nullable = True)
 
     # 1 = in prog, 2 = finalizad awaiting approval, 3=approved
-    approval_status = db.Column(db.Integer)
+    approval_status = db.Column(db.Integer, server_default="1")
 
     complete_dept_name = db.Column(db.String(255), nullable=False)
     college_or_division = db.Column(db.String(255), nullable=False)
@@ -106,7 +106,7 @@ class RCLResponses(db.Model):
     department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=True)
 
     # 1 = in prog, 2 = finalizad awaiting approval, 3=approved
-    approval_status = db.Column(db.Integer)
+    approval_status = db.Column(db.Integer, server_default="1")
 
     # Student Information
     student_name = db.Column(db.String(100), nullable=True)
@@ -195,7 +195,7 @@ class TWResponses(db.Model):
     department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=True)
 
     # 1 = in prog, 2 = finalizad awaiting approval, 3=approved
-    approval_status = db.Column(db.Integer)
+    approval_status = db.Column(db.Integer, server_default="1")
 
     # Student Information
     student_name = db.Column(db.String(100), nullable=True)
@@ -263,7 +263,7 @@ class GeneralPetition(db.Model):  # FOR INTEGRATION
     department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=True)
 
     # 1 = in prog, 2 = finalizad awaiting approval, 3=approved
-    approval_status = db.Column(db.Integer)
+    approval_status = db.Column(db.Integer, server_default="1")
 
     # Student Information Section
     student_last_name = db.Column(db.String(100), nullable=True)
