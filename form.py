@@ -1221,7 +1221,7 @@ def preview_form():
         save_cm_progress()
         gen_cm_pdf()
     elif form_type == "CA":
-        print("TEST3")
+        print("TEST4")
         save_ca_progress()
         gen_ca_pdf()
 
