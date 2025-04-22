@@ -10,19 +10,45 @@
     <table>
         <tr><th>Request ID:</th><td>{{ request.id }}</td></tr>
         <tr><th>Student Name:</th><td>{{ request.student_name }}</td></tr>
-        <tr><th>Request Type:</th><td>{{ "Reduced Course Load (RCL)" if request.is_rcl else "Term Withdrawal" }}</td></tr>
-        <tr><th>Reason:</th><td>{{ request.reason }}</td></tr>
-        <tr><th>Submission Date:</th><td>{{ request.submission_date.strftime('%Y-%m-%d') }}</td></tr>
-        <tr><th>Status:</th><td>{{ request.status }}</td></tr>
+        <tr>
+          <th>Request Type:</th>
+          <td>
+            {% if request.department_id == 1 %}
+              Term Withdrawal (TW)
+            {% elif request.department_id == 2 %}
+              Reduced Course Load (RCL)
+            {% elif request.department_id == 3 %}
+              Change Major (CM)
+            {% elif request.department_id == 4 %}
+              Change of Address (CA)
+            {% else %}
+              Unknown
+            {% endif %}
+          </td>
+        </tr>
+        <tr>
+          <th>Status:</th>
+          <td>
+            {% if request.approval_status == 2 %}
+              Pending Approval
+            {% elif request.approval_status == 3 %}
+              Approved
+            {% elif request.approval_status == 4 %}
+              Rejected
+            {% else %}
+              Unknown
+            {% endif %}
+          </td>
+        </tr>
 
         <tr><th>View PDF:</th>
             <td>
-                <iframe src="{{ url_for('form.view_pdf', request_id=request.id) }}" width="90%" height="1000px style="border: none;""></iframe>
+                <iframe src="{{ url_for('form.view_pdf', dept_id = request.department_id, request_user = request.user_id) }}" width="90%" height="1000px style="border: none;""></iframe>
             </td>
         </tr>
         <tr><th>Download PDF:</th>
             <td>
-                <a href="{{ url_for('form.download_pdf', request_id=request.id) }}" class="download-button">Download PDF</a>
+                <a href="{{ url_for('form.download_pdf', dept_id = request.department_id, request_user = request.user_id) }}" class="download-button">Download PDF</a>
             </td>
         </tr>
     </table>
