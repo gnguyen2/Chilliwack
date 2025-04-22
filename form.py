@@ -186,13 +186,18 @@ def fill_cm_form():
 
         # 5️⃣ If finalized, clean up drafts and start the approval flow ⬅️
         if is_finalized:
-            # Remove any other unfinished drafts this user might have
-            GeneralPetition.query.filter_by(
-                user_id=user_id, is_finalized=False
-            ).delete()
+            # 1️⃣  Delete every other GeneralPetition from *this* user
+            (db.session.query(GeneralPetition)
+                .filter(
+                    GeneralPetition.user_id == user_id,
+                    GeneralPetition.id != response.id        # keep the one we just saved
+                )
+                .delete(synchronize_session="fetch")         # or "False" for speed
+            )
 
             # Mark this response as “submitted / pending approval”
             response.approval_status = 2   # 2 = submitted, waiting for approver
+            db.session.add(response) 
             db.session.commit()
 
             # Create an ApprovalProcess record
@@ -535,8 +540,18 @@ def fill_tw_form():
 
         # If finalized, remove any unfinished drafts
         if is_finalized:
-            TWResponses.query.filter_by(user_id=user_id, is_finalized=False).delete()
-            response.approval_status = 2
+            # 1️⃣  Delete every other GeneralPetition from *this* user
+            (db.session.query(TWResponses)
+                .filter(
+                    TWResponses.user_id == user_id,
+                    TWResponses.id != response.id        # keep the one we just saved
+                )
+                .delete(synchronize_session="fetch")         # or "False" for speed
+            )
+
+            # Mark this response as “submitted / pending approval”
+            response.approval_status = 2   # 2 = submitted, waiting for approver
+            db.session.add(response)
             db.session.commit()
             flash("Form submitted successfully!", "success")
             
@@ -879,8 +894,18 @@ def fill_rcl_form():
 
         # If user finalized the form, remove other drafts
         if is_finalized:
-            RCLResponses.query.filter_by(user_id=user_id, is_finalized=False).delete()
-            response.approval_status = 2
+            # 1️⃣  Delete every other RCLResponses from *this* user
+            (db.session.query(RCLResponses)
+                .filter(
+                    RCLResponses.user_id == user_id,
+                    RCLResponses.id != response.id        # keep the one we just saved
+                )
+                .delete(synchronize_session="fetch")         # or "False" for speed
+            )
+
+            # Mark this response as “submitted / pending approval”
+            response.approval_status = 2   # 2 = submitted, waiting for approver
+            db.session.add(response)
             db.session.commit()
             flash("RCL Form submitted successfully!", "success")
             # Create ApprovalProcess entry
@@ -1189,6 +1214,7 @@ def preview_form():
     # Return the existing PDF for display in the browser (opens in a new tab)
     return send_file(pdf_path, as_attachment=False, download_name=filename, mimetype="application/pdf")
     
+# ------------------------- 1)  AJAX “save progress” --------------------------
 @form_bp.route("/save_ca_progress", methods=["POST"])
 def save_ca_progress():
     if "user" not in session:
@@ -1196,39 +1222,39 @@ def save_ca_progress():
 
     user_id = session["user"]["id"]
 
+    # get current draft or start a new one
     response = CAResponses.query.filter_by(user_id=user_id, is_finalized=False).first()
     if not response:
         response = CAResponses(user_id=user_id)
         db.session.add(response)
 
-    # === Student Info ===
-    response.id = user_id
-    response.user_name = request.form.get("user_name")
-    response.user_phone = request.form.get("user_phone")
-    response.user_email = request.form.get("user_email")
-    response.comments = request.form.get("comments")
-    response.complete_dept_name = request.form.get("complete_dept_name")
-    response.college_or_division = request.form.get("college_or_division")
-    response.dept_acronym = request.form.get("dept_acronym")
-    response.opening_date = datetime.utcnow()
-    response.building_location = request.form.get("building_location")
+    # -------- populate / update -----------
+    response.user_name           = request.form.get("user_name", response.user_name)
+    response.user_phone          = request.form.get("user_phone", response.user_phone)
+    response.user_email          = request.form.get("user_email", response.user_email)
+    response.comments            = request.form.get("comments", response.comments)
+    response.complete_dept_name  = request.form.get("complete_dept_name", response.complete_dept_name)
+    response.college_or_division = request.form.get("college_or_division", response.college_or_division)
+    response.dept_acronym        = request.form.get("dept_acronym", response.dept_acronym)
+    response.building_location   = request.form.get("building_location", response.building_location)
 
-
-    # === Petition Purpose Flags ===
     date_str = request.form.get("date")
     if date_str:
         try:
             response.signature_date = datetime.strptime(date_str, "%Y-%m-%d")
         except ValueError:
-            pass  # invalid date format
+            pass
 
-    response.date_submitted = datetime.utcnow()
-    response.department_id =  4 
+    # -------- bookkeeping -----------
+    response.last_updated  = datetime.utcnow()
+    response.department_id = 4
+    response.approval_status = 1           # draft
     db.session.commit()
-
 
     return jsonify({"message": "Form progress saved successfully!"}), 200
 
+
+# -------------------------- 2)  full form view / submit ----------------------
 @form_bp.route("/ca_form", methods=['GET', 'POST'])
 def fill_ca_form():
     if "user" not in session:
@@ -1236,33 +1262,71 @@ def fill_ca_form():
         return redirect(url_for("home"))
 
     user_id = session["user"]["id"]
-    existing_response = CAResponses.query.filter_by(user_id=user_id, is_finalized=False).first()
+    existing_response = CAResponses.query.filter_by(
+        user_id=user_id, is_finalized=False
+    ).first()
 
+    # ---------------- POST ---------------------------------------------------
     if request.method == 'POST':
         response = existing_response if existing_response else CAResponses(user_id=user_id)
 
-        response.id                    = user_id
-        response.user_name            = request.form.get("user_name", "").strip()
-        response.user_phone           = request.form.get("user_phone", "").strip()
-        response.user_email           = request.form.get("user_email", "").strip()
-        response.comments             = request.form.get("comments", "").strip()
-        response.complete_dept_name   = request.form.get("complete_dept_name", "").strip()
-        response.college_or_division  = request.form.get("college_or_division", "").strip()
-        response.dept_acronym         = request.form.get("dept_acronym", "").strip()
-        response.opening_date         = datetime.utcnow()
-        response.building_location    = request.form.get("building_location", "").strip()
+        # ① populate fields
+        response.user_name           = request.form.get("user_name", "").strip()
+        response.user_phone          = request.form.get("user_phone", "").strip()
+        response.user_email          = request.form.get("user_email", "").strip()
+        response.comments            = request.form.get("comments", "").strip()
+        response.complete_dept_name  = request.form.get("complete_dept_name", "").strip()
+        response.college_or_division = request.form.get("college_or_division", "").strip()
+        response.dept_acronym        = request.form.get("dept_acronym", "").strip()
+        response.building_location   = request.form.get("building_location", "").strip()
 
-
-        # -------------------- 6️⃣  MISC / BOOK‑KEEPING ---------------
+        # ② bookkeeping
         response.last_updated  = datetime.utcnow()
-        response.department_id =  4          # or whichever dept. you need
-        db.session.add(response)
-        db.session.commit()
+        response.department_id = 4
+        response.approval_status = 1
 
-        flash("Petition saved successfully!", "success")
+        # ③ did the user finalize?
+        is_finalized = "confirm_acknowledgment" in request.form
+        response.is_finalized = is_finalized
+
+        db.session.add(response)
+        db.session.commit()                # guarantees response.id exists
+
+        # ④ finalize branch ---------------------------------------------------
+        if is_finalized:
+            # delete ALL other CA drafts / old submissions from the same user
+            (db.session.query(CAResponses)
+               .filter(
+                   CAResponses.user_id == user_id,
+                   CAResponses.id != response.id
+               )
+               .delete(synchronize_session="fetch")
+            )
+
+            # mark this one as submitted / pending approval
+            response.approval_status = 2
+            db.session.add(response)
+            db.session.commit()
+
+            # create ApprovalProcess row
+            approval = ApprovalProcess(
+                user_id    = response.user_id,
+                approver_id= session["user"]["id"],    # who pressed submit
+                form_type  = 4,                        # CA form
+                status     = "pending",
+                decision_date = datetime.utcnow()
+            )
+            db.session.add(approval)
+            db.session.commit()
+
+            flash("Form submitted successfully!", "success")
+            return redirect(url_for("dashboard"))
+
+        # ⑤ draft branch ------------------------------------------------------
+        flash("Form saved successfully!", "success")
         return redirect(url_for("form.fill_ca_form"))
 
-    # GET – render template with any draft pre‑filled
+    # ---------------- GET ----------------------------------------------------
     return render_template("ca_form.html", response=existing_response)
 
 @form_bp.route("/gen_ca_pdf", methods = ["POST"])

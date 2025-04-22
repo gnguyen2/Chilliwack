@@ -79,6 +79,7 @@ class CAResponses(db.Model):
     __tablename__ = 'ca_responses'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=True)
     user_id = db.Column(db.Integer, nullable = False)
     user_name = db.Column(db.String(255), nullable = False)
     user_phone = db.Column(db.String(255), nullable = False)
