@@ -81,9 +81,9 @@
             <th>Actions</th>
         </tr>
 
-        {# Show each request only if: (a) admin’s dept_id is 0 OR (b) it matches admin’s dept_id #}
-        {% for request in pending_requests if user.department_id == 0
-                                            or request.department_id == user.department_id %}
+        {# Show each pending request only if: (a) admin's dept_id is 0 OR (b) it matches admin's dept_id #}
+        {% for request in pending_requests if (user.department_id == 0 or request.department_id == user.department_id) 
+                                            and request.approval_status not in [3, 4] %}
         <tr>
             <td>{{ request.id }}</td>
             <td>{{ request.student_name }}</td>
@@ -114,13 +114,7 @@
                 {% endif %}
             </td>
             <td>
-                {% if request.approval_status == 3 %}
-                Approved
-                {% elif request.approval_status == 4 %}
-                Rejected
-                {% else %}
                 Pending
-                {% endif %}
             </td>
             <td>
                 <a href="{{ url_for('admin.view_request', dept_id = request.department_id, user_id = request.user_id) }}" class="view-button">View Form</a>
