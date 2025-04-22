@@ -114,9 +114,9 @@
                 {% endif %}
             </td>
             <td>
-                {% if request.approval_status == '3' %}
+                {% if request.approval_status == 3 %}
                 Approved
-                {% elif request.approval_status =='4' %}
+                {% elif request.approval_status == 4 %}
                 Rejected
                 {% else %}
                 Pending

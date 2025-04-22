@@ -43,12 +43,12 @@
 
         <tr><th>View PDF:</th>
             <td>
-                <iframe src="{{ url_for('form.view_pdf', dept_id = request.department_id, request_user = request.user_id) }}" width="90%" height="1000px style="border: none;""></iframe>
+                <iframe src="{{ url_for('form.view_pdf', dept_id = request.department_id, user_id = request.user_id) }}" width="90%" height="1000px style="border: none;""></iframe>
             </td>
         </tr>
         <tr><th>Download PDF:</th>
             <td>
-                <a href="{{ url_for('form.download_pdf', dept_id = request.department_id, request_user = request.user_id) }}" class="download-button">Download PDF</a>
+                <a href="{{ url_for('form.download_pdf', dept_id = request.department_id, user_id = request.user_id) }}" class="download-button">Download PDF</a>
             </td>
         </tr>
     </table>

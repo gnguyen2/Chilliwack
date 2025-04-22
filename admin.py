@@ -210,6 +210,20 @@ def approve_request(dept_id, user_id):
     if hasattr(request_entry, "approval_status"):
         request_entry.approval_status = 3  # assuming 3 = approved
 
+    # ---------------- approval‑process table ----
+    approval = (ApprovalProcess.query
+                            .filter_by(user_id=user_id,
+                                       form_type=dept_id,
+                                       status="pending")
+                            .order_by(ApprovalProcess.req_id.desc())
+                            .first())
+
+    if approval:
+        approval.status = "approved"
+        approval.decision_date = datetime.utcnow()
+    else:
+        flash("Warning: no pending ApprovalProcess entry found.", "warning")
+
     db.session.commit()
     flash(f"{model.__tablename__} form for user {user_id} has been approved.", "success")
     return redirect(url_for("admin.admindashboard"))
@@ -244,6 +258,19 @@ def reject_request(dept_id, user_id):
     if hasattr(request_entry, "approval_status"):
         request_entry.approval_status = 4  # assuming 3 = approved
 
+    approval = (ApprovalProcess.query
+                            .filter_by(user_id=user_id,
+                                       form_type=dept_id,
+                                       status="pending")
+                            .order_by(ApprovalProcess.req_id.desc())
+                            .first())
+
+    if approval:
+        approval.status = "rejected"
+        approval.decision_date = datetime.utcnow()
+    else:
+        flash("Warning: no pending ApprovalProcess entry found.", "warning")    
+
     db.session.commit()
     flash(f"{model.__tablename__} form for user {user_id} has been rejected.", "success")
     return redirect(url_for("admin.admindashboard"))
@@ -265,8 +292,7 @@ def view_request(dept_id, user_id):
     # Fetch the request, checking both RCL and Withdrawal tables
     request_entry = model.query.filter_by(user_id=user_id).order_by(model.id.desc()).first()
 
-
-    return render_template("view_request.html", request=request_entry)
+    return render_template("view_request.html", request = request_entry, dept_id=dept_id, user_id=user_id)
 
 @admin_bp.route("/admin/download_pdf/<int:dept_id>/<int:user_id>")
 @role_required("administrator")
