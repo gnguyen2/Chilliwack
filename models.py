@@ -86,6 +86,9 @@ class CAResponses(db.Model):
     user_email = db.Column(db.String(255), nullable = False)
     comments = db.Column (db.Text, nullable = True)
 
+    # 1 = in prog, 2 = finalizad awaiting approval, 3=approved
+    approval_status = db.Column(db.Integer)
+
     complete_dept_name = db.Column(db.String(255), nullable=False)
     college_or_division = db.Column(db.String(255), nullable=False)
     dept_acronym = db.Column(db.String(50), nullable=True)
