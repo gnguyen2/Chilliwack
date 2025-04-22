@@ -61,8 +61,14 @@
             <label for="comments">Comments:</label>
             <textarea name="comments" id="comments" rows="5" style="width: 100%;"></textarea>
         </div>
-
-        
+        <!-- user must tick to finalize -->
+        <label>
+            <input type="checkbox"
+                id="confirm_acknowledgment"
+                name="confirm_acknowledgment"
+                required>
+            I confirm the information above is complete and final.
+        </label>
         <br>
         <button type="submit" class="submit-button" id="submitCAButton" name="submitButton">Submit Address Change</button>
     </form>
