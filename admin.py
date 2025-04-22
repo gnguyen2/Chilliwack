@@ -370,57 +370,27 @@ def update_user_assignment():
 
     return redirect(url_for("admin.departments_roles"))
 
-# View pending approvals & history
+# View only approved / rejected approvals
 @admin_bp.route("/admin/approvals", methods=["GET"])
 @role_required("administrator")
 def approvals():
-    form_type = request.args.get("form_type")
-    user_id = request.args.get("user_id")
-    dept_id = request.args.get("department_id")
-    start_date = request.args.get("start_date")
-    end_date = request.args.get("end_date")
+    # 1) fetch every approval that is no longer pending
+    decided_approvals = (
+        ApprovalProcess.query
+        .filter(ApprovalProcess.status.in_(["approved", "rejected"]))
+        .order_by(ApprovalProcess.decision_date.desc())
+        .all()
+    )
 
-    # Start query
-    approvals_query = ApprovalProcess.query
 
-    if form_type:
-        try:
-            approvals_query = approvals_query.filter(ApprovalProcess.form_type == int(form_type))
-        except ValueError:
-            flash("Invalid form type filter.", "warning")
-
-    if user_id:
-        try:
-            approvals_query = approvals_query.filter(ApprovalProcess.user_id == int(user_id))
-        except ValueError:
-            flash("Invalid user ID filter.", "warning")
-
-    if dept_id:
-        try:
-            approvals_query = approvals_query.filter(ApprovalProcess.form_type == int(dept_id))
-        except ValueError:
-            flash("Invalid department ID filter.", "warning")
-
-    if start_date:
-        approvals_query = approvals_query.filter(ApprovalProcess.decision_date >= start_date)
-    if end_date:
-        approvals_query = approvals_query.filter(ApprovalProcess.decision_date <= end_date)
-
-    approvals = approvals_query.order_by(ApprovalProcess.decision_date.desc()).all()
-
-    # Separate pending and historical
-    pending_approvals = [a for a in approvals if a.status == "pending"]
-    history = [a for a in approvals if a.status != "pending"]
-
-    # Supporting context data
-    users = User.query.all()
-    departments = Department.query.all()
+    # 2) context helpers
+    users        = User.query.all()
+    departments  = Department.query.all()
     current_user = User.query.filter_by(email=session["user"]["email"]).first()
 
     return render_template(
-        "pending_approvals.html",
-        pending_approvals=pending_approvals,
-        history=history,
+        "pending_approvals.html",      # use same template if it already lists history
+        decided_approvals=decided_approvals,
         users=users,
         departments=departments,
         user=current_user

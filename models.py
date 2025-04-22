@@ -73,7 +73,7 @@ class ApprovalProcess(db.Model):
     approver = db.relationship("User", foreign_keys=[approver_id], back_populates="approvals")
 
     def __repr__(self):
-        return f"<Approval {self.id} - Request: {self.req_id} - Status: {self.status}>"
+        return f"<Approval {self.req_id} - Request: {self.req_id} - Status: {self.status}>"
 
 class CAResponses(db.Model):
     __tablename__ = 'ca_responses'

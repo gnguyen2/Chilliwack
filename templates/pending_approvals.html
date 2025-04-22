@@ -8,7 +8,7 @@
 </head>
 <body class="admin-container">
 
-    <h1>Pending Approvals</h1>
+    <h1>Approval History </h1>
 
     <!-- ?? Filter Section -->
     <form method="GET" class="filter-form">
@@ -56,7 +56,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for approval in pending_approvals %}
+            {% for approval in decided_approvals %}
             <tr>
                 <td>{{ approval.req_id }}</td>
                 <td>
@@ -72,7 +72,7 @@
                 <td>{{ approval.status.capitalize() }}</td>
                 <td>
                     <!-- Use form_type (as department ID) to determine source -->
-                    <a href="{{ url_for('admin.view_request', request_id=approval.req_id) }}" class="view-button">View Form</a>
+                    <a href="{{ url_for('admin.view_request', dept_id=approval.form_type, user_id=approval.user_id) }}" class="view-button">View Form</a>
                 </td>
             </tr>
             {% endfor %}
@@ -80,38 +80,7 @@
         </tbody>
     </table>
 
-    <h1>Approval History (Audit Log)</h1>
-
-    <!-- ?? History Table -->
-    <table>
-        <thead>
-            <tr>
-                <th>Form ID</th>
-                <th>Requester</th>
-                <th>Approver</th>
-                <th>Action</th>
-                <th>Timestamp</th>
-                <th>Comments</th>
-                <th>View</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for entry in history %}
-            <tr>
-                <td>{{ entry.request.id }}</td>
-                <td>{{ entry.request.student_email }}</td>
-                <td>{{ entry.approver.name }}</td>
-                <td>{{ entry.status.capitalize() }}</td>
-                <td>{{ entry.decision_date.strftime('%Y-%m-%d %H:%M') if entry.decision_date else '�' }}</td>
-                <td>{{ entry.comments or '�' }}</td>
-                <a href="{{ url_for('admin.view_request', request_id=request.id) }}" class="view-button">View Form</a>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
     <hr>
-    <h2>Approval History</h2>
     <div class="back-link">
         <a href="{{ url_for('admin.admindashboard') }}" class="button">← Back to Admin Dashboard</a>
     </div>
