@@ -195,6 +195,14 @@ def fill_cm_form():
                 .delete(synchronize_session="fetch")         # or "False" for speed
             )
 
+            (db.session.query(ApprovalProcess)
+                .filter(
+                    ApprovalProcess.user_id  == user_id,
+                    ApprovalProcess.form_type == 3        # CA form
+                )
+                .delete(synchronize_session="fetch")
+            )
+
             # Mark this response as “submitted / pending approval”
             response.approval_status = 2   # 2 = submitted, waiting for approver
             db.session.add(response) 
@@ -549,6 +557,14 @@ def fill_tw_form():
                 .delete(synchronize_session="fetch")         # or "False" for speed
             )
 
+            (db.session.query(ApprovalProcess)
+                .filter(
+                    ApprovalProcess.user_id  == user_id,
+                    ApprovalProcess.form_type == 1        # CA form
+                )
+                .delete(synchronize_session="fetch")
+            )
+
             # Mark this response as “submitted / pending approval”
             response.approval_status = 2   # 2 = submitted, waiting for approver
             db.session.add(response)
@@ -901,6 +917,14 @@ def fill_rcl_form():
                     RCLResponses.id != response.id        # keep the one we just saved
                 )
                 .delete(synchronize_session="fetch")         # or "False" for speed
+            )
+
+            (db.session.query(ApprovalProcess)
+                .filter(
+                    ApprovalProcess.user_id  == user_id,
+                    ApprovalProcess.form_type == 2        # CA form
+                )
+                .delete(synchronize_session="fetch")
             )
 
             # Mark this response as “submitted / pending approval”
@@ -1300,6 +1324,14 @@ def fill_ca_form():
                    CAResponses.id != response.id
                )
                .delete(synchronize_session="fetch")
+            )
+
+            (db.session.query(ApprovalProcess)
+                .filter(
+                    ApprovalProcess.user_id  == user_id,
+                    ApprovalProcess.form_type == 4        # CA form
+                )
+                .delete(synchronize_session="fetch")
             )
 
             # mark this one as submitted / pending approval
