@@ -1204,7 +1204,7 @@ def preview_form():
     form_type = request.form.get("form_type")  # Get the form type (TW or RCL)
 
     # Validate form type
-    if form_type not in ["TW", "RCL", "CM"]:
+    if form_type not in ["TW", "RCL", "CM", "CA"]:
         return jsonify({"error": "Invalid form type"}), 400
 
     # Call the appropriate save function
@@ -1218,10 +1218,12 @@ def preview_form():
         gen_rcl_pdf()
     elif form_type == "CM":
         print("TEST3")
-        
-        save_rcl_progress()
-
+        save_cm_progress()
         gen_cm_pdf()
+    elif form_type == "CA":
+        print("TEST3")
+        save_ca_progress()
+        gen_ca_pdf()
 
 
     # Define the file name (Make sure your PDFs are saved in the right location)
@@ -1273,6 +1275,8 @@ def save_ca_progress():
     response.department_id = 4
     response.approval_status = 1           # draft
     db.session.commit()
+
+    gen_ca_pdf()
 
     return jsonify({"message": "Form progress saved successfully!"}), 200
 
