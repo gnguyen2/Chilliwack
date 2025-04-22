@@ -174,9 +174,41 @@ def fill_cm_form():
 
         # -------------------- 6️⃣  MISC / BOOK‑KEEPING ---------------
         response.last_updated  = datetime.utcnow()
-        response.department_id =  3          # or whichever dept. you need
+        response.department_id =  3         # or whichever dept. you need
+        response.approval_status = 1                  # 1 = draft / waiting
+                                                   
+        # 4️⃣ Is the form finalized?
+        is_finalized = "confirm_acknowledgment" in request.form
+        response.is_finalized = is_finalized 
+
         db.session.add(response)
         db.session.commit()
+
+        # 5️⃣ If finalized, clean up drafts and start the approval flow ⬅️
+        if is_finalized:
+            # Remove any other unfinished drafts this user might have
+            GeneralPetition.query.filter_by(
+                user_id=user_id, is_finalized=False
+            ).delete()
+
+            # Mark this response as “submitted / pending approval”
+            response.approval_status = 2   # 2 = submitted, waiting for approver
+            db.session.commit()
+
+            # Create an ApprovalProcess record
+            approval = ApprovalProcess(
+                user_id   = response.user_id,    # student
+                approver_id = session["user"]["id"],   # whoever is submitting
+                form_type = 3,                    # 3 = CM petition
+                status    = "pending",
+                decision_date = datetime.utcnow(),
+                comments  = None,
+            )
+            db.session.add(approval)
+            db.session.commit()
+
+            flash("Petition submitted successfully!", "success")
+            return redirect(url_for("dashboard")) 
 
         flash("Petition saved successfully!", "success")
         return redirect(url_for("form.fill_cm_form"))
@@ -259,6 +291,7 @@ def save_cm_progress():
 
     response.date_submitted = datetime.utcnow()
     response.department_id =  3 
+    response.approval_status = 1
     db.session.commit()
 
 
@@ -454,24 +487,6 @@ def fill_tw_form():
             flash("Error: The email associated with this request does not exist in the system.", "danger")
             return redirect(url_for("form.fill_tw_form"))
 
-        # Check if request already exists
-        request_entry = Request.query.filter_by(student_email=response.email, request_type="TW").first()
-
-        if not request_entry:
-            # Create a new request if one doesn't exist
-            new_request = Request(
-                student_email=response.email,
-                request_type="TW",
-                semester=request.form.get("withdrawal_term"),
-                year=request.form.get("year"),
-                status="draft"
-            )
-            db.session.add(new_request)
-            db.session.commit()
-            response.request_id = new_request.id
-        else:
-            response.request_id = request_entry.id
-
         # Process file uploads
         files = request.files.getlist("supporting_documents")
         for file in files:
@@ -514,18 +529,21 @@ def fill_tw_form():
         response.is_finalized = is_finalized
 
         response.department_id = "1"
+        response.approval_status = 1
         db.session.add(response)
         db.session.commit()
 
         # If finalized, remove any unfinished drafts
         if is_finalized:
             TWResponses.query.filter_by(user_id=user_id, is_finalized=False).delete()
+            response.approval_status = 2
             db.session.commit()
             flash("Form submitted successfully!", "success")
             
             approval = ApprovalProcess(
-                request_id=response.request_id,
-                approver_id=user_exists.id,
+                user_id=response.user_id,
+                approver_id=user_exists.id,  # whoever is submitting it
+                form_type = 2,
                 status="pending",
                 decision_date=datetime.utcnow(),
                 comments=None,
@@ -585,6 +603,7 @@ def save_tw_progress():
     response.last_updated = datetime.utcnow()
     
     response.department_id = "1"
+    response.approval_status = 1
     db.session.commit()
 
     gen_tw_pdf()
