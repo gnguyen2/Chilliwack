@@ -1,4 +1,4 @@
-from flask import Blueprint, flash, redirect, url_for, session, render_template, send_file
+from flask import Blueprint, flash, redirect, url_for, session, render_template, send_file, request 
 from decorators import role_required
 from models import db, User, Role, Status, RCLResponses, TWResponses, Department, ApprovalProcess, GeneralPetition, Delegation, GeneralPetitionDocuments, CAResponses
 from sqlalchemy.orm import joinedload
@@ -296,8 +296,8 @@ def view_request(dept_id, user_id):
 
 @admin_bp.route("/admin/download_pdf/<int:dept_id>/<int:user_id>")
 @role_required("administrator")
-def download_pdf(request_id):
-    request_entry = RCLResponses.query.get(request_id) or TWResponses.query.get(request_id) or GeneralPetition.query.get(request_id) or CAResponses.query.get(request_id)
+def download_pdf(dept_id, user_id):
+    request_entry = RCLResponses.query.get(user_id) or TWResponses.query.get(user_id) or GeneralPetition.query.get(user_id) or CAResponses.query.get(user_id)
 
     if request_entry and request_entry.pdf_path:
         return send_file(request_entry.pdf_path, as_attachment=True)
